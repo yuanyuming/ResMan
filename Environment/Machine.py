@@ -19,7 +19,7 @@ class Machine:
         allocated = False
         
         for i in range(0,self.time_horizon - job.len):
-            new_avail_res = self.avail_slot[t:t+job.len,:]-job.res_vec
+            new_avail_res = self.avail_slot[i:i+job.len,:]-job.res_vec
             if np.all(new_avail_res[:]>=0):
                 allocated = True
                 
@@ -30,3 +30,29 @@ class Machine:
                 self.running_job.append(job)
                 
                 # 图形表示
+                used_color = np.unique(self.canvas[:])
+                
+                # 应有足够的颜色
+                for color in self.colormap:
+                    if color not in self.colormap:
+                        new_color = color
+                        break
+                    
+                assert job.start_time != -1
+                assert job.finish_time != -1
+                assert job.finish_time > job.finish_time
+                
+                canvas_start_time = job.start_time - curr_time
+                canvas_end_time = job.finish_time - curr_time
+                
+                for res in range(self.num_res):
+                    for i in range(canvas_start_time,canvas_end_time):
+                        avail_slot = np.where(self.canvas[res,i,:]==0)[0]
+                        self.canvas[res,i,avail_slot[:job.res_vec[res]]] = new_color
+                        
+                break
+            return allocated
+        
+        def time_proceed(self,curr_time):
+            
+            self.avail_slot[:-1,:] = self.avail_slot[1:,:]

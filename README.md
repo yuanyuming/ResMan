@@ -1,6 +1,5 @@
 # 总览
 
-
 # Tricks
 
 ## Python Venv
@@ -17,6 +16,13 @@ python -m venv 虚拟环境名称
 虚拟环境名称\scripts\activate.ps1
 ```
 
+`setting.json`中添加
+
+```json
+"python.terminal.activateEnvInCurrentTerminal": true
+```
+
+完成开启工作区自动加载虚拟环境
 ### 3.迁移
 
 更改 `pyenv.cfg`文件中的路径

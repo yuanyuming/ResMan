@@ -1,3 +1,5 @@
 {
-    "typewriterAutoScroll.enable": true
+    "typewriterAutoScroll.enable": true,
+    "python.terminal.activateEnvInCurrentTerminal": true
+
 }
