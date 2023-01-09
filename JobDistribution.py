@@ -1,10 +1,8 @@
 import numpy as np
 import parameters
-import email
-
 
 '''
-任务分布
+任务生成
 '''
 
 
@@ -26,7 +24,7 @@ class Dist:
         self.dominant_res_upper = max_nw_size
         
         self.other_res_lower = 1
-        self.other_res_upper = max_nw_size / 51555
+        self.other_res_upper = max_nw_size / 5
         
     def normal_dist(self):
         
@@ -52,37 +50,33 @@ class Dist:
                 self.job_len_big_upper)
         
         #NOTE - 任务资源请求
-        dominant_res = np.randint(0,self.num_res)
+        dominant_res = np.random.randint(0,self.num_res) 
+        nw_size = np.zeros([self.num_res])
         for i in range(self.num_res):
             # comment: 
             if i == dominant_res:
                 nw_size[i] = np.random.randint(self.dominant_res_lower,\
                     self.dominant_res_upper+1)
             else:
-                nw_size[i] = np.randint(self.other_res_lower,\
+                nw_size[i] = np.random.randint(self.other_res_lower,\
                     self.other_res_upper+1)
         
         return nw_len, nw_size
 
 def generate_sequence_work(pa=parameters.Parameters(),seed=29):
-    
     np.random.seed(seed)
-    
     simulate_len = pa.simulate_len * pa.num_ex
     
     nw_dist = pa.dist.bi_model_dist
+    nw_len_seq = np.zeros(simulate_len,dtype=np.int64)
+    nw_size_seq = np.zeros((simulate_len,pa.num_res),dtype=np.int8)
     
-    nw_len_seq = np.zeros(simulate_len,dtype=int)
-    nw_size_seq = np.zeros((simulate_len,pa.num_res),dtype=int)
-    
-    for item in range(simulate_len):
+    for i in range(simulate_len):
         # comment: 
         if np.random.rand()<pa.new_job_rate:
             nw_len_seq[i],nw_size_seq[i,:]=nw_dist()
             
-    nw_len_seq= np.resheape(nw_len_seq,[pa.num_ex,pa.simulate_len])
-    nw_size_seq = np.resheape(nw_size_seq,[pa.num_ex,pa.simulate_len,pa.num_res])
+    nw_len_seq= np.reshape(nw_len_seq,[pa.num_ex,pa.simulate_len])
+    nw_size_seq = np.reshape(nw_size_seq,[pa.num_ex,pa.simulate_len,pa.num_res])
     
     return nw_len_seq,nw_size_seq
-
-np
