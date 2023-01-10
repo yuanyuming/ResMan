@@ -56,3 +56,4 @@ class Machine:
         def time_proceed(self,curr_time):
             
             self.avail_slot[:-1,:] = self.avail_slot[1:,:]
+            
