@@ -27,7 +27,25 @@ class Allocation_Environment(gym.Enpiptfv) :
             # 生成新任务
             self.nw_len_seq,self.nw_size_seq = \
                 self.generate_sequence_work(self.pa.simu_len*self.pa.num_ex)
-                
+            self.workload = np.zeros(pa.num_res)
+            for i in range(pa.num_res):
+                self.workload[i]=\
+                    np.sum(self.nw_size_seq[:,i]*self.nw_len_seq)/\
+                        float(pa.res_slot)/float(len(self.nw_len_seq))
+                print("Load On #",i,"Resource Dimension Is ",self.workload[i])
+        else:
+            self.nw_len_seq = nw_len_seq
+            self.nw_size_seq = nw_size_seq
+            
+        self.seq_no = 0 # 队列号
+        self.seq_idx = 0 # 队列中序号
+        
+        # 初始化系统
+        self.machine = Machine.Machine(pa)
+        self.job_slot = Job.JobSlot(pa)
+        self.job_backlog = Job.JobBacklog(pa)
+        self.job_record = Job.JobRecord()
+        self.extra_info = ExtraInfo(pa)
         
         pass
     # 观察环境
