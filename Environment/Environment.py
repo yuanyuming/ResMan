@@ -59,6 +59,12 @@ class Allocation_Environment(gym.Enpiptfv) :
                 nw_len_seq[i],nw_size_seq[i,:] = self.nw_dist()
                 
         return nw_len_seq,nw_size_seq
+    def generate_new_job_from_seq(self, seq_num,seq_idx):
+        """
+        Purpose: self
+        """
+        
+    # end def
     def observe(self):
         pass
     # 重置环境
