@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import gym
 import Job
 import Machine
@@ -63,9 +64,94 @@ class Allocation_Environment(gym.Enpiptfv) :
         """
         Purpose: self
         """
+        new_job = Job.Job(res_vec=self.nw_size_seq[seq_num,seq_idx,:],
+                          job_len=self.nw_len_seq[seq_num,seq_idx],
+                          job_id=len(self.job_record.record),
+                          enter_time=self.curr_time)
+        return new_job
+        
+    def image_repre(self):
+        """
+        Purpose: self
+        """
+        backlog_width = int(math.ceil(self.pa.backlog_size
+            / float(self.pa.time_horizon)))
+        image_repr = np.zeros((self.pa.network_input_height,\
+            self.pa.network_input_width))
+        
+        ir_pt = 0
+        for i in range(self.pa.num_res):
+            image_repr[:,ir_pt,ir_pt+self.pa.res_slot] = \
+                self.machine.canvas[i, :, :]
+                
+            for j in range(self.pa.num_nw):
+                if (self.job_slot[j] is not None ):
+                    image_repr[: self.job_slot.slot[j].len,
+                                ir_pt: ir_pt + 
+                                self.job_slot.slot[j].res_vec[i]] = 1
+                    # comment: 
+                # end if
+                ir_pt += self.pa.max_job_size
+                
+        image_repr[:self.job_backlog.curr_size/backlog_width,
+                    ir_pt:ir_pt+
+                    self.job_backlog.curr_size%backlog_width] =1
+        ir_pt += backlog_width
+        
+        image_repr[:,ir_pt:ir_pt+1]=self.extra_info.time_since_last_job/\
+            float(self.extra_info.max_tracking_time_since_last_job)
+        return image_repr
+        
+    # end def
+    def compact_repre(self):
+        """
+        Purpose: self
+        """
+        compact_repre = np.zeros(self.pa.time_horizon*(self.pa.num_res+1)+ \
+        self.pa.num_nw*(self.pa.num_res+1)+1,dtype=float)
+        cr_pt=0
+        # 当前任务奖励,每一步后,机器中存在多少任务
+        job_allcoated = np.ones(self.pa.time_horizon) * len(self.machine.running_job)
+        for job in self.machine.running_job:
+            job_allcoated[job.finish_time - self.curr_time:]-=1
+        compact_repre[cr_pt:cr_pt+self.pa.time_horizon] = job_allcoated
+        cr_pt+= self.pa.time_horizon
+        
+        # 当前工作允许的时间间隙
+        for i in range(self.pa.num_res):
+            compact_repre[cr_pt:cr_pt+self.pa.time_horizon] = self.machine.avail_slot[:,i]
+            
+        # 新任务时长和大小
+        for i in range(self.pa.num_res):
+            if self.job_slot.slot[i] is None:
+                compact_repre[cr_pt:cr_pt+self.pa.num_res+1] = 0
+                cr_pt += self.pa.num_res +1
+            else:
+                compact_repre[cr_pt]+=1
+                
+                for j in range(self.pa.num_res):
+                    compact_repre[cr_pt] = self.job_slot.slot[i].res_slot[j]
+                    cr_pt+=1
+                    # comment: 
+                # end for
+            # comment: 
+        # end for
+        
+        # backlog queue
+        compact_repre[cr_pt] = self.job_backlog.curr_size
+        cr_pt += 1
+        
+        assert cr_pt == len(compact_repre)
+        
+        return compact_repre
         
     # end def
     def observe(self):
+        if self.repre=="image":
+            return self.image_repre()
+        elif self.repre == 'compact':
+            return self.compact_repre()
+    def plot_state(self):
         pass
     # 重置环境
     def reset(self):
