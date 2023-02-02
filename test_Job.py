@@ -1,7 +1,7 @@
 import pytest
 import job_distribution
 import numpy
-import Parameters
+import parameters
 
 def test_JobDist():
     """

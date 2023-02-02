@@ -1,9 +1,9 @@
 
 import numpy as np
 
-import Parameters
+import parameters
 
-def generate_sequence_work(pa=Parameters.Parameters(),seed=29):
+def generate_sequence_work(pa=parameters.Parameters(),seed=29):
     
     np.random.seed(seed)
     

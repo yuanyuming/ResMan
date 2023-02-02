@@ -1,4 +1,4 @@
-import Parameters
+import parameters
 '''
 定义任务Job相关结构
 '''

@@ -3,7 +3,7 @@ import math
 import gym
 import Job
 import Machine
-import Parameters
+import parameters
 
 class Allocation_Environment(gym.Enpiptfv) :
     def __init__(self,pa,nw_len_seq=None,nw_size_seq=None,
