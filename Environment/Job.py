@@ -1,9 +1,19 @@
+<<<<<<< Updated upstream
 import Parameters
+=======
+"""_summary_
+"""
+
+import Parameters
+
+
+
+
+
+>>>>>>> Stashed changes
 '''
 定义任务Job相关结构
 '''
-
-
 class Job:
     '''
     res_vec:资源需求向量
