@@ -1,4 +1,7 @@
-import Parameters
+from Parameters import Parameters
+
+
+
 '''
 定义任务Job相关结构
 '''
