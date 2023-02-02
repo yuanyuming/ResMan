@@ -1,11 +1,13 @@
-import numpy as np
 import math
-import JobDistribution
+import numpy as np
+
+import job_distribution
+
+
+
 '''
 定义相关参数
 '''
-
-
 class Parameters:
     def __init__(self):
 
@@ -45,7 +47,7 @@ class Parameters:
         self.discount = 1
 
         # 任务分布
-        self.dist = JobDistribution.Dist(self.num_res,
+        self.dist = job_distribution.Dist(self.num_res,
                                          self.max_job_size, self.max_job_len)
 
         # NOTE - 图形表示
