@@ -10,7 +10,3 @@ def test_JobDist():
     nw_len_seq,nw_size_seq = job_distribution.generate_sequence_work()
     print(nw_len_seq,nw_size_seq)
 # end def
-
-
-
-import time
