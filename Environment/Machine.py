@@ -1,7 +1,7 @@
 import numpy as np
-import parameters
+import Parameters
 class Machine:
-    def __init__(self,pa=parameters.Parameters()) -> None:
+    def __init__(self,pa=Parameters.Parameters()) -> None:
         self.num_res = pa.num_res
         self.time_horizon = pa.time_horizon
         self.res_slot = pa.res_slot
