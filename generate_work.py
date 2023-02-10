@@ -1,9 +1,9 @@
 
 import numpy as np
 
-import parameters
+import Parameters
 
-def generate_sequence_work(pa=parameters.Parameters(),seed=29):
+def generate_sequence_work(pa=Parameters.Parameters(),seed=29):
     
     np.random.seed(seed)
     
@@ -14,7 +14,7 @@ def generate_sequence_work(pa=parameters.Parameters(),seed=29):
     nw_len_seq = np.zeros(simulate_len,dtype=int)
     nw_size_seq = np.zeros((simulate_len,pa.num_res),dtype=int)
     
-    for item in range(simulate_len):
+    for i in range(simulate_len):
         # comment: 
         if np.random.rand()<pa.new_job_rate:
             nw_len_seq[i],nw_size_seq[i,:]=nw_dist()

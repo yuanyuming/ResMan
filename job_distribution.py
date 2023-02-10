@@ -1,5 +1,5 @@
 import numpy as np
-import parameters
+import Parameters
 
 '''
 任务生成
@@ -63,7 +63,7 @@ class Dist:
         
         return nw_len, nw_size
 
-def generate_sequence_work(pa=parameters.Parameters(),seed=29):
+def generate_sequence_work(pa=Parameters.Parameters(),seed=29):
     np.random.seed(seed)
     simulate_len = pa.simulate_len * pa.num_ex
     
