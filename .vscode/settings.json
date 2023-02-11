@@ -1,10 +1,11 @@
 {
     "typewriterAutoScroll.enable": true,
     "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.defaultInterpreterPath": "${workspaceFolder}\\man\\Scripts\\python.exe",
     "python.testing.pytestArgs": [
-        "."
+        "unit_test"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
 
 }
