@@ -3,10 +3,11 @@ import math
 import gym
 import Job
 import Machine
-import parameters
+import matplotlib.pyplot as plt
+import Parameters
 
 class Allocation_Environment(gym.Enpiptfv) :
-    def __init__(self,pa,nw_len_seq=None,nw_size_seq=None,
+    def __init__(self,pa=Parameters.Parameters() ,nw_len_seq=None,nw_size_seq=None,
                  seed=42,render=False,repre='image',end='no_new_job') -> None:
         # 设置虚拟机
         # 创建虚拟机生成器
@@ -60,7 +61,7 @@ class Allocation_Environment(gym.Enpiptfv) :
                 nw_len_seq[i],nw_size_seq[i,:] = self.nw_dist()
                 
         return nw_len_seq,nw_size_seq
-    def generate_new_job_from_seq(self, seq_num,seq_idx):
+    def get_new_job_from_seq(self, seq_num,seq_idx):
         """
         Purpose: self
         """
@@ -112,6 +113,7 @@ class Allocation_Environment(gym.Enpiptfv) :
         cr_pt=0
         # 当前任务奖励,每一步后,机器中存在多少任务
         job_allcoated = np.ones(self.pa.time_horizon) * len(self.machine.running_job)
+        
         for job in self.machine.running_job:
             job_allcoated[job.finish_time - self.curr_time:]-=1
         compact_repre[cr_pt:cr_pt+self.pa.time_horizon] = job_allcoated
@@ -152,12 +154,169 @@ class Allocation_Environment(gym.Enpiptfv) :
         elif self.repre == 'compact':
             return self.compact_repre()
     def plot_state(self):
+        plt.figure("screen",figsize=(20,5))
+        
+        skip_row = 0
+        
+        for i in range(self.pa.num_res):
+            plt.subplot(self.pa.num_res,
+                        1+self.pa.new_nw+1, # 第一个+1当前任务, 最后一个+1记录队列
+                        1*(self.pa.new_nw+1)+skip_row+1) # 将记录放在最后, +1以避免0
+            plt.imshow(self.machine.canvas[i,:,:],interpolation='nearest',vmax=1)
+            for j in range(self.pa.num_nw):
+                job_slot = np.zeros((self.pa.time_horizon,self.pa.max_job_size))
+                if self.job_slot.slot[j] is not None:
+                    job_slot[:self.job_slot.slot[j].len,:self.job_slot[j].res_vec[i]] = 1
+                    
+                plt.subplot(self.pa.num_res,
+                            1+self.pa.num_nw+1,
+                            1+i*(self.pa.num_nw+1)+j+skip_row+1)
+                plt.imshow(job_slot,interpolation="nearest",vmax=1)
+                
+                if j == self.pa.num_nw -1:
+                    skip_row+=1
+                    
+        skip_row -= 1
+        backlog_width = int(math.ceil(self.pa.backlog_size/float(self.pa.time_horizon)))
+        backlog = np.zeros((self.pa.time_horizon, backlog_width))
+        
+        backlog[:self.job_backlog.curr_size/backlog_width, backlog_width] = 1
+        backlog_width[self.job_backlog.curr_size/backlog_width, : self.job_backlog.curr_size%backlog_width] =1
+        
+        plt.subplot(self.pa.num_res,
+                    1+self.pa.num_nw+1,
+                    self.pa.num_res * (self.pa.num_nw+1)+skip_row+1)
+        
+        extra_info = np.ones((self.pa.time_horizon,1))*\
+            self.extra_info.time_since_last_job/\
+                float(self.extra_info.max_tracking_time_since_last_job)
+                
+        plt.imshow(extra_info,interpolation='nearest',vmax=1)
+        
+        plt.show()
         pass
+    def get_reward(self):
+        """
+        Purpose: 计算reward
+        """
+        reward = 0
+        for j in self.machine.running_job:
+            reward += self.pa.delay_penalty / float(j.len)
+            
+        for j in self.job_slot.slot:
+            if j is not None:
+                reward += self.pa.hold_penalty / float(j.len)
+                
+        for j in self.job_backlog.backlog:
+            if j is not None:
+                reward += self.pa.dismiss_penalty / float(j.len)
+                
+        return reward
+        
+    # end def
     # 重置环境
     def reset(self):
+        self.seq_idx = 0
+        self.curr_time = 0
+        
+        # 初始化系统
+        self.machine = Machine(self.pa)
+        self.job_slot = Job.JobSlot(self.pa)
+        self.job_backlog = Job.JobBacklog(self.pa)
+        self.job_record = Job.JobRecord()
+        self.extra_info = ExtraInfo(self.pa)
         pass
     # 执行一步
-    def step(self):
+    def step(self,a,repeat=False):
+        status = None
+        
+        done = False
+        reward = 0
+        info = None
+        
+        if a == self.pa.num_nw:
+            status = 'MoveOn'
+        elif self.job_slot.slot[a] is None:
+            status = 'MoveOn'
+        else:
+            allocated = self.machine.allocate_job(self.job_slot.slot[a],self.curr_time)
+            if not allocated:
+                status = 'MoveOn'
+            else:
+                status = 'Allocate'
+                
+        if status == 'MoveOn':
+            self.curr_time += 1
+            self.machine.time_proceed(self.curr_time)
+            self.extra_info.time_proceed()
+            
+            # 添加新任务
+            self.seq_idx += 1
+            
+            # 判断是否结束
+            if self.end == 'no_new_job':
+                if self.seq_idx >= self.pa.simu_len:
+                    done = True
+            elif self.end == 'all_done':
+                if self.seq_idx >= self.pa.simu_len and \
+                    len(self.machine.running_job) ==0 and \
+                    all(s is None for s in self.job_slot.slot) and \
+                    all(s is None for s in self.job_backlog.backlog):
+                        done = True
+                elif self.curr_time > self.pa.episode_max_length:
+                    done = True
+                    
+            if not done:
+                if self.seq_idx < self.pa.simu_len:
+                    new_job = self.get_new_job_from_seq(self.seq_no,self.seq_idx)
+                    
+                    if new_job.len > 0:
+                        to_backlog = True
+                        
+                        for i in range(self.pa.nun_nw):
+                            if self.job_slot.slot[i] is None:
+                                self.job_slot.slot[i] = new_job
+                                self.job_record.record[new_job.id] = new_job
+                                to_backlog = False
+                                break
+                            
+                            if to_backlog:
+                                if self.job_backlog.curr_size < self.pa.backlog_size:
+                                    self.job_backlog.backlog[self.job_backlog.curr_size]= new_job
+                                    self.job_backlog.curr_size += 1
+                                    self.job_record.record[new_job.id] = new_job
+                                else:
+                                    print("Backlog is FULL!")
+                                    
+            reward = self.get_reward()
+            
+        elif status == 'Allocate':
+            self.job_record.record[self.job_slot[a].id] = self.job_slot.slot[a]
+            self.job_slot.slot[a] = None
+            
+            # backlog 退队
+            if self.job_backlog.curr_size > 0 :
+                self.job_slot.slot[a] = self.job_backlog.backlog[0]
+                self.job_backlog.backlog[:-1] = self.job_backlog.backlog[1:]
+                self.job_backlog.backlog[-1] = None
+                self.job_backlog.curr_size -=1
+                
+        ob = self.observe()
+        
+        info = self.job_record
+        
+        if done:
+            self.seq_idx = 0
+            
+            if not repeat:
+                self.seq_no = (self.seq_no + 1) % self.pa.num_ex
+                
+            self.reset()
+            
+        if self.render:
+            self.plot_state()
+            
+        return ob, reward, done, info
         pass
     def close(self):
         pass

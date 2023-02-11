@@ -53,16 +53,16 @@ class Machine:
                 break
             return allocated
         
-        def time_proceed(self,curr_time):
-            
-            self.avail_slot[:-1,:] = self.avail_slot[1:,:]
-            self.avail_slot[-1,:] = self.res_slot
-            
-            for job in self.running_job:
-                if  job.finish_time <= curr_time:
-                    self.running_job.remove(job)
-                    
-            # 图形表示
-            
-            self.canvas[:,:-1,:] = self.canvas[:,1:,:]
-            self.canvas[:,-1,:] = 0
+    def time_proceed(self,curr_time):
+        
+        self.avail_slot[:-1,:] = self.avail_slot[1:,:]
+        self.avail_slot[-1,:] = self.res_slot
+        
+        for job in self.running_job:
+            if  job.finish_time <= curr_time:
+                self.running_job.remove(job)
+                
+        # 图形表示
+        
+        self.canvas[:,:-1,:] = self.canvas[:,1:,:]
+        self.canvas[:,-1,:] = 0
