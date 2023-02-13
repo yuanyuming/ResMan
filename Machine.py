@@ -1,19 +1,20 @@
 import numpy as np
-import parameters
+
+
 class Machine:
-    def __init__(self,pa=parameters.Parameters()) -> None:
-        self.num_res = pa.num_res
-        self.time_horizon = pa.time_horizon
-        self.res_slot = pa.res_slot
+    def __init__(self,num_res, time_horizon, res_slot, job_num_cap) -> None:
+        self.num_res = num_res
+        self.time_horizon = time_horizon
+        self.res_slot = res_slot
         
         self.avail_slot = np.ones((self.time_horizon,self.num_res))\
             *self.res_slot
         self.running_job = []
         
-        self.colormap = np.arange(1/float(pa.job_num_cap,1,1/float(pa.job_num_cap)))
+        self.colormap = np.arange(1/float(job_num_cap,1,1/float(job_num_cap)))
         np.random.shuffle(self.colormap)
         
-        self.canvas = np.zeros((pa.num_res,pa.time_horizon,pa.res_slot))
+        self.canvas = np.zeros((num_res,time_horizon,res_slot))
         
     def allocate_job(self,job,curr_time):
         allocated = False

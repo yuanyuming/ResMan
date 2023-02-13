@@ -109,3 +109,22 @@ class Parameters:
 
             # +1表示空动作
             self.network_output_dim = self.num_nw + 1
+            
+        def generate_sequence_work(self,seed=29):
+            np.random.seed(seed)
+            simulate_len = self.simulate_len * self.num_ex
+
+            nw_dist = self.dist.bi_model_dist
+            nw_len_seq = np.zeros(simulate_len,dtype=np.int64)
+            nw_size_seq = np.zeros((simulate_len,self.num_res),dtype=np.int8)
+
+            for i in range(simulate_len):
+                # comment: 
+                if np.random.rand()<self.new_job_rate:
+                    nw_len_seq[i],nw_size_seq[i,:]=nw_dist()
+
+            nw_len_seq= np.reshape(nw_len_seq,[self.num_ex,self.simulate_len])
+            nw_size_seq = np.reshape(nw_size_seq,[self.num_ex,self.simulate_len,self.num_res])
+
+            return nw_len_seq,nw_size_seq
+

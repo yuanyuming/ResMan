@@ -1,5 +1,5 @@
 import numpy as np
-import Parameters
+import parameters
 
 '''
 任务生成
@@ -63,20 +63,20 @@ class Dist:
         
         return nw_len, nw_size
 
-def generate_sequence_work(pa=Parameters.Parameters(),seed=29):
-    np.random.seed(seed)
-    simulate_len = pa.simulate_len * pa.num_ex
+# def generate_sequence_work(pa=parameters.Parameters(),seed=29):
+#     np.random.seed(seed)
+#     simulate_len = pa.simulate_len * pa.num_ex
     
-    nw_dist = pa.dist.bi_model_dist
-    nw_len_seq = np.zeros(simulate_len,dtype=np.int64)
-    nw_size_seq = np.zeros((simulate_len,pa.num_res),dtype=np.int8)
+#     nw_dist = pa.dist.bi_model_dist
+#     nw_len_seq = np.zeros(simulate_len,dtype=np.int64)
+#     nw_size_seq = np.zeros((simulate_len,pa.num_res),dtype=np.int8)
     
-    for i in range(simulate_len):
-        # comment: 
-        if np.random.rand()<pa.new_job_rate:
-            nw_len_seq[i],nw_size_seq[i,:]=nw_dist()
+#     for i in range(simulate_len):
+#         # comment: 
+#         if np.random.rand()<pa.new_job_rate:
+#             nw_len_seq[i],nw_size_seq[i,:]=nw_dist()
             
-    nw_len_seq= np.reshape(nw_len_seq,[pa.num_ex,pa.simulate_len])
-    nw_size_seq = np.reshape(nw_size_seq,[pa.num_ex,pa.simulate_len,pa.num_res])
+#     nw_len_seq= np.reshape(nw_len_seq,[pa.num_ex,pa.simulate_len])
+#     nw_size_seq = np.reshape(nw_size_seq,[pa.num_ex,pa.simulate_len,pa.num_res])
     
-    return nw_len_seq,nw_size_seq
+#     return nw_len_seq,nw_size_seq

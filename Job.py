@@ -1,4 +1,3 @@
-import parameters
 '''
 定义任务Job相关结构
 '''
@@ -19,12 +18,12 @@ class Job:
         self.finish_time = -1
         
 class JobSlot:
-    def __init__(self,pa = parameters.Parameters()):
-        self.slot = [None] * pa.num_nw
+    def __init__(self,num_nw):
+        self.slot = [None] * num_nw
         
 class JobBacklog:
-    def __init__(self,pa) -> None:
-        self.backlog = [None]*pa.backlog_size
+    def __init__(self,backlog_size) -> None:
+        self.backlog = [None]*backlog_size
         self.curr_size = 0
         
 class JobRecord:

@@ -4,10 +4,10 @@ import gym
 import Job
 import Machine
 import matplotlib.pyplot as plt
-import Parameters
+import parameters
 
-class Allocation_Environment(gym.Enpiptfv) :
-    def __init__(self,pa=Parameters.Parameters() ,nw_len_seq=None,nw_size_seq=None,
+class Allocation_Environment :
+    def __init__(self,pa=parameters.Parameters() ,nw_len_seq=None,nw_size_seq=None,
                  seed=42,render=False,repre='image',end='no_new_job') -> None:
         # 设置虚拟机
         # 创建虚拟机生成器
@@ -43,11 +43,11 @@ class Allocation_Environment(gym.Enpiptfv) :
         self.seq_idx = 0 # 队列中序号
         
         # 初始化系统
-        self.machine = Machine.Machine(pa)
-        self.job_slot = Job.JobSlot(pa)
-        self.job_backlog = Job.JobBacklog(pa)
+        self.machine = Machine.Machine(pa.num_res, pa.time_horizon, pa.res_slot, pa.job_num_cap)
+        self.job_slot = Job.JobSlot(pa.num_nw)
+        self.job_backlog = Job.JobBacklog(pa.backlog_size)
         self.job_record = Job.JobRecord()
-        self.extra_info = ExtraInfo(pa)
+        self.extra_info = ExtraInfo(pa.max_track_since_new)
         
         pass
     # 观察环境
@@ -323,9 +323,9 @@ class Allocation_Environment(gym.Enpiptfv) :
 
 
 class ExtraInfo:
-    def __init__(self,pa) -> None:
+    def __init__(self,max_track_time_since_new) -> None:
         self.time_since_last_job = 0
-        self.max_tracking_time_since_last_job = pa.max_track_time_since_new
+        self.max_tracking_time_since_last_job = max_track_time_since_new
         
         def new_job_comes(self):
             self.time_since_last_job = 0
