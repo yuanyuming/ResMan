@@ -1,7 +1,7 @@
 # EditorConfig
 Helps maintain consistent coding styles for multiple developers working on the same project across various editors and IDEs.
 
-# Ussage
+# Usage
 Right-clicking in the folder where you'd like it to be and selecting Generate .editorconfig.
 
 # Example file

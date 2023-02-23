@@ -6,7 +6,7 @@ Easy way to manage snippet.
 - Edit and delete snippets
 - Snippet manager
 
-# Ussage
+# Usage
 1. Push the + Button
 1. Write The Key
 1. Write the Snippet
