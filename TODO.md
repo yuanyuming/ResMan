@@ -1,1 +1,1 @@
-
+-[] Configure The VSCode Extension
