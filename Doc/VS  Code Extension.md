@@ -13,6 +13,7 @@ Table Of Contents
 # File
 1. Excalidraw
 1. File Browser
+1. GitHub Repositories
 
 # Appearance
 1. Fluent Icons
