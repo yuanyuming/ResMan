@@ -89,23 +89,23 @@ class Parameters:
         self.batch_size = 10
         self.evaluate_policy_name = 'SJF'
 
-        # NOTE - 计算相关的参数
-        def compute_dependent_parameters(self):
-            """
-            Purpose: 
-            """
-            assert self.backlog_size % self.time_horizon == 0
-            self.backlog_width = self.backlog_size/self.time_horizon
-            self.network_input_height = self.time_horizon
-            # +1代表从最新任务开始的时间信息
-            self.network_input_width = (self.res_slot +
-                                        self.max_job_size*self.num_nw) * self.num_res +\
-                self.backlog_size+1
+    # NOTE - 计算相关的参数
+    def compute_dependent_parameters(self):
+        """
+        Purpose: 
+        """
+        assert self.backlog_size % self.time_horizon == 0
+        self.backlog_width = self.backlog_size/self.time_horizon
+        self.network_input_height = self.time_horizon
+        # +1代表从最新任务开始的时间信息
+        self.network_input_width = (self.res_slot +
+                                    self.max_job_size*self.num_nw) * self.num_res +\
+            self.backlog_size+1
 
-            # NOTE - 压缩表示
-            # +1表示积压指示
-            self.network_compact_dim = (self.num_res+1) *\
-                (self.time_horizon+self.num_nw)+1
+        # NOTE - 压缩表示
+        # +1表示积压指示
+        self.network_compact_dim = (self.num_res+1) *\
+            (self.time_horizon+self.num_nw)+1
 
-            # +1表示空动作
-            self.network_output_dim = self.num_nw + 1
+        # +1表示空动作
+        self.network_output_dim = self.num_nw + 1

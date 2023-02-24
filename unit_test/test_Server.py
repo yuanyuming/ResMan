@@ -1,16 +1,21 @@
+
+import sys
+sys.path.append('c:\\Users\\Yuming\\source\\repos\\ResMan')
+
 import pytest
+
 import parameters
 import Environment
 
 def test_backlog():
     pa = parameters.Parameters()
     pa.num_nw = 5
-    pa.simu_len = 50
+    pa.simulate_len = 50
     pa.num_ex = 10
     pa.new_job_rate = 1
     pa.compute_dependent_parameters()
 
-    env = Env.Allocation_Environment(pa, render=False, repre='image')
+    env = Environment.Allocation_Environment(pa, render=False, repre='image')
 
     env.step(5)
     env.step(5)
@@ -61,7 +66,7 @@ def test_compact_speed():
     pa.new_job_rate = 0.3
     pa.compute_dependent_parameters()
 
-    env = Env(pa, render=False, repre='compact')
+    env = Environment.Allocation_Environment(pa, render=False, repre='compact')
 
     import other_agents
     import time
@@ -82,7 +87,7 @@ def test_image_speed():
     pa.new_job_rate = 0.3
     pa.compute_dependent_parameters()
 
-    env = Env(pa, render=False, repre='image')
+    env = Environment(pa, render=False, repre='image')
 
     import other_agents
     import time
@@ -93,4 +98,3 @@ def test_image_speed():
         env.step(a)
     end_time = time.time()
     print("- Elapsed time: ", end_time - start_time, "sec -")
-

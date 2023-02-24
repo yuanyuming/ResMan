@@ -1,6 +1,6 @@
 import numpy as np
 import math
-import gym
+# import gym
 import Job
 import Machine
 import matplotlib.pyplot as plt
@@ -28,7 +28,7 @@ class Allocation_Environment :
         if nw_len_seq is None or nw_size_seq is None:
             # 生成新任务
             self.nw_len_seq,self.nw_size_seq = \
-                self.generate_sequence_work(self.pa.simu_len*self.pa.num_ex)
+                self.generate_sequence_work(self.pa.simulate_len*self.pa.num_ex)
             self.workload = np.zeros(pa.num_res)
             for i in range(pa.num_res):
                 self.workload[i]=\
@@ -53,7 +53,7 @@ class Allocation_Environment :
     # 观察环境
     def generate_sequence_work(self,simu_len):
         nw_len_seq = np.zeros(simu_len,dtype=int)
-        nw_size_seq = np.zeros((simu_len,self.pa.new_job_rate),dtype=int)
+        nw_size_seq = np.zeros((simu_len,self.pa.num_nw),dtype=int)
         
         for i in range(simu_len):
             if np.random.rand() < self.pa.new_job_rate:

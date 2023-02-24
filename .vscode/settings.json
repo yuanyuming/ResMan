@@ -7,5 +7,10 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
+    "cSpell.language": "en,en-US",
+    "files.autoSave": "onFocusChange",
+    "python.terminal.launchArgs": [
+    
+    ],
 
 }
