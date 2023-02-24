@@ -7,6 +7,17 @@ import pytest
 import parameters
 import Environment
 
+def test_generate_sequence_work():
+    """
+    Purpose: Test the generate_sequence function
+
+    """
+    pa = parameters.Parameters()
+    env = Environment.Allocation_Environment(pa)
+    env.generate_sequence_work(5)
+
+# end def
+
 def test_backlog():
     pa = parameters.Parameters()
     pa.num_nw = 5

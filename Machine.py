@@ -11,7 +11,7 @@ class Machine:
             *self.res_slot
         self.running_job = []
         
-        self.colormap = np.arange(1/float(job_num_cap,1,1/float(job_num_cap)))
+        self.colormap = np.arange(1/float(job_num_cap),1,1/float(job_num_cap))
         np.random.shuffle(self.colormap)
         
         self.canvas = np.zeros((num_res,time_horizon,res_slot))

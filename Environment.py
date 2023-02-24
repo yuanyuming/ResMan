@@ -35,6 +35,11 @@ class Allocation_Environment :
                     np.sum(self.nw_size_seq[:,i]*self.nw_len_seq)/\
                         float(pa.res_slot)/float(len(self.nw_len_seq))
                 print("Load On #",i,"Resource Dimension Is ",self.workload[i])
+            self.nw_len_seq = np.reshape(self.nw_len_seq,
+                                        [self.pa.num_ex, self.pa.simulate_len])
+            self.nw_size_seq = np.reshape(self.nw_size_seq,
+                                           [self.pa.num_ex, self.pa.simulate_len, self.pa.num_res])
+
         else:
             self.nw_len_seq = nw_len_seq
             self.nw_size_seq = nw_size_seq
@@ -53,7 +58,7 @@ class Allocation_Environment :
     # 观察环境
     def generate_sequence_work(self,simu_len):
         nw_len_seq = np.zeros(simu_len,dtype=int)
-        nw_size_seq = np.zeros((simu_len,self.pa.num_nw),dtype=int)
+        nw_size_seq = np.zeros((simu_len,self.pa.num_res),dtype=int)
         
         for i in range(simu_len):
             if np.random.rand() < self.pa.new_job_rate:
@@ -255,10 +260,10 @@ class Allocation_Environment :
             
             # 判断是否结束
             if self.end == 'no_new_job':
-                if self.seq_idx >= self.pa.simu_len:
+                if self.seq_idx >= self.pa.simulate_len:
                     done = True
             elif self.end == 'all_done':
-                if self.seq_idx >= self.pa.simu_len and \
+                if self.seq_idx >= self.pa.simulate_len and \
                     len(self.machine.running_job) ==0 and \
                     all(s is None for s in self.job_slot.slot) and \
                     all(s is None for s in self.job_backlog.backlog):
@@ -267,13 +272,13 @@ class Allocation_Environment :
                     done = True
                     
             if not done:
-                if self.seq_idx < self.pa.simu_len:
+                if self.seq_idx < self.pa.simulate_len:
                     new_job = self.get_new_job_from_seq(self.seq_no,self.seq_idx)
                     
                     if new_job.len > 0:
                         to_backlog = True
                         
-                        for i in range(self.pa.nun_nw):
+                        for i in range(self.pa.num_nw):
                             if self.job_slot.slot[i] is None:
                                 self.job_slot.slot[i] = new_job
                                 self.job_record.record[new_job.id] = new_job
@@ -327,10 +332,10 @@ class ExtraInfo:
         self.time_since_last_job = 0
         self.max_tracking_time_since_last_job = max_track_time_since_new
         
-        def new_job_comes(self):
-            self.time_since_last_job = 0
-            
-        def time_proceed(self):
-            if self.time_since_last_job < self.max_tracking_time_since_last_job:
-                self.time_since_last_job += 1
+    def new_job_comes(self):
+        self.time_since_last_job = 0
+        
+    def time_proceed(self):
+        if self.time_since_last_job < self.max_tracking_time_since_last_job:
+            self.time_since_last_job += 1
 
