@@ -87,8 +87,8 @@ class Allocation_Environment :
         
         ir_pt = 0
         for i in range(self.pa.num_res):
-            image_repr[:,ir_pt,ir_pt+self.pa.res_slot] = \
-                self.machine.canvas[i, :, :]
+            image_repr[:,ir_pt:ir_pt+self.pa.res_slot] = \
+                self.machine.canvas[i]
                 
             for j in range(self.pa.num_nw):
                 if (self.job_slot[j] is not None ):

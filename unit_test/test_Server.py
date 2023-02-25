@@ -17,7 +17,15 @@ def test_generate_sequence_work():
     env.generate_sequence_work(5)
 
 # end def
-
+def test_image_representation():
+    """
+    Purpose: representation the job image
+    """
+    env = Environment.Allocation_Environment()
+    return env.machine.canvas
+    
+    
+# end def
 def test_backlog():
     pa = parameters.Parameters()
     pa.num_nw = 5
