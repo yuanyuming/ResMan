@@ -16,5 +16,7 @@
         "matplotlib",
         "pyplot"
     ],
+    "python.analysis.typeCheckingMode": "basic",
+    "typewriterScrollMode.enable": true,
 
 }

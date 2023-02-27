@@ -1,6 +1,6 @@
 
 import sys
-sys.path.append('c:\\Users\\Yuming\\source\\repos\\ResMan')
+sys.path.append(".")
 
 import pytest
 
