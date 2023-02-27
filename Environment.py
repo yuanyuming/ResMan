@@ -241,8 +241,9 @@ class Allocation_Environment:
         self.curr_time = 0
 
         # 初始化系统
-        self.machine = Machine(self.pa)
-        self.job_slot = Job.JobSlot(self.pa)
+        self.machine = Machine.Machine(
+            self.pa.num_res, self.pa.time_horizon, self.pa.res_slot, self.pa.job_num_cap)
+        self.job_slot = Job.JobSlot(self.pa.num_nw)
         self.job_backlog = Job.JobBacklog(self.pa)
         self.job_record = Job.JobRecord()
         self.extra_info = ExtraInfo(self.pa)
