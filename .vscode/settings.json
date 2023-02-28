@@ -3,7 +3,8 @@
     "python.terminal.activateEnvInCurrentTerminal": true,
     "python.defaultInterpreterPath": "${workspaceFolder}\\man\\Scripts\\python.exe",
     "python.testing.pytestArgs": [
-        "unit_test"
+        "unit_test",
+        "-s"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
@@ -18,5 +19,7 @@
     ],
     "python.analysis.typeCheckingMode": "basic",
     "typewriterScrollMode.enable": true,
-
+    "[markdown]": {
+        "editor.quickSuggestions": true
+    },
 }

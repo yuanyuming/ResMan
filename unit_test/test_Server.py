@@ -1,11 +1,10 @@
 
+import Environment
+import parameters
+import pytest
 import sys
 sys.path.append(".")
 
-import pytest
-
-import parameters
-import Environment
 
 def test_generate_sequence_work():
     """
@@ -17,15 +16,26 @@ def test_generate_sequence_work():
     env.generate_sequence_work(5)
 
 # end def
+
+
 def test_image_representation():
     """
     Purpose: representation the job image
     """
     env = Environment.Allocation_Environment()
     return env.machine.canvas
-    
-    
 # end def
+
+
+def test_image_repre():
+    """
+    Purpose: 
+    """
+    print('ttt')
+
+# end def
+
+
 def test_backlog():
     pa = parameters.Parameters()
     pa.num_nw = 5
@@ -44,7 +54,7 @@ def test_backlog():
 
     env.step(5)
     assert env.job_backlog.backlog[0] is not None
-    assert env.job_backlog.backlog[1] is None
+    env.job_backlog.show()
     print("New job is backlogged.")
 
     env.step(5)

@@ -76,7 +76,7 @@ class Allocation_Environment:
         """
         Purpose: self
         """
-        new_job = Job.Job(res_vec=self.nw_size_seq[seq_num, seq_idx, :],
+        new_job = Job.Job(res_vec=self.nw_size_seq[seq_num, seq_idx],
                           job_len=self.nw_len_seq[seq_num, seq_idx],
                           job_id=len(self.job_record.record),
                           enter_time=self.curr_time)
@@ -98,7 +98,7 @@ class Allocation_Environment:
                 self.machine.canvas[i]
 
             for j in range(self.pa.num_nw):
-                if (self.job_slot[j] is not None):
+                if (self.job_slot.slot[j] is not None):
                     image_repr[: self.job_slot.slot[j].len,
                                ir_pt: ir_pt +
                                self.job_slot.slot[j].res_vec[i]] = 1
@@ -106,9 +106,9 @@ class Allocation_Environment:
                 # end if
                 ir_pt += self.pa.max_job_size
 
-        image_repr[:self.job_backlog.curr_size/backlog_width,
-                   ir_pt:ir_pt +
-                   self.job_backlog.curr_size % backlog_width] = 1
+        image_repr[:int(self.job_backlog.curr_size/backlog_width),
+                   ir_pt:int(ir_pt +
+                   self.job_backlog.curr_size % backlog_width)] = 1
         ir_pt += backlog_width
 
         image_repr[:, ir_pt:ir_pt+1] = self.extra_info.time_since_last_job /\
@@ -250,13 +250,11 @@ class Allocation_Environment:
         pass
     # 执行一步
 
-    def step(self, a, repeat=False):
+    def choose_state(self, a):
+        """
+        Purpose: Choose the state according to the selected action
+        """
         status = None
-
-        done = False
-        reward = 0
-        info = None
-
         if a == self.pa.num_nw:
             status = 'MoveOn'
         elif self.job_slot.slot[a] is None:
@@ -268,7 +266,64 @@ class Allocation_Environment:
                 status = 'MoveOn'
             else:
                 status = 'Allocate'
+        return status
+    # end def
 
+    def move_on(self, done):
+        """
+        Purpose: move on
+        """
+
+        self.curr_time += 1
+        self.machine.time_proceed(self.curr_time)
+        self.extra_info.time_proceed()
+        # 添加新任务
+        self.seq_idx += 1
+        # 判断是否结束
+        if self.end == 'no_new_job':
+            if self.seq_idx >= self.pa.simulate_len:
+                done = True
+        elif self.end == 'all_done':
+            if self.seq_idx >= self.pa.simulate_len and \
+                    len(self.machine.running_job) == 0 and \
+                    all(s is None for s in self.job_slot.slot) and \
+                    all(s is None for s in self.job_backlog.backlog):
+                done = True
+            elif self.curr_time > self.pa.episode_max_length:
+                done = True
+
+        if not done:
+            if self.seq_idx < self.pa.simulate_len:
+                new_job = self.get_new_job_from_seq(
+                    self.seq_no, self.seq_idx)
+                if new_job.len > 0:
+                    to_backlog = True
+                    for i in range(self.pa.num_nw):
+                        if self.job_slot.slot[i] is None:
+                            self.job_slot.slot[i] = new_job
+                            self.job_record.record[new_job.id] = new_job
+                            to_backlog = False
+                            break
+                        if to_backlog:
+                            if self.job_backlog.curr_size < self.pa.backlog_size:
+                                self.job_backlog.backlog[self.job_backlog.curr_size] = new_job
+                                self.job_backlog.curr_size += 1
+                                self.job_record.record[new_job.id] = new_job
+                            else:
+                                print("Backlog is FULL!")
+
+        reward = self.get_reward()
+
+    # end def
+
+    def step(self, a, repeat=False):
+        status = None
+
+        done = False
+        reward = 0
+        info = None
+
+        status = self.choose_state(a)
         if status == 'MoveOn':
             self.curr_time += 1
             self.machine.time_proceed(self.curr_time)
