@@ -1,7 +1,6 @@
 
 import Environment
 import parameters
-import pytest
 import sys
 sys.path.append(".")
 
@@ -63,6 +62,8 @@ def test_backlog():
     env.step(5)
 
     job = env.job_backlog.backlog[0]
+    job.show()
+    env.job_slot.show()
     env.step(0)
     assert env.job_slot.slot[0] == job
 
