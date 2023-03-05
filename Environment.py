@@ -175,8 +175,8 @@ class Allocation_Environment:
 
         for i in range(self.pa.num_res):
             plt.subplot(self.pa.num_res,
-                        1+self.pa.new_nw+1,  # 第一个+1当前任务, 最后一个+1记录队列
-                        1*(self.pa.new_nw+1)+skip_row+1)  # 将记录放在最后, +1以避免0
+                        1+self.pa.num_nw+1,  # 第一个+1当前任务, 最后一个+1记录队列
+                        1*(self.pa.num_nw+1)+skip_row+1)  # 将记录放在最后, +1以避免0
             plt.imshow(self.machine.canvas[i, :, :],
                        interpolation='nearest', vmax=1)
             for j in range(self.pa.num_nw):
@@ -200,8 +200,8 @@ class Allocation_Environment:
         backlog = np.zeros((self.pa.time_horizon, backlog_width))
 
         backlog[:self.job_backlog.curr_size/backlog_width, backlog_width] = 1
-        backlog_width[self.job_backlog.curr_size/backlog_width,
-                      : self.job_backlog.curr_size % backlog_width] = 1
+        backlog[self.job_backlog.curr_size/backlog_width,
+                : self.job_backlog.curr_size % backlog_width] = 1
 
         plt.subplot(self.pa.num_res,
                     1+self.pa.num_nw+1,
@@ -244,9 +244,9 @@ class Allocation_Environment:
         self.machine = Machine.Machine(
             self.pa.num_res, self.pa.time_horizon, self.pa.res_slot, self.pa.job_num_cap)
         self.job_slot = Job.JobSlot(self.pa.num_nw)
-        self.job_backlog = Job.JobBacklog(self.pa)
+        self.job_backlog = Job.JobBacklog(self.pa.backlog_size)
         self.job_record = Job.JobRecord()
-        self.extra_info = ExtraInfo(self.pa)
+        self.extra_info = ExtraInfo(self.pa.max_track_since_new)
         pass
     # 执行一步
 
@@ -368,6 +368,8 @@ class Allocation_Environment:
                                 else:
                                     print("Backlog is FULL!")
 
+                            self.extra_info.new_job_comes()
+
             reward = self.get_reward()
 
         elif status == 'Allocate':
@@ -404,7 +406,7 @@ class Allocation_Environment:
 
 
 class ExtraInfo:
-    def __init__(self, max_track_time_since_new) -> None:
+    def __init__(self, max_track_time_since_new=0) -> None:
         self.time_since_last_job = 0
         self.max_tracking_time_since_last_job = max_track_time_since_new
 

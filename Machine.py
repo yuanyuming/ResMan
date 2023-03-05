@@ -20,11 +20,17 @@ class Machine:
         np.random.shuffle(self.colormap)
 
         self.canvas = np.zeros((num_res, time_horizon, res_slot))
-    '''
-    Allocate the Job to this Machine
-    '''
 
+    def get_color(self):
+        """
+        Purpose: get an unused color
+        """
+
+    # end def
     def allocate_job(self, job, curr_time):
+        '''
+            Allocate the Job to this Machine
+        '''
         allocated = False
 
         for i in range(0, self.time_horizon - job.len):
@@ -43,7 +49,7 @@ class Machine:
 
                 # 应有足够的颜色
                 for color in self.colormap:
-                    if color not in self.colormap:
+                    if color not in used_color:
                         new_color = color
                         break
 
