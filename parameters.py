@@ -4,10 +4,11 @@ import numpy as np
 import job_distribution
 
 
-
 '''
 定义相关参数
 '''
+
+
 class Parameters:
     def __init__(self):
 
@@ -48,7 +49,7 @@ class Parameters:
 
         # 任务分布
         self.dist = job_distribution.Dist(self.num_res,
-                                         self.max_job_size, self.max_job_len)
+                                          self.max_job_size, self.max_job_len)
 
         # NOTE - 图形表示
         # 确信可以被图形表示
@@ -88,6 +89,7 @@ class Parameters:
         # NOTE - 监督学习模仿的策略
         self.batch_size = 10
         self.evaluate_policy_name = 'SJF'
+        self.compute_dependent_parameters()
 
     # NOTE - 计算相关的参数
     def compute_dependent_parameters(self):
