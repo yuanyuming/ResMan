@@ -20,6 +20,8 @@
 - init class
   - average job comming per slot
 - attributes
+  - average
+  - 
 - method
   - get_job_collection
 
@@ -42,8 +44,6 @@
   - start()
   - finish()
   - generate_job()
-
-#### Class JobDistribution
 
 #### Class JobSlot
 
