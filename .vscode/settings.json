@@ -27,4 +27,5 @@
             "other": "on"
         }
     },
+    "python.testing.pytestPath": "",
 }

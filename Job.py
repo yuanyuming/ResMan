@@ -5,6 +5,64 @@ import prettytable
 import numpy as np
 
 
+class JobDistribution:
+    def __init__(self, max_nw_vec=[10, 20], max_job_len=10):
+        self.num_res = len(max_nw_vec)
+        self.max_nw_size = max_nw_vec
+        self.max_job_len = max_job_len
+
+        self.job_small_chance = 0.8
+
+        self.job_len_big_lower = int(max_job_len * 2/3)
+        self.job_len_big_upper = max_job_len
+
+        self.job_len_small_lower = 1
+        self.job_len_small_upper = int(max_job_len/5)
+
+        self.dominant_res_lower = np.divide(np.array(max_nw_vec), 2)
+        self.dominant_res_upper = max_nw_vec
+
+        self.other_res_lower = 1
+        self.other_res_upper = np.divide(np.array(max_nw_vec), 5)
+
+    def normal_dist(self):
+
+        # NOTE - 新任务时长
+        nw_len = np.random.randint(1, self.max_job_len+1)
+
+        nw_size = np.zeros(self.num_res)
+
+        for i in range(self.num_res):
+            # comment:
+            nw_size[i] = np.random.randint(1, self.max_nw_size[i]+1)
+        # end for
+        return nw_len, nw_size
+
+    def bi_model_dist(self):
+
+        # NOTE - 新任务时长
+        if np.random.rand() < self.job_small_chance:
+            nw_len = np.random.randint(self.job_len_small_lower,
+                                       self.job_len_small_upper+1)
+        else:  # 大任务
+            nw_len = np.random.randint(self.job_len_big_lower,
+                                       self.job_len_big_upper)
+
+        # NOTE - 任务资源请求
+        dominant_res = np.random.randint(0, self.num_res)
+        nw_size = np.zeros([self.num_res])
+        for i in range(self.num_res):
+            # comment:
+            if i == dominant_res:
+                nw_size[i] = np.random.randint(self.dominant_res_lower[i],
+                                               self.dominant_res_upper[i]+1)
+            else:
+                nw_size[i] = np.random.randint(self.other_res_lower,
+                                               self.other_res_upper[i]+1)
+
+        return nw_len, nw_size
+
+
 class Job:
     '''
     res_vec:资源需求向量
@@ -21,6 +79,10 @@ class Job:
         self.enter_time = enter_time
         self.start_time = -1
         self.finish_time = -1
+        self.job_vec = self.generate_job()
+
+    def random_job(self, dist=JobDistribution().bi_model_dist):
+        self.len, self.res_vec = dist()
         self.job_vec = self.generate_job()
 
     def generate_job(self):
@@ -45,72 +107,14 @@ class Job:
         Purpose: show the job
         """
         table = prettytable.PrettyTable(
-            ['Job Id', 'Res Vector', 'Enter Time', 'Start Time', 'Finish Time'])
-        table.add_row([self.id, self.res_vec, self.enter_time,
+            ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
+        table.add_row([self.id, self.res_vec, self.len, self.enter_time,
                       self.start_time, self.finish_time])
         table.set_style(prettytable.MSWORD_FRIENDLY)
         print("Job Info")
         print(table)
         print("Job Vector")
         print(self.job_vec)
-
-
-class JobDistribution:
-    def __init__(self, num_res, max_nw_size, job_len):
-        self.num_res = num_res
-        self.max_nw_size = max_nw_size
-        self.job_len = job_len
-
-        self.job_small_chance = 0.8
-
-        self.job_len_big_lower = job_len * 2/3
-        self.job_len_big_upper = job_len
-
-        self.job_len_small_lower = 1
-        self.job_len_small_upper = job_len/5
-
-        self.dominant_res_lower = max_nw_size / 2
-        self.dominant_res_upper = max_nw_size
-
-        self.other_res_lower = 1
-        self.other_res_upper = max_nw_size / 5
-
-    def normal_dist(self):
-
-        # NOTE - 新任务时长
-        nw_len = np.random.randint(1, self.job_len+1)
-
-        nw_size = np.zeros(self.num_res)
-
-        for i in range(self.num_res):
-            # comment:
-            nw_size[i] = np.random.randint(1, self.max_nw_size+1)
-        # end for
-        return nw_len, nw_size
-
-    def bi_model_dist(self):
-
-        # NOTE - 新任务时长
-        if np.random.rand() < self.job_small_chance:
-            nw_len = np.random.randint(self.job_len_small_lower,
-                                       self.job_len_small_upper+1)
-        else:  # 大任务
-            nw_len = np.random.randint(self.job_len_big_lower,
-                                       self.job_len_big_upper)
-
-        # NOTE - 任务资源请求
-        dominant_res = np.random.randint(0, self.num_res)
-        nw_size = np.zeros([self.num_res])
-        for i in range(self.num_res):
-            # comment:
-            if i == dominant_res:
-                nw_size[i] = np.random.randint(self.dominant_res_lower,
-                                               self.dominant_res_upper+1)
-            else:
-                nw_size[i] = np.random.randint(self.other_res_lower,
-                                               self.other_res_upper+1)
-
-        return nw_len, nw_size
 
 
 class JobSlot:
@@ -126,11 +130,13 @@ class JobSlot:
         Purpose: show the JobSlot
         """
         table = prettytable.PrettyTable(
-            ['Job Id', 'Res Vector', 'Enter Time', 'Start Time', 'Finish Time'])
+            ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
         for job in self.slot:
             if job is not None:
-                table.add_row([job.id, job.res_vec, job.enter_time,
+                table.add_row([job.id, job.res_vec, job.len, job.enter_time,
                                job.start_time, job.finish_time])
+            else:
+                table.add_row([None]*6)
         print(table)
 
     def add_new_job(self, job):
@@ -138,9 +144,14 @@ class JobSlot:
         Purpose: 
         """
         for i in range(len(self.slot)):
-            if i is None:
+            if self.slot[i] is None:
                 self.slot[i] = job
                 break
+
+    def select_job(self, num=0):
+        job = self.slot[num]
+        self.slot[num] = None
+        return job
     # end def
 
 
@@ -164,6 +175,7 @@ class JobBacklog:
             if job is not None:
                 table.add_row([job.id, job.res_vec, job.enter_time,
                                job.start_time, job.finish_time])
+
         print(table)
 
     def add_backlog(self, job):
@@ -171,8 +183,8 @@ class JobBacklog:
         Purpose: 
         """
         if self.curr_size < self.backlog_size:
-            self.curr_size += 1
             self.backlog[self.curr_size] = job
+            self.curr_size += 1
         else:
             self.backlog[:-1] = self.backlog[1:]
             self.backlog[-1] = job
@@ -182,3 +194,24 @@ class JobBacklog:
 class JobRecord:
     def __init__(self) -> None:
         self.record = {}
+
+    def new_record(self, job=Job()):
+        """
+        Purpose: add new record
+        """
+        self.record[job.id] = job
+
+    def show(self):
+        """
+        Purpose: 
+        """
+        table = prettytable.PrettyTable(
+            ['Job Id', 'Res Vector', 'Enter Time', 'Start Time', 'Finish Time'])
+        for record in self.record:
+            table.add_row([self.record[record].id, self.record[record].res_vec, self.record[record].enter_time,
+                           self.record[record].start_time, self.record[record].finish_time])
+        print(table)
+
+    # end def
+
+    # end def
