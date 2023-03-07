@@ -21,6 +21,10 @@
     "python.analysis.typeCheckingMode": "basic",
     "typewriterScrollMode.enable": true,
     "[markdown]": {
-        "editor.quickSuggestions": true
+        "editor.quickSuggestions": {
+            "comments": "on",
+            "strings": "on",
+            "other": "on"
+        }
     },
 }

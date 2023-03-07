@@ -34,3 +34,4 @@ python -m pip install --force-reinstall pip
 ```
 
 目前发现路径依赖的是 `pip`
+

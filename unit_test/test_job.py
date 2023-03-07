@@ -5,6 +5,11 @@ import sys
 sys.path.append(".")
 
 
+def test_job():
+    job = Job.Job()
+    job.show()
+
+
 def test_jobSlot():
     """
     Purpose: make sure that JobSlot works properly
@@ -21,6 +26,7 @@ def test_jobbacklog():
     """
     Purpose: test that JobBacklog works properly
     """
+
     env = Environment.Allocation_Environment()
     job = env.get_new_job_from_seq(0, 0)
     job.show()

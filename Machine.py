@@ -1,12 +1,13 @@
 import numpy as np
+import prettytable
 
 
 class Machine:
-    '''
-    Initializes the machine
-    '''
-
     def __init__(self, num_res, time_horizon, res_slot, job_num_cap) -> None:
+        '''
+        Initializes the machine
+        '''
+
         self.num_res = num_res
         self.time_horizon = time_horizon
         self.res_slot = res_slot
@@ -26,7 +27,6 @@ class Machine:
         Purpose: get an unused color
         """
 
-    # end def
     def allocate_job(self, job, curr_time):
         '''
             Allocate the Job to this Machine
@@ -96,4 +96,15 @@ class Machine:
         Purpose: one
         """
 
-    # end def
+        table = prettytable.PrettyTable(
+            ["Number of Res", "Time Horizon", "Number of Running Jobs"])
+        table.add_row([self.num_res, self.time_horizon, len(self.running_job)])
+        table.set_style(prettytable.MSWORD_FRIENDLY)
+        table.title = "Machine Info"
+        print(table)
+        print("Resource slots:")
+        print(self.res_slot)
+        print("Available slots:")
+        print(self.avail_slot)
+        print("Running Jobs:")
+        print(self.running_job)
