@@ -1,1 +1,6 @@
--[] Configure The VSCode Extension
+# TODO
+
+- [ ] Agents
+- [ ] Users
+- [ ] Servers
+- [x] Jobs

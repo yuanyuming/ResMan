@@ -4,6 +4,8 @@
 import prettytable
 import numpy as np
 
+from scipy.stats import poisson
+
 
 class JobDistribution:
     def __init__(self, max_nw_vec=[10, 20], max_job_len=10):
@@ -91,6 +93,13 @@ class Job:
         """
         return [self.res_vec] * self.len
 
+    def read_job_from_file(self):
+        """
+        Purpose: 
+        """
+
+    # end def
+
     # end def
     def start(self, curr_time):
         """
@@ -115,6 +124,40 @@ class Job:
         print(table)
         print("Job Vector")
         print(self.job_vec)
+
+
+class JobCollection:
+    def __init__(self, average, id_start=0, enter_time=0, job_dist=JobDistribution().bi_model_dist):
+        self.average = average
+        self.id_start = id_start
+        self.enter_time = enter_time
+        self.Dist = job_dist
+
+    def get_job_collection(self):
+        """
+        Purpose: 
+        """
+        poi = poisson.rvs(self.average, size=1)
+        return self.generate_jobs(poi)
+
+    def generate_jobs(self, num=10):
+        """
+        Purpose: one
+        """
+        collection = []
+        for id in range(self.id_start, self.id_start+num):
+            job = Job()
+            job.enter_time = self.enter_time
+            job.id = id
+            job.random_job(self.Dist)
+            collection.append(job)
+        self.id_start += num
+
+    # end def
+
+    # end def
+
+    # end def
 
 
 class JobSlot:
