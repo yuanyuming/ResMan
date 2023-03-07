@@ -132,6 +132,7 @@ class JobCollection:
         self.id_start = id_start
         self.enter_time = enter_time
         self.Dist = job_dist
+        self.id = id_start
 
     def get_job_collection(self):
         """
@@ -145,13 +146,13 @@ class JobCollection:
         Purpose: one
         """
         collection = []
-        for id in range(self.id_start, self.id_start+num):
+        for id in range(self.id, self.id+num):
             job = Job()
             job.enter_time = self.enter_time
             job.id = id
             job.random_job(self.Dist)
             collection.append(job)
-        self.id_start += num
+        self.id += num
 
     # end def
 
