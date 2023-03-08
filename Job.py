@@ -7,6 +7,22 @@ import numpy as np
 from scipy.stats import poisson
 
 
+'''
+Parameters:
+JobDistribution: 
+- max new work vector
+- max job len
+
+JobCollection:
+- averge jobs per slot
+- id start
+- enter time
+- duration
+- Dist
+
+'''
+
+
 class JobDistribution:
     def __init__(self, max_nw_vec=[10, 20], max_job_len=10):
         self.num_res = len(max_nw_vec)
@@ -82,6 +98,7 @@ class Job:
         self.start_time = -1
         self.finish_time = -1
         self.job_vec = self.generate_job()
+        self.price = 0
 
     def random_job(self, dist=JobDistribution().bi_model_dist):
         self.len, self.res_vec = dist()
@@ -98,9 +115,6 @@ class Job:
         Purpose: 
         """
 
-    # end def
-
-    # end def
     def start(self, curr_time):
         """
         Purpose: 

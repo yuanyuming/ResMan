@@ -41,11 +41,34 @@
   - enter time
   - start time
   - finish time
+  - job vector
+  - price
 - method
   - show()
   - start()
   - finish()
+  - to_list()
   - generate_job()
+
+#### Class JobCollection
+
+- init class
+  - average
+  - id start
+  - enter time
+  - duration
+  - job distribution
+- attribute
+  - average
+  - id start
+  - enter time
+  - duration
+  - job distribution
+- method
+  - get_job_collection
+  - get_job_collections
+
+#### Class JobPreallocation
 
 #### Class JobSlot
 

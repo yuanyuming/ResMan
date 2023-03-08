@@ -3,8 +3,23 @@ import prettytable
 import Job
 
 
+class SlotShow:
+    def __init__(self, res_slot=[10, 15], avial_slot=[[0, 1], [2, 1], [7, 10], [0, 1], [2, 1], [7, 10]]):
+        self.res_slot = res_slot
+        self.avail_slot = np.asarray(avial_slot)
+        self.percent_slot = (
+            self.avail_slot / self.res_slot * 8).round().astype(int)
+
+    def compute_chart(self):
+        bar = " ▁▂▃▄▅▆▇█"
+        bars = [char for char in bar]
+        for i in range(len(self.res_slot)):
+            bar_show = [bars[s] for s in self.percent_slot[:, i]]
+            print("- Resources #", i, ":𝄃", ''.join(bar_show), "𝄃")
+
+
 class Machine:
-    def __init__(self, id, num_res, time_horizon, res_slot, cost_vector, current_time=0) -> None:
+    def __init__(self, id=0, num_res=2, time_horizon=20, job_slot_size=10, job_backlog_size=10, res_slot=[20, 40], cost_vector=[4, 6], current_time=0) -> None:
         '''
         Initializes the machine
         '''
@@ -12,12 +27,18 @@ class Machine:
         self.num_res = num_res
         self.time_horizon = time_horizon
         self.current_time = current_time
+        self.job_slot = Job.JobSlot(job_slot_size)
+        self.job_backlog = Job.JobBacklog(job_backlog_size)
         self.res_slot = res_slot
         self.reward = 0
         self.cost_vector = cost_vector
         self.avail_slot = np.ones((self.time_horizon, self.num_res))\
             * self.res_slot
         self.running_job = []
+        self.reward = 0
+
+    def get_price(self, job=Job.Job()):
+        pass
 
     def allocate_job(self, job=Job.Job()):
         '''
@@ -31,8 +52,8 @@ class Machine:
                 allocated = True
 
                 self.avail_slot[i:i+job.len] = new_avail_res
-                job.start_time = self.current_time + i
-                job.finish_time = job.start_time + job.len
+                job.start(self.current_time + i)
+                job.finish(job.start_time + job.len)
 
                 self.running_job.append(job)
 
@@ -53,6 +74,7 @@ class Machine:
 
         for job in self.running_job:
             if job.finish_time <= self.current_time:
+                self.reward += job.price
                 self.running_job.remove(job)
         self.current_time += 1
 
@@ -75,7 +97,6 @@ class Machine:
         print("Resources Vector")
         for i in range(len(self.res_slot)):
             print("- Resources #", i, ":", res_vec[i])
-    # end def
 
     def show(self, verbose=False):
         """
@@ -91,24 +112,23 @@ class Machine:
         print(table)
         self.show_available_slot()
         self.show_res_vec()
-
-        print()
         self.show_running_job()
+        print(self.reward)
 
 
-class SlotShow:
-    def __init__(self, res_slot=[10, 15], avial_slot=[[0, 1], [2, 1], [7, 10], [0, 1], [2, 1], [7, 10]]):
-        self.res_slot = res_slot
-        self.avail_slot = np.asarray(avial_slot)
-        self.percent_slot = (
-            self.avail_slot / self.res_slot * 8).round().astype(int)
+class MachineSet:
+    def __init__(self):
+        self.machines = []
 
-    def compute_chart(self):
-        bar = " ▁▂▃▄▅▆▇█"
-        bars = [char for char in bar]
-        for i in range(len(self.res_slot)):
-            bar_show = [bars[s] for s in self.percent_slot[:, i]]
-            print("- Resources #", i, ":𝄃", ''.join(bar_show), "𝄃")
+    def add_machine(self, num_res, time_horizon, job_slot_size, res_slot, cost_vector, current_time=0):
+        self.machines.append(Machine(len(self.machines),
+                                     num_res, time_horizon, job_slot_size, res_slot, cost_vector, current_time))
 
-        pass
-        # end def
+    def generate_machines(self, num):
+        """
+        Purpose: 
+        """
+        for i in range(num):
+            self.machines.append(None)
+
+    # end def
