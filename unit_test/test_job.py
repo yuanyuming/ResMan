@@ -1,5 +1,7 @@
 
-import Environment
+import timeit
+import prettytable
+from matplotlib.pyplot import table
 import Job
 import sys
 sys.path.append(".")
@@ -78,4 +80,44 @@ def test_jobrecord():
 
     job_record.show()
 
+
+def test_jobcollection_generate():
+    jc = Job.JobCollection()
+    collection = jc.get_job_collection()
+    table = prettytable.PrettyTable(
+        ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
+    for job in collection:
+        table.add_row(job.to_list())
+    print(table)
+    collection = jc.get_job_collection()
+    table = prettytable.PrettyTable(
+        ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
+    for job in collection:
+        table.add_row(job.to_list())
+    print(table)
+
+
+def test_jobcollection_s():
+    """
+    Purpose: 
+    """
+    jc = Job.JobCollection()
+    collections = jc.get_job_collections()
+    for collection in collections:
+        table = prettytable.PrettyTable(
+            ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
+        for job in collection:
+            table.add_row(job.to_list())
+        print(table)
 # end def
+
+
+def test_compare_job_collection_and_s():
+    jc = Job.JobCollection(duration=100)
+    collections = jc.get_job_collections()
+    for collection in collections:
+        table = prettytable.PrettyTable(
+            ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
+        for job in collection:
+            table.add_row(job.to_list())
+        print(table)

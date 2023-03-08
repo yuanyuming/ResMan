@@ -1,22 +1,28 @@
-Table Of Contents
+# Table Of Contents
 
-# Code
-1. Better Comments 
+## Code
+
+1. Better Comments
 1. Blockman
 1. Bookmarks
 1. Easy Snippet
 1. Error Lens
+1. TabOut
 
-# Configure
+## Configure
+
 1. EditorConfig for VS Code
 
-# File
+## File
+
 1. Excalidraw
 1. File Browser
 1. GitHub Repositories
 
-# Appearance
+## Appearance
+
 1. Fluent Icons
 
-# Note
+## Note
+
 1. GistPad

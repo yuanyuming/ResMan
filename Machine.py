@@ -3,15 +3,16 @@ import prettytable
 
 
 class Machine:
-    def __init__(self, num_res, time_horizon, res_slot, job_num_cap) -> None:
+    def __init__(self, id, num_res, time_horizon, res_slot, cost_vector) -> None:
         '''
         Initializes the machine
         '''
-
+        self.id = id
         self.num_res = num_res
         self.time_horizon = time_horizon
         self.res_slot = res_slot
-
+        self.reward = 0
+        self.cost_vector = cost_vector
         self.avail_slot = np.ones((self.time_horizon, self.num_res))\
             * self.res_slot
         self.running_job = []
@@ -62,19 +63,38 @@ class Machine:
 
     def show(self):
         """
-        show the state of this machine
-        Purpose: one
+
+        Purpose: show the state of this machine
         """
 
         table = prettytable.PrettyTable(
-            ["Number of Res", "Time Horizon", "Number of Running Jobs"])
-        table.add_row([self.num_res, self.time_horizon, len(self.running_job)])
-        table.set_style(prettytable.MSWORD_FRIENDLY)
+            ["id", "Number of Res", "Time Horizon", "Resource Slot", "Reward", "Cost Vector", "Number of Running Jobs"])
+        table.add_row(
+            [self.id, self.num_res, self.time_horizon, self.res_slot, self.reward, self.cost_vector, str(len(self.running_job))])
         table.title = "Machine Info"
         print(table)
         print("Resource slots:")
         print(self.res_slot)
         print("Available slots:")
-        print(self.avail_slot)
+        slot_show = SlotShow(self.res_slot, self.avail_slot)
+        slot_show.compute_chart()
         print("Running Jobs:")
         print(self.running_job)
+
+
+class SlotShow:
+    def __init__(self, res_slot=[10, 15], avial_slot=[[0, 1], [2, 1], [7, 10], [0, 1], [2, 1], [7, 10]]):
+        self.res_slot = res_slot
+        self.avail_slot = np.asarray(avial_slot)
+        self.percent_slot = (
+            self.avail_slot / self.res_slot * 8).round().astype(int)
+
+    def compute_chart(self):
+        bar = " ▁▂▃▄▅▆▇█"
+        bars = [char for char in bar]
+        for i in range(len(self.res_slot)):
+            bar_show = [bars[s] for s in self.percent_slot[:, i]]
+            print("- Resoures #", i, ":𝄃", ''.join(bar_show), "𝄃")
+
+        pass
+        # end def

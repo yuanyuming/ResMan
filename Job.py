@@ -111,54 +111,78 @@ class Job:
     def finish(self, curr_time):
         self.finish_time = curr_time
 
+    def to_list(self):
+        return [self.id, self.res_vec, self.len, self.enter_time,
+                self.start_time, self.finish_time]
+
     def show(self):
         """
         Purpose: show the job
         """
         table = prettytable.PrettyTable(
             ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
-        table.add_row([self.id, self.res_vec, self.len, self.enter_time,
-                      self.start_time, self.finish_time])
+        table.add_row(self.to_list())
         table.set_style(prettytable.MSWORD_FRIENDLY)
-        print("Job Info")
+        table.title = "Job Info"
         print(table)
         print("Job Vector")
         print(self.job_vec)
 
 
 class JobCollection:
-    def __init__(self, average, id_start=0, enter_time=0, job_dist=JobDistribution().bi_model_dist):
+    def __init__(self, average=5, id_start=0, enter_time=0, duration=10, job_dist=JobDistribution().bi_model_dist):
         self.average = average
         self.id_start = id_start
         self.enter_time = enter_time
         self.Dist = job_dist
-        self.id = id_start
+        self.now_id = id_start
+        self.duration = duration
 
     def get_job_collection(self):
         """
         Purpose: 
         """
-        poi = poisson.rvs(self.average, size=1)
-        return self.generate_jobs(poi)
-
-    def generate_jobs(self, num=10):
-        """
-        Purpose: one
-        """
+        poi = poisson.rvs(self.average)
         collection = []
-        for id in range(self.id, self.id+num):
+        for id in range(self.now_id, self.now_id+poi):
             job = Job()
             job.enter_time = self.enter_time
             job.id = id
             job.random_job(self.Dist)
             collection.append(job)
-        self.id += num
+        self.enter_time += 1
+        self.now_id += poi
+        return collection
 
-    # end def
+    def get_job_collections(self):
+        """
+        Purpose: 
+        """
+        poi = poisson.rvs(self.average, size=self.duration)
+        collection = []
+        collections = []
+        for t in range(self.duration):
+            for id in range(self.now_id, self.now_id+int(poi[t])):
 
-    # end def
+                job = Job()
+                job.enter_time = self.enter_time
+                job.id = id
+                job.random_job(self.Dist)
+                collection.append(job)
+            self.enter_time += 1
+            self.now_id += poi[t]
+            collections.append(collection)
+            collection = []
+        return collections
 
-    # end def
+#
+
+# todo 为任务安排主机执行,按段随机分配
+
+
+class JobPreallocation:
+    def __init__(self, machine_set, visible, max_send, job_collections) -> None:
+        pass
 
 
 class JobSlot:
@@ -181,6 +205,7 @@ class JobSlot:
                                job.start_time, job.finish_time])
             else:
                 table.add_row([None]*6)
+        table.title = "JobSlot Info"
         print(table)
 
     def add_new_job(self, job):
@@ -211,7 +236,7 @@ class JobBacklog:
 
     def show(self):
         """
-        Purpose: show the JobSlot
+        Purpose: show the JobBacklog
         """
         table = prettytable.PrettyTable(
             ['Job Id', 'Res Vector', 'Enter Time', 'Start Time', 'Finish Time'])
@@ -220,6 +245,7 @@ class JobBacklog:
                 table.add_row([job.id, job.res_vec, job.enter_time,
                                job.start_time, job.finish_time])
 
+        table.title = "JobBacklog"
         print(table)
 
     def add_backlog(self, job):
@@ -254,8 +280,5 @@ class JobRecord:
         for record in self.record:
             table.add_row([self.record[record].id, self.record[record].res_vec, self.record[record].enter_time,
                            self.record[record].start_time, self.record[record].finish_time])
+        table.title = "JobRecord"
         print(table)
-
-    # end def
-
-    # end def

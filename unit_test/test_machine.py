@@ -8,14 +8,22 @@ def:
     show
 '''
 
-from platform import machine
-import Machine
-
 
 def test_Machine_init():
     """
     Purpose: 
     """
-    machine = Machine.Machine(2, 20, 15, 40)
+    import Machine
+    machine = Machine.Machine(1, 2, 20, [25, 40], [4, 6])
     machine.show()
+# end def
+
+
+def test_caaa():
+    """
+    Purpose: 
+    """
+    import Machine
+    ss = Machine.SlotShow()
+    ss.compute_chart()
 # end def

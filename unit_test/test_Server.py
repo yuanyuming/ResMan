@@ -1,5 +1,4 @@
 
-import Environment
 import parameters
 import sys
 sys.path.append(".")

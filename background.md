@@ -14,14 +14,16 @@
   - normal dist
   - bi model dist
 
-
 #### Class JobCollection
 
 - init class
   - average job comming per slot
 - attributes
   - average
-  - 
+  - id_start
+  - enter time
+  - distribution
+  - now id
 - method
   - get_job_collection
 
@@ -75,8 +77,11 @@
 #### Machine
 
 - attribute
+  - id
   - number of resource
   - time horizon
+  - reward
+  - cost_vector
   - resource slot
   - available slot
   - running job
@@ -84,6 +89,7 @@
   - allocate job
   - time proceed
   - show
+
 ### Users
 
 ### Agents
