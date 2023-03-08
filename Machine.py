@@ -1,15 +1,17 @@
 import numpy as np
 import prettytable
+import Job
 
 
 class Machine:
-    def __init__(self, id, num_res, time_horizon, res_slot, cost_vector) -> None:
+    def __init__(self, id, num_res, time_horizon, res_slot, cost_vector, current_time=0) -> None:
         '''
         Initializes the machine
         '''
         self.id = id
         self.num_res = num_res
         self.time_horizon = time_horizon
+        self.current_time = current_time
         self.res_slot = res_slot
         self.reward = 0
         self.cost_vector = cost_vector
@@ -17,7 +19,7 @@ class Machine:
             * self.res_slot
         self.running_job = []
 
-    def allocate_job(self, job, curr_time):
+    def allocate_job(self, job=Job.Job()):
         '''
             Allocate the Job to this Machine
         '''
@@ -29,7 +31,7 @@ class Machine:
                 allocated = True
 
                 self.avail_slot[i:i+job.len] = new_avail_res
-                job.start_time = curr_time + i
+                job.start_time = self.current_time + i
                 job.finish_time = job.start_time + job.len
 
                 self.running_job.append(job)
@@ -38,18 +40,10 @@ class Machine:
                 assert job.finish_time != -1
                 assert job.finish_time > job.start_time
 
-                canvas_start_time = job.start_time - curr_time
-                canvas_end_time = job.finish_time - curr_time
-
-                for res in range(self.num_res):
-                    for i in range(canvas_start_time, canvas_end_time):
-                        avail_slot = np.where(self.canvas[res, i, :] == 0)[0]
-                        print(avail_slot[:job.res_vec[res]])
-
                 break
-            return allocated
+        return allocated
 
-    def time_proceed(self, curr_time):
+    def time_proceed(self):
         '''
         process time
         '''
@@ -58,28 +52,48 @@ class Machine:
         self.avail_slot[-1, :] = self.res_slot
 
         for job in self.running_job:
-            if job.finish_time <= curr_time:
+            if job.finish_time <= self.current_time:
                 self.running_job.remove(job)
+        self.current_time += 1
 
-    def show(self):
+    def show_running_job(self):
+        print("Running Jobs:")
+        print([job.id for job in self.running_job])
+
+    def show_available_slot(self):
+        print("Resource slots:")
+        print(self.res_slot)
+        print("Available slots:")
+        slot_show = SlotShow(self.res_slot, self.avail_slot)
+        slot_show.compute_chart()
+
+    def show_res_vec(self):
+        """
+        Purpose: 
+        """
+        res_vec = [' '.join([str(c) for c in i]) for i in self.avail_slot.T]
+        print("Resources Vector")
+        for i in range(len(self.res_slot)):
+            print("- Resources #", i, ":", res_vec[i])
+    # end def
+
+    def show(self, verbose=False):
         """
 
         Purpose: show the state of this machine
         """
 
         table = prettytable.PrettyTable(
-            ["id", "Number of Res", "Time Horizon", "Resource Slot", "Reward", "Cost Vector", "Number of Running Jobs"])
+            ["id", "Current Time", "Number of Res", "Time Horizon", "Resource Slot", "Reward", "Cost Vector", "Number of Running Jobs"])
         table.add_row(
-            [self.id, self.num_res, self.time_horizon, self.res_slot, self.reward, self.cost_vector, str(len(self.running_job))])
+            [self.id, self.current_time,  self.num_res, self.time_horizon, self.res_slot, self.reward, self.cost_vector, str(len(self.running_job))])
         table.title = "Machine Info"
         print(table)
-        print("Resource slots:")
-        print(self.res_slot)
-        print("Available slots:")
-        slot_show = SlotShow(self.res_slot, self.avail_slot)
-        slot_show.compute_chart()
-        print("Running Jobs:")
-        print(self.running_job)
+        self.show_available_slot()
+        self.show_res_vec()
+
+        print()
+        self.show_running_job()
 
 
 class SlotShow:
@@ -94,7 +108,7 @@ class SlotShow:
         bars = [char for char in bar]
         for i in range(len(self.res_slot)):
             bar_show = [bars[s] for s in self.percent_slot[:, i]]
-            print("- Resoures #", i, ":𝄃", ''.join(bar_show), "𝄃")
+            print("- Resources #", i, ":𝄃", ''.join(bar_show), "𝄃")
 
         pass
         # end def

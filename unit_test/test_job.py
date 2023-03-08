@@ -115,9 +115,9 @@ def test_jobcollection_s():
 def test_compare_job_collection_and_s():
     jc = Job.JobCollection(duration=100)
     collections = jc.get_job_collections()
+    table = prettytable.PrettyTable(
+        ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
     for collection in collections:
-        table = prettytable.PrettyTable(
-            ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
         for job in collection:
             table.add_row(job.to_list())
-        print(table)
+    print(table)
