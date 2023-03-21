@@ -28,4 +28,5 @@
         }
     },
     "python.testing.pytestPath": "",
+    "dictCompletion.addSpaceAfterCompletion": false,
 }
