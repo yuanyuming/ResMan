@@ -4,6 +4,7 @@
 man
 __pycache__
 unit_test\__pycache__
+.idea
 ### LaTeX ###
 ## Core latex/pdflatex auxiliary files:
 *.aux
