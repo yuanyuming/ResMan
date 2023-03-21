@@ -33,3 +33,4 @@ python -m pip install --force-reinstall pip
 ```
 
 目前发现路径依赖的是 `pip`
+python3.8 -m venv --upgrade <path_to_dir>
