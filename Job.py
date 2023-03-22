@@ -118,7 +118,7 @@ class Job:
     def start(self, curr_time):
         """
         Purpose: 
-        """
+        """ 
         self.start_time = curr_time
 
     # end def
