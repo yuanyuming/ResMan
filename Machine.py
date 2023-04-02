@@ -118,17 +118,20 @@ class Machine:
 
 class MachineSet:
     def __init__(self):
+        self.number = 0
         self.machines = []
 
     def add_machine(self, num_res, time_horizon, job_slot_size, res_slot, cost_vector, current_time=0):
-        self.machines.append(Machine(len(self.machines),
+        self.machines.append(Machine(self.number,
                                      num_res, time_horizon, job_slot_size, res_slot, cost_vector, current_time))
+        self.number += 1
 
-    def generate_machines(self, num):
+    def generate_machines_random(self, num):
         """
         Purpose: 
         """
         for i in range(num):
-            self.machines.append(None)
+            self.add_machine(num_res=2, time_horizon=20, job_slot_size=10, res_slot=[
+                             20, 40], cost_vector=[4, 6], current_time=0)
 
     # end def
