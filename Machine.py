@@ -36,9 +36,16 @@ class Machine:
             * self.res_slot
         self.running_job = []
         self.reward = 0
+        self.policy = self.fixed_norm
 
     def get_price(self, job=Job.Job()):
-        pass
+        return self.id, self.policy(job, self.cost_vector)
+
+    def fixed(self, job=Job.Job(), cost_vector=[4, 6]):
+        return np.dot(job.res_vec, cost_vector)
+
+    def fixed_norm(self, job=Job.Job(), cost_vector=[4, 6], var=0.2):
+        return np.dot(job.res_vec, cost_vector) + var * np.random.normal()
 
     def allocate_job(self, job=Job.Job()):
         '''
@@ -74,7 +81,7 @@ class Machine:
 
         for job in self.running_job:
             if job.finish_time <= self.current_time:
-                self.reward += job.price
+                self.reward += job.pay
                 self.running_job.remove(job)
         self.current_time += 1
 
@@ -117,13 +124,30 @@ class Machine:
 
 
 class MachineSet:
+    def __init__(self, machine=[Machine()]):
+        self.machines = machine
+
+    def add_machine(self, machine=Machine()):
+        """
+        Purpose: 
+        """
+        self.machines.append(machine)
+    # end def
+
+
+class Cluster:
     def __init__(self):
         self.number = 0
         self.machines = []
+        self.job_slot_size = 10
+        self.num_res = 2
+        self.time_horizon = 20
+        self.current_time = 0
+        self.job_backlog_size = 10
 
-    def add_machine(self, num_res, time_horizon, job_slot_size, res_slot, cost_vector, current_time=0):
-        self.machines.append(Machine(self.number,
-                                     num_res, time_horizon, job_slot_size, res_slot, cost_vector, current_time))
+    def add_machine(self, res_slot, cost_vector):
+        self.machines.append(Machine(self.number, self.num_res, self.time_horizon,
+                                     self.job_slot_size, self.job_backlog_size, res_slot, cost_vector, self.current_time))
         self.number += 1
 
     def generate_machines_random(self, num):
@@ -131,7 +155,72 @@ class MachineSet:
         Purpose: 
         """
         for i in range(num):
-            self.add_machine(num_res=2, time_horizon=20, job_slot_size=10, res_slot=[
-                             20, 40], cost_vector=[4, 6], current_time=0)
+            bais_r = np.random.randint(-5, 5)
+            bais_c = np.random.randint(-2, 2)
+            self.add_machine(
+                res_slot=[20+bais_r, 40+bais_r], cost_vector=[4+bais_c, 6+bais_c])
 
-    # end def
+    def allocate_job(self, machine_id=0, job=Job.Job()):
+        self.machines[machine_id].allocate_job(job)
+
+    def step(self):
+        pass
+
+    def show(self):
+        table = prettytable.PrettyTable(
+            ['id', "Resource Slot", "Reward", "Cost Vector"])
+        for machine in self.machines:
+            table.add_row([machine.id, machine.res_slot,
+                          machine.reward, machine.cost_vector])
+        print(table)
+
+
+class JobCollection:
+    def __init__(self, collection=[Job.Job()]) -> None:
+        self.collection = collection
+
+
+class MachineRestrict:
+    def __init__(self, cluster=Cluster(), collection=Job.JobCollection().get_job_collection(), max_machines=10, min_machines=3) -> None:
+        self.cluster = cluster
+        self.collection = collection
+        self.max_machines = max_machines
+        self.min_machines = min_machines
+        self.generate_restrict()
+        pass
+
+    def generate_restrict(self):
+        for job in self.collection:
+            min = np.random.randint(0, self.cluster.number-self.max_machines)
+            t = np.random.randint(self.min_machines, self.max_machines)
+            array = np.arange(min, min+self.max_machines)
+            np.random.shuffle(array)
+            job.restrict_machines = array[:t]
+
+    def show(self):
+        table = prettytable.PrettyTable(['Job Id', 'Restrict Machine'])
+        for job in self.collection:
+            table.add_row([job.id, job.restrict_machines])
+        print(table)
+
+
+class Quote:
+    def __init__(self, job=Job.Job(), cluster=Cluster()) -> None:
+        self.job = job
+        self.cluster = cluster.machines
+        self.quotes = []
+        self.get_price_set()
+        pass
+
+    def get_price_set(self):
+        for machine_id in self.job.restrict_machines:
+            self.quotes.append(
+                (self.cluster[machine_id].get_price(self.job)))
+            pass
+
+    def show(self):
+        table = prettytable.PrettyTable(['Machine', 'Price'])
+        for item in self.quotes:
+            table.add_row([*item])
+
+        print(table)

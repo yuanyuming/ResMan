@@ -8,8 +8,9 @@ def:
     show
 '''
 
-
-import imp
+from scipy import cluster
+import Job
+import Machine
 
 
 def test_Machine_init():
@@ -51,3 +52,31 @@ def test_machine_allocate():
     mac.show()
 
 # end def
+
+
+def test_machine_cluster():
+    cluster = Machine.Cluster()
+    cluster.generate_machines_random(10)
+    cluster.show()
+
+
+def test_strict_machine():
+    cluster = Machine.Cluster()
+    cluster.generate_machines_random(100)
+    collection = Job.JobCollection(average=20)
+    restrict = Machine.MachineRestrict(
+        cluster=cluster, collection=collection.get_job_collection())
+    restrict.show()
+
+
+def test_policy_fixed():
+    machine = Machine.Machine()
+    price = machine.get_price()
+
+
+def test_Quote():
+    cluster = Machine.Cluster()
+    cluster.generate_machines_random(30)
+    jobs = Machine.MachineRestrict(cluster=cluster)
+    quote = Machine.Quote(job=jobs.collection[0], cluster=cluster)
+    quote.show()

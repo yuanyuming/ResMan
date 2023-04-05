@@ -94,11 +94,12 @@ class Job:
         self.id = job_id
         self.res_vec = res_vec
         self.len = job_len
+        self.restrict_machines = [1, 3]
         self.enter_time = enter_time
         self.start_time = -1
         self.finish_time = -1
         self.job_vec = self.generate_job()
-        self.price = 0
+        self.pay = 0
 
     def random_job(self, dist=JobDistribution().bi_model_dist):
         self.len, self.res_vec = dist()
@@ -118,12 +119,12 @@ class Job:
     def start(self, curr_time):
         """
         Purpose: 
-        """ 
+        """
         self.start_time = curr_time
+        self.finish(curr_time+self.len)
 
-    # end def
-    def finish(self, curr_time):
-        self.finish_time = curr_time
+    def finish(self, finish_time):
+        self.finish_time = finish_time
 
     def to_list(self):
         return [self.id, self.res_vec, self.len, self.enter_time,
@@ -141,6 +142,9 @@ class Job:
         print(table)
         print("Job Vector")
         print(self.job_vec)
+
+    def get_pay(self, price_set=[]):
+        pass
 
 
 class JobCollection:
@@ -188,10 +192,6 @@ class JobCollection:
             collections.append(collection)
             collection = []
         return collections
-
-#
-
-# todo 为任务安排主机执行,按段随机分配
 
 
 class JobPreallocation:

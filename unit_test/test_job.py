@@ -97,6 +97,12 @@ def test_jobcollection_generate():
     print(table)
 
 
+def test_jobcollection():
+    jc = Job.JobCollection()
+    jc.get_job_collection()
+    print(jc.id_start)
+
+
 def test_jobcollection_s():
     """
     Purpose: 

@@ -27,6 +27,5 @@
             "other": "on"
         }
     },
-    "python.testing.pytestPath": "",
     "dictCompletion.addSpaceAfterCompletion": false,
 }
