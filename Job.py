@@ -24,9 +24,9 @@ JobCollection:
 
 
 class JobDistribution:
-    def __init__(self, max_nw_vec=[10, 20], max_job_len=10):
-        self.num_res = len(max_nw_vec)
-        self.max_nw_size = max_nw_vec
+    def __init__(self, max_job_vec=[10, 20], max_job_len=10):
+        self.num_res = len(max_job_vec)
+        self.max_nw_size = max_job_vec
         self.max_job_len = max_job_len
 
         self.job_small_chance = 0.8
@@ -37,11 +37,11 @@ class JobDistribution:
         self.job_len_small_lower = 1
         self.job_len_small_upper = int(max_job_len/5)
 
-        self.dominant_res_lower = np.divide(np.array(max_nw_vec), 2)
-        self.dominant_res_upper = max_nw_vec
+        self.dominant_res_lower = np.divide(np.array(max_job_vec), 2)
+        self.dominant_res_upper = max_job_vec
 
         self.other_res_lower = 1
-        self.other_res_upper = np.divide(np.array(max_nw_vec), 5)
+        self.other_res_upper = np.divide(np.array(max_job_vec), 5)
 
     def normal_dist(self):
 
@@ -181,7 +181,6 @@ class JobCollection:
         collections = []
         for t in range(self.duration):
             for id in range(self.now_id, self.now_id+int(poi[t])):
-
                 job = Job()
                 job.enter_time = self.enter_time
                 job.id = id

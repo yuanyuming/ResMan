@@ -5,6 +5,12 @@ import Machine
 from gymnasium import spaces
 
 
+class VehicleJobSchedulingParameters:
+    def __init__(self):
+        self.max_job_vec = []
+        self.job_distribution = Job.JobDistribution()
+
+
 class VehicleJobScheduling(gym.Env):
     metadata = {"render_modes": ["human", "ascii"]}
 
@@ -15,6 +21,7 @@ class VehicleJobScheduling(gym.Env):
 
         self.observation_space = spaces.Dict()
         self.action_space = spaces.Dict()
+
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
 

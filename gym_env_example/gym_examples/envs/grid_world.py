@@ -19,7 +19,6 @@ class GridWorldEnv(gym.Env):
                 "target": spaces.Box(0, size - 1, shape=(2,), dtype=int),
             }
         )
-
         # We have 4 actions, corresponding to "right", "up", "left", "down", "right"
         self.action_space = spaces.Discrete(4)
 
