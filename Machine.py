@@ -178,6 +178,8 @@ class JobCollection:
     def __init__(self, collection=[Job.Job()]) -> None:
         self.collection = collection
 
+# 将JobCollection的迭代器传入MachineRestrict的迭代器,返回一个迭代器
+
 
 class MachineRestrict:
     def __init__(self, cluster=Cluster(), collection=Job.JobCollection().get_job_collection(), max_machines=10, min_machines=3) -> None:
@@ -201,6 +203,15 @@ class MachineRestrict:
         for job in self.collection:
             table.add_row([job.id, job.restrict_machines])
         print(table)
+
+    def __iter__(self):
+        self.a = 1
+        return self
+
+    def __next__(self):
+        x = self.a
+        self.a += 1
+        return x
 
 
 class Quote:

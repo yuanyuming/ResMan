@@ -40,13 +40,15 @@ class VehicleJobSchedulingParameters:
         # Cluster Generate
         self.cluster = Machine.Cluster(self.machine_numbers, self.job_backlog_size,
                                        self.job_slot_size, self.num_res, self.time_horizon, self.current_time)
+        self.cluster.generate_machines_random(self.machine_numbers)
 
         # Machine Restrict Config
         self.max_machines = 10
         self.min_machines = 3
 
         # Machine Restrict
-        self.machine_restrictions = Machine.MachineRestrict()
+        self.machine_restrictions = Machine.MachineRestrict(
+            self.cluster, self.job_collection, self.max_machines, self.min_machines)
         # Network Config
 
 
@@ -54,6 +56,8 @@ class VehicleJobScheduling(gym.Env):
     metadata = {"render_modes": ["human", "ascii"]}
 
     def __init__(self, render_mode=None, parameter=VehicleJobSchedulingParameters()) -> None:
+        self.cluster = parameter.cluster
+        self.job_generator = parameter.machine_restrictions
         self.machines = []
         self.job_generator = Job.JobCollection()
         self.machine_restriction = Machine.MachineRestrict()
