@@ -35,7 +35,6 @@ class Machine:
         self.avail_slot = np.ones((self.time_horizon, self.num_res))\
             * self.res_slot
         self.running_job = []
-        self.reward = 0
         self.policy = self.fixed_norm
 
     def get_price(self, job=Job.Job()):
@@ -136,14 +135,14 @@ class MachineSet:
 
 
 class Cluster:
-    def __init__(self):
-        self.number = 0
+    def __init__(self, machine_numbers=10, job_backlog_size=10, job_slot_size=10, num_res=2, time_horizon=20, current_time=0):
+        self.number = machine_numbers
         self.machines = []
-        self.job_slot_size = 10
-        self.num_res = 2
-        self.time_horizon = 20
-        self.current_time = 0
-        self.job_backlog_size = 10
+        self.job_backlog_size = job_backlog_size
+        self.job_slot_size = job_slot_size
+        self.num_res = num_res
+        self.time_horizon = time_horizon
+        self.current_time = current_time
 
     def add_machine(self, res_slot, cost_vector):
         self.machines.append(Machine(self.number, self.num_res, self.time_horizon,
@@ -216,7 +215,14 @@ class Quote:
         for machine_id in self.job.restrict_machines:
             self.quotes.append(
                 (self.cluster[machine_id].get_price(self.job)))
-            pass
+        return self.quotes
+
+    def get_pay(self):
+        arr = np.array(self.quotes)
+        min_value = np.min(arr)
+        min_index = np.argmin(arr)
+        self.job.pay = min_value
+        self.job.running_machine = self.job.restrict_machines[min_index]
 
     def show(self):
         table = prettytable.PrettyTable(['Machine', 'Price'])

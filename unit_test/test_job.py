@@ -127,3 +127,13 @@ def test_compare_job_collection_and_s():
         for job in collection:
             table.add_row(job.to_list())
     print(table)
+
+
+def test_job_collection_iter():
+    jc = Job.JobCollection(duration=10)
+    i = 0
+    for collection in iter(jc):
+        collection[0][0].show()
+        i += 1
+        if i == 10:
+            break

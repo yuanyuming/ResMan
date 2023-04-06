@@ -1,6 +1,7 @@
 '''
 定义任务Job相关结构
 '''
+from matplotlib import collections
 import prettytable
 import numpy as np
 
@@ -24,12 +25,12 @@ JobCollection:
 
 
 class JobDistribution:
-    def __init__(self, max_job_vec=[10, 20], max_job_len=10):
+    def __init__(self, max_job_vec=[10, 20], max_job_len=10, job_small_chance=0.8):
         self.num_res = len(max_job_vec)
         self.max_nw_size = max_job_vec
         self.max_job_len = max_job_len
 
-        self.job_small_chance = 0.8
+        self.job_small_chance = job_small_chance
 
         self.job_len_big_lower = int(max_job_len * 2/3)
         self.job_len_big_upper = max_job_len
@@ -95,6 +96,7 @@ class Job:
         self.res_vec = res_vec
         self.len = job_len
         self.restrict_machines = [1, 3]
+        self.running_machine = 0
         self.enter_time = enter_time
         self.start_time = -1
         self.finish_time = -1
@@ -143,7 +145,7 @@ class Job:
         print("Job Vector")
         print(self.job_vec)
 
-    def get_pay(self, price_set=[]):
+    def get_pay(self, price_set=[5, 7]):
         pass
 
 
@@ -190,6 +192,13 @@ class JobCollection:
             self.now_id += poi[t]
             collections.append(collection)
             collection = []
+        return collections
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        collections = self.get_job_collections()
         return collections
 
 
