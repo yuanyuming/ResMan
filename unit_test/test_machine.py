@@ -90,6 +90,29 @@ def test_strict_machine_iter():
             break
 
 
+def test_job_iterator():
+    cluster = Machine.Cluster()
+    cluster.generate_machines_random(100)
+    collection = Job.JobCollection(average=1)
+    mr = Machine.MachineRestrict(cluster, iter(collection))
+    it = Machine.NestedList(iter(mr))
+    jt = iter(it)
+    for time in range(50):
+        for job in jt:
+            job.show()
+        print('done!!!!!!!!!!!!!!!!!!!!!!', time)
+
+
+def test_Zero():
+    it = Machine.NestedList([[], [1, 2]])
+    for job in it:
+        print(job)
+        print('!!!!!!!')
+    print('1 done!!!!!!!')
+    for job in it:
+        print(job)
+
+
 def test_policy_fixed():
     machine = Machine.Machine()
     price = machine.get_price()

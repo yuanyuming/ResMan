@@ -219,6 +219,44 @@ class MachineRestrict:
         return self.generate_restrict()
 
 
+# 定义一个可迭代的类
+class NestedList:
+    # 初始化方法，接受一个列表的列表作为参数
+    def __init__(self, nested_list):
+        # 把参数赋值给实例属性
+        self.nested_list = iter(nested_list)
+        # 初始化当前的子列表和索引
+        self.sublist = []
+        self.index = 0
+        self.done = False
+
+    # 定义一个__iter__方法，返回一个迭代器对象
+    def __iter__(self):
+        # 返回自身作为迭代器对象
+        return self
+
+    # 定义一个__next__方法，返回下一个元素
+    def __next__(self):
+        # 如果当前的子列表为空，就从嵌套列表中获取下一个子列表，并重置索引
+        if self.done:
+            self.done = False
+            raise StopIteration
+        if not self.sublist:
+            self.sublist = next(self.nested_list)
+            self.index = 0
+
+        # 如果当前的索引小于子列表的长度，就返回子列表中的元素，并增加索引
+        if self.index < len(self.sublist):
+            value = self.sublist[self.index]
+            self.index += 1
+            return value
+        # 如果当前的索引等于子列表的长度，就抛出一个StopIteration异常，并清空子列表，以便下次迭代时获取下一个子列表
+        else:
+            self.sublist = []
+            self.done = True
+            raise StopIteration
+
+
 class Quote:
     def __init__(self, job=Job.Job(), cluster=Cluster()) -> None:
         self.job = job

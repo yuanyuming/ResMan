@@ -130,12 +130,12 @@ def test_compare_job_collection_and_s():
 
 
 def test_job_collection_iter():
-    jc = Job.JobCollection(duration=10)
+    jc = Job.JobCollection(average=1)
     i = 0
-    for collection in iter(jc):
-        # print(collection)
-        if len(collection) == 0:
-            print('empty')
+    for collections in iter(jc):
+        for collection in collections:
+            for job in collection:
+                job.show()
         i += 1
-        if i == 1000:
+        if i == 100:
             break
