@@ -15,7 +15,7 @@ import Machine
 
 def test_Machine_init():
     """
-    Purpose: 
+    Purpose:
     """
     import Machine
     machine = Machine.Machine(1, 2, 20, 10, [25, 40], [4, 6])
@@ -25,7 +25,7 @@ def test_Machine_init():
 
 def test_caaa():
     """
-    Purpose: 
+    Purpose:
     """
     import Machine
     ss = Machine.SlotShow()
@@ -35,7 +35,7 @@ def test_caaa():
 
 def test_machine_allocate():
     """
-    Purpose: 
+    Purpose:
     """
     import Job
     import Machine
@@ -65,8 +65,29 @@ def test_strict_machine():
     cluster.generate_machines_random(100)
     collection = Job.JobCollection(average=20)
     restrict = Machine.MachineRestrict(
-        cluster=cluster, collection=collection.get_job_collection())
+        cluster=cluster, collection=iter(collection))
+    next(restrict)
     restrict.show()
+    next(restrict)
+    restrict.show()
+
+
+def test_strict_machine_iter():
+    cluster = Machine.Cluster()
+    cluster.generate_machines_random(100)
+    collection = Job.JobCollection(average=20)
+    mr = Machine.MachineRestrict(cluster, iter(collection))
+    i = 0
+    for collection in iter(mr):
+        for jobs in collection:
+            for job in jobs:
+                job.show()
+                print(i)
+                break
+            break
+        i += 1
+        if i == 1000:
+            break
 
 
 def test_policy_fixed():

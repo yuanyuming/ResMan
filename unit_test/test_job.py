@@ -133,7 +133,9 @@ def test_job_collection_iter():
     jc = Job.JobCollection(duration=10)
     i = 0
     for collection in iter(jc):
-        collection[0][0].show()
+        # print(collection)
+        if len(collection) == 0:
+            print('empty')
         i += 1
-        if i == 10:
+        if i == 1000:
             break

@@ -182,36 +182,41 @@ class JobCollection:
 
 
 class MachineRestrict:
-    def __init__(self, cluster=Cluster(), collection=Job.JobCollection().get_job_collection(), max_machines=10, min_machines=3) -> None:
+    def __init__(self, cluster=Cluster(), collection=iter(Job.JobCollection()), max_machines=10, min_machines=3) -> None:
         self.cluster = cluster
-        self.collection = collection
+        self.iter_collection = collection
+        self.collection = []
         self.max_machines = max_machines
         self.min_machines = min_machines
-        self.generate_restrict()
         pass
 
     def generate_restrict(self):
-        for job in self.collection:
-            min = np.random.randint(0, self.cluster.number-self.max_machines)
-            t = np.random.randint(self.min_machines, self.max_machines)
-            array = np.arange(min, min+self.max_machines)
-            np.random.shuffle(array)
-            job.restrict_machines = array[:t]
+        collection = next(self.iter_collection)
+        for jobs in collection:
+            for job in jobs:
+                min = np.random.randint(
+                    0, self.cluster.    number-self.max_machines)
+                t = np.random.randint(self.min_machines, self.  max_machines)
+                array = np.arange(min, min+self.max_machines)
+                np.random.shuffle(array)
+                job.restrict_machines = array[:t]
+        self.collection = collection
+        return collection
 
     def show(self):
-        table = prettytable.PrettyTable(['Job Id', 'Restrict Machine'])
-        for job in self.collection:
-            table.add_row([job.id, job.restrict_machines])
+        table = prettytable.PrettyTable(
+            ['Job Id', 'Enter Time', 'Restrict Machine'])
+        for jobs in self.collection:
+            for job in jobs:
+                table.add_row([job.id, job.enter_time, job.restrict_machines])
         print(table)
 
     def __iter__(self):
-        self.a = 1
+
         return self
 
     def __next__(self):
-        x = self.a
-        self.a += 1
-        return x
+        return self.generate_restrict()
 
 
 class Quote:

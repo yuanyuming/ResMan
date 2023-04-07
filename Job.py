@@ -95,7 +95,7 @@ class Job:
         self.id = job_id
         self.res_vec = res_vec
         self.len = job_len
-        self.restrict_machines = [1, 3]
+        self.restrict_machines = []
         self.running_machine = 0
         self.enter_time = enter_time
         self.start_time = -1
@@ -129,7 +129,7 @@ class Job:
         self.finish_time = finish_time
 
     def to_list(self):
-        return [self.id, self.res_vec, self.len, self.enter_time,
+        return [self.id, self.res_vec, self.len, self.restrict_machines, self.enter_time,
                 self.start_time, self.finish_time]
 
     def show(self):
@@ -137,7 +137,7 @@ class Job:
         Purpose: show the job
         """
         table = prettytable.PrettyTable(
-            ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
+            ['Job Id', 'Res Vector', 'Job Len', 'Restrict Machine', 'Enter Time', 'Start Time', 'Finish Time'])
         table.add_row(self.to_list())
         table.set_style(prettytable.MSWORD_FRIENDLY)
         table.title = "Job Info"
@@ -147,6 +147,9 @@ class Job:
 
     def get_pay(self, price_set=[5, 7]):
         pass
+
+    def __str__(self):
+        return "id:{},Res Vector:{},Job Len:{}".format(self.id, self.res_vec, self.len)
 
 
 class JobCollection:
