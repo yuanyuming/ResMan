@@ -228,7 +228,6 @@ class NestedList:
         # 初始化当前的子列表和索引
         self.sublist = []
         self.index = 0
-        self.done = False
 
     # 定义一个__iter__方法，返回一个迭代器对象
     def __iter__(self):
@@ -237,13 +236,6 @@ class NestedList:
 
     # 定义一个__next__方法，返回下一个元素
     def __next__(self):
-        # 如果当前的子列表为空，就从嵌套列表中获取下一个子列表，并重置索引
-        if self.done:
-            self.done = False
-            raise StopIteration
-        if not self.sublist:
-            self.sublist = next(self.nested_list)
-            self.index = 0
 
         # 如果当前的索引小于子列表的长度，就返回子列表中的元素，并增加索引
         if self.index < len(self.sublist):
@@ -252,8 +244,8 @@ class NestedList:
             return value
         # 如果当前的索引等于子列表的长度，就抛出一个StopIteration异常，并清空子列表，以便下次迭代时获取下一个子列表
         else:
-            self.sublist = []
-            self.done = True
+            self.index = 0
+            self.sublist = next(self.nested_list)
             raise StopIteration
 
 

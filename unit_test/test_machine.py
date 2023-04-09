@@ -96,7 +96,8 @@ def test_job_iterator():
     collection = Job.JobCollection(average=1)
     mr = Machine.MachineRestrict(cluster, iter(collection))
     it = Machine.NestedList(iter(mr))
-    jt = iter(it)
+    
+    jt = Machine.NestedList(iter(it))
     for time in range(50):
         for job in jt:
             job.show()
