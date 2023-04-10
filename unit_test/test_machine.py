@@ -8,7 +8,7 @@ def:
     show
 '''
 
-from scipy import cluster
+
 import Job
 import Machine
 
