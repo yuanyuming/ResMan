@@ -170,7 +170,7 @@ class MachineSet:
 class Cluster:
     def __init__(
         self,
-        machine_numbers=10,
+        machine_numbers=20,
         job_backlog_size=10,
         job_slot_size=10,
         num_res=2,
@@ -278,6 +278,24 @@ class MachineRestrict:
         return self.generate_restrict()
 
 
+class ListIterator:
+    def __init__(self, iterator):
+        self.iterator = iterator  # 输入的迭代器
+        self.list = []  # 存储列表的变量
+        self.index = 0  # 当前列表的索引
+
+    def __iter__(self):
+        return self  # 返回自身作为迭代器
+
+    def __next__(self):
+        if self.index >= len(self.list):  # 如果索引超出了列表的长度
+            self.list = next(self.iterator)  # 调用输入的迭代器产生一个新的列表
+            self.index = 0  # 重置索引
+        element = self.list[self.index]  # 获取当前列表的元素
+        self.index += 1  # 索引加一
+        return element  # 返回元素
+
+
 # 定义一个可迭代的类
 class NestedList:
     # 初始化方法，接受一个列表的列表作为参数
@@ -285,7 +303,7 @@ class NestedList:
         # 把参数赋值给实例属性
         self.nested_list = iter(nested_list)
         # 初始化当前的子列表和索引
-        self.sublist = []
+        self.sublist = next(self.nested_list)
         self.index = 0
 
     # 定义一个__iter__方法，返回一个迭代器对象
@@ -296,11 +314,7 @@ class NestedList:
     # 定义一个__next__方法，返回下一个元素
     def __next__(self):
         # 如果当前的索引小于子列表的长度，就返回子列表中的元素，并增加索引
-        if len(self.sublist) == 0:
-            self.index = 0
-            self.sublist = next(self.nested_list)
-            self.index += 1
-            raise StopIteration
+
         if self.index < len(self.sublist):
             value = self.sublist[self.index]
             self.index += 1
@@ -309,10 +323,10 @@ class NestedList:
         else:
             self.index = 0
             self.sublist = next(self.nested_list)
+
             raise StopIteration
 
-# 写一个类，接受一个列表的列表作为参数，返回一个迭代器对象,列表是一个列表的列表
-class Lis:
+
 class Quote:
     def __init__(self, job=Job.Job(), cluster=Cluster()) -> None:
         self.job = job
