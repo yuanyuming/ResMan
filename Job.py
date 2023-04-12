@@ -205,9 +205,6 @@ class JobCollection:
         return collections
 
 
-class JobPreallocation:
-    def __init__(self, machine_set, visible, max_send, job_collections) -> None:
-        pass
 
 
 class JobSlot:
@@ -246,7 +243,17 @@ class JobSlot:
         job = self.slot[num]
         self.slot[num] = None
         return job
-    # end def
+    def __str__(self):
+        table = prettytable.PrettyTable(
+            ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
+        for job in self.slot:
+            if job is not None:
+                table.add_row([job.id, job.res_vec, job.len, job.enter_time,
+                               job.start_time, job.finish_time])
+            else:
+                table.add_row([None]*6)
+        table.title = "JobSlot Info"
+        return str(table)
 
 
 class JobBacklog:
@@ -283,7 +290,19 @@ class JobBacklog:
         else:
             self.backlog[:-1] = self.backlog[1:]
             self.backlog[-1] = job
-    # end def
+    def show(self):
+        """
+        Purpose: show the JobBacklog
+        """
+        table = prettytable.PrettyTable(
+            ['Job Id', 'Res Vector', 'Enter Time', 'Start Time', 'Finish Time'])
+        for job in self.backlog:
+            if job is not None:
+                table.add_row([job.id, job.res_vec, job.enter_time,
+                               job.start_time, job.finish_time])
+
+        table.title = "JobBacklog"
+        return str(table)
 
 
 class JobRecord:

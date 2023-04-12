@@ -49,6 +49,9 @@ class VehicleJobSchedulingParameters:
         # Machine Restrict
         self.machine_restrictions = Machine.MachineRestrict(
             self.cluster, self.job_collection, self.max_machines, self.min_machines)
+        
+        # Job Iterator
+        self.job_iterator = Machine.ListIterator(iter(self..))
         # Network Config
 
 
