@@ -40,14 +40,23 @@ class Machine:
         self.num_res = num_res
         self.time_horizon = time_horizon
         self.current_time = current_time
-        self.job_slot = Job.JobSlot(job_slot_size)
-        self.job_backlog = Job.JobBacklog(job_backlog_size)
+        self.job_slot_size = job_slot_size
+        self.job_backlog_size = job_backlog_size
+        self.job_slot = Job.JobSlot(self.job_slot_size)
+        self.job_backlog = Job.JobBacklog(self.job_backlog_size)
         self.res_slot = res_slot
         self.reward = 0
         self.cost_vector = cost_vector
         self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
         self.running_job = []
         self.policy = self.fixed_norm
+
+    def reset(self):
+        self.job_slot = Job.JobSlot(self.job_slot_size)
+        self.job_backlog = Job.JobBacklog(self.job_backlog_size)
+        self.reward = 0
+        self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
+        self.running_job = []
 
     def get_price(self, job=Job.Job()):
         return self.id, self.policy(job, self.cost_vector)
@@ -241,24 +250,32 @@ class MachineRestrict:
     def __init__(
         self,
         cluster=Cluster(),
-        collection=iter(Job.JobCollection()),
+        collection=Job.JobCollection(),
         max_machines=10,
         min_machines=3,
     ) -> None:
         self.cluster = cluster
-        self.iter_collection = collection
+        self.collections = collection
+        self.iter_collection = iter(collection)
         self.collection = []
         self.max_machines = max_machines
         self.min_machines = min_machines
-        pass
+
+    def reset(self):
+        self.collections.reset()
+        self.iter_collection = iter(self.collections)
+        self.collection = []
 
     def generate_restrict(self):
+        # 生成限制机器,首先随机生成一个机器的下标,然后随机生成一个机器的数量,打乱机器的顺序,取前面的机器
         collection = next(self.iter_collection)
         for jobs in collection:
             for job in jobs:
-                min = np.random.randint(0, self.cluster.number - self.max_machines)
+                min_machine_num = np.random.randint(
+                    0, self.cluster.number - self.max_machines
+                )
                 t = np.random.randint(self.min_machines, self.max_machines)
-                array = np.arange(min, min + self.max_machines)
+                array = np.arange(min_machine_num, min_machine_num + self.max_machines)
                 np.random.shuffle(array)
                 job.restrict_machines = array[:t]
         self.collection = collection
