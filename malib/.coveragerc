@@ -1,0 +1,31 @@
+[run]
+branch = False
+omit = 
+	# ignore typings and base class
+	*/__init__.py
+	malib/rollout/envs/gr_football/*
+	malib/rollout/envs/sc2/*
+	malib/rollout/envs/env.py
+	malib/rl/random/*
+	malib/utils/*
+	malib/scenarios/league_training_scenario.py
+	malib/runner.py
+	malib/models/*
+	malib/common/distributions.py
+	malib/common/manager.py
+	malib/agent/team_agent.py
+	malib/agent/async_agent.py
+	malib/agent/agent_interface.py
+	malib/mocker/*
+
+
+[report]
+skip_empty = True
+omit =
+	malib/settings.py
+	malib/registration.py
+	malib/utils/*
+	malib/models/*
+
+[html]
+directory = cov_html

@@ -101,6 +101,7 @@ class Job:
         self.restrict_machines = []
         self.running_machine = 0
         self.enter_time = enter_time
+        self.time_restrict = -1
         self.start_time = -1
         self.finish_time = -1
         self.job_vec = self.generate_job()
