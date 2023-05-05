@@ -1,8 +1,8 @@
 import gymnasium as gym
 import numpy as np
+from gymnasium import spaces
 import Job
 import Machine
-from gymnasium import spaces
 
 
 class VehicleJobSchedulingParameters:
@@ -20,7 +20,6 @@ class VehicleJobSchedulingParameters:
         # Job Collection Config
         self.average = 5
         self.duration = 10
-        self.max_job_vec = [10, 20]
         self.max_job_len = 10
         self.job_small_chance = 0.8
 
@@ -71,17 +70,16 @@ class VehicleJobScheduling(gym.Env):
     def __init__(
         self, render_mode=None, parameter=VehicleJobSchedulingParameters()
     ) -> None:
-        
-            # 初始化环境的参数，可以根据需要添加或修改
-        self.num_agents = ... # 环境中的智能体数量
-        self.max_cycles = ... # 环境的最大步数或时间限制
-        self.observation_shape = ... # 智能体的观测空间形状
-        self.action_size = ... # 智能体的动作空间大小
+        # 初始化环境的参数，可以根据需要添加或修改
+        self.num_agents = ...  # 环境中的智能体数量
+        self.max_cycles = ...  # 环境的最大步数或时间限制
+        self.observation_shape = ...  # 智能体的观测空间形状
+        self.action_size = ...  # 智能体的动作空间大小
         # 调用父类的构造方法，传入智能体列表和智能体选择器
-        super().__init__(agents=[f"agent_{i}" for i in range(self.num_agents)],     agent_selector=agent_selector(...))
+        # super().__init__(agents=[f"agent_{i}" for i in range(self.num_agents)],     agent_selector=agent_selector(...=))
         # 初始化智能体的观测空间和动作空间，可以根据需要添加或修改
-        self.observation_spaces = {agent: spaces.Box(low=0, high=255, shape=self.   observation_shape, dtype=np.uint8) for agent in self.agents}
-        self.action_spaces = {agent: spaces.Discrete(self.action_size) for agent in     self.agents}
+        # self.observation_spaces = {agent: spaces.Box(low=0, high=255, shape=self.   observation_shape, dtype=np.uint8) for agent in self.agents}
+        # self.action_spaces = {agent: spaces.Discrete(self.action_size) for agent in     self.agents}
         self.parameters = parameter
 
         self.observation_space = spaces.Dict()
@@ -91,39 +89,40 @@ class VehicleJobScheduling(gym.Env):
         self.render_mode = render_mode
 
     def reset(self, *, seed=None, options=None):
-        super().reset(seed=seed)
-        self.parameters.reset()
+        #     super().reset(seed=seed)
+        #     self.parameters.reset()
 
-    def step(self, action):
-        # 检查当前智能体是否有效
-        if self.dones[self.agent_selection]:
-            return self._was_done_step(action)
-        # 检查动作是否合法
-        if not self.action_spaces[self.agent_selection].contains(action):
-            raise ValueError(
-                f"Invalid action {action} for agent {self. agent_selection}"
-            )
-        # 更新环境的状态和智能体的观测、奖励等变量
-        # 根据环境的逻辑和规则，编写相应的代码
-        # ...
-        # 设置终止和截断标志
-        self.dones[self.agent_selection] = ...  # 根据环境的逻辑和规则，判断当前智能体是否   完成
-        self.terminal = ...  # 根据环境的逻辑和规则，判断整个环境是否结束
-        self.truncation = ...  # 根据环境的逻辑和规则，判断是否达到最大步数或时间限制
-        # 如果有必要，调用self._was_dead_step(action)函数来处理智能体的死亡或游戏结束的情况
-        if self.dones[self.agent_selection] or self.terminal:
-            return self._was_dead_step(action)
-        # 切换到下一个智能体
-        self._cumulative_rewards[self.agent_selection] = 0
-        self.agent_selection = self._agent_selector.next()
-        # 每Step开始时, 从JobIterator中获取一个JobCollection
-        job_list = next(self.parameters.job_iterator)
-        # 然后,
-        observation = 1
-        reward = 1
-        terminated = False
-        info = {}
-        return observation, reward, terminated, False, info
+        # def step(self, action):
+        #     # 检查当前智能体是否有效
+        #     #if self.dones[self.agent_selection]:
+        #         return self._was_done_step(action)
+        #     # 检查动作是否合法
+        #     #if not self.action_spaces[self.agent_selection].contains(action):
+        #         raise ValueError(
+        #             f"Invalid action {action} for agent {self. agent_selection}"
+        #         )
+        #     # 更新环境的状态和智能体的观测、奖励等变量
+        #     # 根据环境的逻辑和规则，编写相应的代码
+        #     # ...
+        #     # 设置终止和截断标志
+        #     #self.dones[self.agent_selection] = ...  # 根据环境的逻辑和规则，判断当前智能体是否   完成
+        #     #self.terminal = ...  # 根据环境的逻辑和规则，判断整个环境是否结束
+        #     #self.truncation = ...  # 根据环境的逻辑和规则，判断是否达到最大步数或时间限制
+        #     # 如果有必要，调用self._was_dead_step(action)函数来处理智能体的死亡或游戏结束的情况
+        #     #if self.dones[self.agent_selection] or self.terminal:
+        #         return self._was_dead_step(action)
+        #     # 切换到下一个智能体
+        #     #self._cumulative_rewards[self.agent_selection] = 0
+        #     #self.agent_selection = self._agent_selector.next()
+        #     # 每Step开始时, 从JobIterator中获取一个JobCollection
+        #     #job_list = next(self.parameters.job_iterator)
+        #     # 然后,
+        #     observation = 1
+        #     reward = 1
+        #     terminated = False
+        #     info = {}
+        #     return observation, reward, terminated, False, info
+        pass
 
     def render(self):
         pass

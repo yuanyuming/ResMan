@@ -51,6 +51,12 @@ class Machine:
         self.running_job = []
         self.policy = self.fixed_norm
 
+    def add_backlog(self, job=Job.Job()):
+        """
+        Add the Job to the backlog
+        """
+        self.job_backlog.add_job(job)
+
     def reset(self):
         self.job_slot = Job.JobSlot(self.job_slot_size)
         self.job_backlog = Job.JobBacklog(self.job_backlog_size)
@@ -66,6 +72,19 @@ class Machine:
 
     def fixed_norm(self, job=Job.Job(), cost_vector=[4, 6], var=0.2):
         return np.dot(job.res_vec, cost_vector) + var * np.random.normal()
+
+    def can_allocate(self, job=Job.Job()):
+        """
+        Check if the Job can be allocated to this Machine
+        """
+        allocated = False
+
+        for i in range(0, self.time_horizon - job.len):
+            new_avail_res = self.avail_slot[i : i + job.len, :] - job.res_vec
+            if np.all(new_avail_res[:] >= 0):
+                allocated = True
+                break
+        return allocated
 
     def allocate_job(self, job=Job.Job()):
         """
@@ -162,6 +181,39 @@ class Machine:
         self.show_running_job()
         print(self.reward)
 
+    def __str__(self) -> str:
+        table = prettytable.PrettyTable(
+            [
+                "id",
+                "Current Time",
+                "Number of Res",
+                "Time Horizon",
+                "Resource Slot",
+                "Reward",
+                "Cost Vector",
+                "Number of Running Jobs",
+            ]
+        )
+        table.add_row(
+            [
+                self.id,
+                self.current_time,
+                self.num_res,
+                self.time_horizon,
+                self.res_slot,
+                self.reward,
+                self.cost_vector,
+                str(len(self.running_job)),
+            ]
+        )
+        table.title = "Machine Info"
+        print(table)
+        self.show_available_slot()
+        self.show_res_vec()
+        self.show_running_job()
+        print(self.reward)
+        return table.get_string() + "\n" + str(self.reward)
+
 
 class MachineSet:
     def __init__(self, machine=[Machine()]):
@@ -214,17 +266,23 @@ class Cluster:
         Purpose:
         """
         for i in range(num):
-            bais_r = np.random.randint(-5, 5)
-            bais_c = np.random.randint(-2, 2)
+            bias_r = np.random.randint(-5, 5)
+            bias_c = np.random.randint(-2, 2)
             self.add_machine(
-                res_slot=[20 + bais_r, 40 + bais_r],
-                cost_vector=[4 + bais_c, 6 + bais_c],
+                res_slot=[20 + bias_r, 40 + bias_r],
+                cost_vector=[4 + bias_c, 6 + bias_c],
             )
 
     def allocate_job(self, machine_id=0, job=Job.Job()):
         self.machines[machine_id].allocate_job(job)
 
     def step(self):
+        for machine in self.machines:
+            machine.time_proceed()
+        self.current_time += 1
+        pass
+
+    def observation(self):
         pass
 
     def show(self):
@@ -277,6 +335,7 @@ class MachineRestrict:
                 t = np.random.randint(self.min_machines, self.max_machines)
                 array = np.arange(min_machine_num, min_machine_num + self.max_machines)
                 np.random.shuffle(array)
+                # TODO 限制机器的数量,验证是否有空槽位
                 job.restrict_machines = array[:t]
         self.collection = collection
         return collection
