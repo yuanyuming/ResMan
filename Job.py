@@ -92,19 +92,30 @@ class Job:
     job_id:任务id,唯一
     enter_time:进入队列的时间
     #TODO - 具体安排是否需要进入队列的时间,因为考虑到多机分配问题
+    # TODO - 任务优先级,根据任务优先级计算限制时间
     """
 
-    def __init__(self, res_vec=[2, 3], job_len=5, job_id=0, enter_time=0):
+    def __init__(
+        self,
+        res_vec=[2, 3],
+        job_len=5,
+        job_id=0,
+        enter_time=0,
+        time_restrict=0,
+        pay=0,
+        budget=0,
+    ):
         self.id = job_id
         self.res_vec = res_vec
         self.len = job_len
         self.restrict_machines = []
         self.running_machine = 0
         self.enter_time = enter_time
-        self.time_restrict = -1
+        self.time_restrict = 0
         self.start_time = -1
         self.finish_time = -1
         self.job_vec = self.generate_job()
+        self.budget = budget
         self.pay = 0
 
     def random_job(self, dist=JobDistribution().bi_model_dist):
@@ -250,6 +261,7 @@ class JobSlot:
 
     def __init__(self, num_nw):
         self.slot = [None] * num_nw
+        self.surplus_slot = num_nw
 
     def show(self):
         """
@@ -281,6 +293,7 @@ class JobSlot:
                 table.add_row([None] * 6)
         table.title = "JobSlot Info"
         print(table)
+        print("Surplus Slot:{}".format(self.surplus_slot))
 
     def add_new_job(self, job):
         """
@@ -289,11 +302,13 @@ class JobSlot:
         for i in range(len(self.slot)):
             if self.slot[i] is None:
                 self.slot[i] = job
+                self.surplus_slot -= 1
                 break
 
     def select_job(self, num=0):
         job = self.slot[num]
         self.slot[num] = None
+        self.surplus_slot += 1
         return job
 
     def __str__(self):
@@ -322,12 +337,12 @@ class JobSlot:
             else:
                 table.add_row([None] * 6)
         table.title = "JobSlot Info"
-        return str(table)
+        return str(table) + "\nSurplus Slot:{}".format(self.surplus_slot)
 
 
 class JobBacklog:
     """
-    Backlog the jobs
+    Backlog of the jobs
     """
 
     def __init__(self, backlog_size) -> None:
@@ -357,7 +372,7 @@ class JobBacklog:
         table.title = "JobBacklog"
         print(table)
 
-    def add_backlog(self, job):
+    def add_job(self, job):
         """
         Purpose:
         """
@@ -367,28 +382,6 @@ class JobBacklog:
         else:
             self.backlog[:-1] = self.backlog[1:]
             self.backlog[-1] = job
-
-    def show(self):
-        """
-        Purpose: show the JobBacklog
-        """
-        table = prettytable.PrettyTable(
-            ["Job Id", "Res Vector", "Enter Time", "Start Time", "Finish Time"]
-        )
-        for job in self.backlog:
-            if job is not None:
-                table.add_row(
-                    [
-                        job.id,
-                        job.res_vec,
-                        job.enter_time,
-                        job.start_time,
-                        job.finish_time,
-                    ]
-                )
-
-        table.title = "JobBacklog"
-        return str(table)
 
 
 class JobRecord:
