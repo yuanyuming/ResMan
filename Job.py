@@ -25,7 +25,13 @@ JobCollection:
 
 
 class JobDistribution:
-    def __init__(self, max_job_vec=[10, 20], max_job_len=10, job_small_chance=0.8):
+    def __init__(
+        self,
+        max_job_vec=[10, 20],
+        max_job_len=10,
+        job_small_chance=0.8,
+        job_priority_range=[1, 5],
+    ):
         self.num_res = len(max_job_vec)
         self.max_nw_size = max_job_vec
         self.max_job_len = max_job_len
@@ -43,9 +49,13 @@ class JobDistribution:
 
         self.other_res_lower = 1
         self.other_res_upper = np.divide(np.array(max_job_vec), 5)
+        self.priority_range = job_priority_range
 
     def __str__(self) -> str:
         return f"JobDistribution({self.max_nw_size}, {self.max_job_len}, {self.job_small_chance})"
+
+    def priority(self):
+        return np.random.randint(self.priority_range[0], self.priority_range[1] + 1)
 
     def normal_dist(self):
         # NOTE - 新任务时长
@@ -85,14 +95,18 @@ class JobDistribution:
         return nw_len, nw_size
 
 
+class bid:
+    def __init__(self) -> None:
+        pass
+
+
 class Job:
     """
     res_vec:资源需求向量
     job_len:任务长度
     job_id:任务id,唯一
     enter_time:进入队列的时间
-    #TODO - 具体安排是否需要进入队列的时间,因为考虑到多机分配问题
-    # TODO - 任务优先级,根据任务优先级计算限制时间
+    # TODO - 任务优先级
     """
 
     def __init__(
@@ -101,8 +115,7 @@ class Job:
         job_len=5,
         job_id=0,
         enter_time=0,
-        time_restrict=0,
-        pay=0,
+        priority=1,
         budget=0,
     ):
         self.id = job_id
@@ -114,9 +127,12 @@ class Job:
         self.time_restrict = 0
         self.start_time = -1
         self.finish_time = -1
+        self.priority = priority
         self.job_vec = self.generate_job()
         self.budget = budget
         self.pay = 0
+        self.utility = 0
+        self.running_machine = -1
 
     def random_job(self, dist=JobDistribution().bi_model_dist):
         self.len, self.res_vec = dist()
@@ -133,6 +149,9 @@ class Job:
         Purpose:
         """
 
+    def request(self):
+        return self.id, self.res_vec, self.len, self.priority, self.restrict_machines
+
     def start(self, curr_time):
         """
         Purpose:
@@ -148,10 +167,12 @@ class Job:
             self.id,
             self.res_vec,
             self.len,
+            self.priority,
             self.restrict_machines,
             self.enter_time,
             self.start_time,
             self.finish_time,
+            self.utility,
         ]
 
     def show(self):
@@ -163,10 +184,12 @@ class Job:
                 "Job Id",
                 "Res Vector",
                 "Job Len",
+                "Priority",
                 "Restrict Machines",
                 "Enter Time",
                 "Start Time",
                 "Finish Time",
+                "Utility",
             ]
         )
         table.add_row(self.to_list())
@@ -193,11 +216,13 @@ class JobCollection:
         enter_time=0,
         duration=10,
         job_dist=JobDistribution().bi_model_dist,
+        job_priority_range=JobDistribution().priority,
     ):
         self.average = average
         self.id_start = id_start
         self.enter_time = enter_time
         self.Dist = job_dist
+        self.priority = job_priority_range
         self.now_id = id_start
         self.duration = duration
 
@@ -239,6 +264,7 @@ class JobCollection:
                 job.enter_time = self.enter_time
                 job.id = id
                 job.random_job(self.Dist)
+                job.priority = self.priority()
                 collection.append(job)
             self.enter_time += 1
             self.now_id += poi[t]

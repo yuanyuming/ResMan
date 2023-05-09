@@ -65,13 +65,17 @@ class Machine:
         self.running_job = []
 
     def get_price(self, job=Job.Job()):
-        return self.id, self.policy(job, self.cost_vector)
+        return self.policy(job)
 
     def fixed(self, job=Job.Job(), cost_vector=[4, 6]):
         return np.dot(job.res_vec, cost_vector)
 
-    def fixed_norm(self, job=Job.Job(), cost_vector=[4, 6], var=0.2):
-        return np.dot(job.res_vec, cost_vector) + var * np.random.normal()
+    def fixed_norm(self, job=Job.Job(), var=0.2):
+        return (
+            (np.dot(job.res_vec, self.cost_vector) + var * np.random.normal())
+            * job.len
+            * job.priority
+        )
 
     def can_allocate(self, job=Job.Job()):
         """
@@ -215,19 +219,6 @@ class Machine:
         return table.get_string() + "\n" + str(self.reward)
 
 
-class MachineSet:
-    def __init__(self, machine=[Machine()]):
-        self.machines = machine
-
-    def add_machine(self, machine=Machine()):
-        """
-        Purpose:
-        """
-        self.machines.append(machine)
-
-    # end def
-
-
 class Cluster:
     def __init__(
         self,
@@ -285,6 +276,9 @@ class Cluster:
     def observation(self):
         pass
 
+    def get_machine(self, machine_id):
+        return self.machines[machine_id]
+
     def show(self):
         table = prettytable.PrettyTable(
             ["id", "Resource Slot", "Reward", "Cost Vector"]
@@ -294,6 +288,24 @@ class Cluster:
                 [machine.id, machine.res_slot, machine.reward, machine.cost_vector]
             )
         print(table)
+
+
+class Bids:
+    def __init__(self, machines=[1, 3, 5], cluster=Cluster(), job=Job.Job()):
+        self.machines = [cluster.get_machine(i) for i in machines]
+        self.job = job
+        self.bids = []
+        self.get_bid()
+
+    def add_machine(self, machine=Machine()):
+        """
+        Purpose:
+        """
+        self.machines.append(machine)
+
+    def get_bid(self):
+        for machine in self.machines:
+            self.bids.append(machine.get_bid(self.job))
 
 
 class JobCollection:
@@ -326,6 +338,7 @@ class MachineRestrict:
 
     def generate_restrict(self):
         # 生成限制机器,首先随机生成一个机器的下标,然后随机生成一个机器的数量,打乱机器的顺序,取前面的机器
+        #
         collection = next(self.iter_collection)
         for jobs in collection:
             for job in jobs:

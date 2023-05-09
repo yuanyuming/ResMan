@@ -39,3 +39,15 @@ def test_env_single_para():
         + ", Allocate Rate: "
         + str(allocate_jobs / all_jobs)
     )
+
+
+def get_job():
+    import Environment
+
+    para = Environment.VehicleJobSchedulingParameters()
+    return next(para.job_iterator)[0]
+
+
+def test_job_show():
+    get_job().show()
+    print(get_job())

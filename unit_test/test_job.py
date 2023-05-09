@@ -1,9 +1,9 @@
-
 import timeit
 import prettytable
 from matplotlib.pyplot import table
 import Job
 import sys
+
 sys.path.append(".")
 
 
@@ -43,7 +43,7 @@ def test_jobSlot():
     print("Job slot:Select job #4!")
     job_slot.select_job(4)
     job_slot.show()
-    print('Job slot:New #11 Comes')
+    print("Job slot:New #11 Comes")
     job = Job.Job(job_id=11)
     job.random_job()
     job_slot.add_new_job(job)
@@ -70,7 +70,7 @@ def test_jobbacklog():
 
 def test_jobrecord():
     """
-    Purpose: 
+    Purpose:
     """
     job_record = Job.JobRecord()
     for i in range(100):
@@ -85,13 +85,15 @@ def test_jobcollection_generate():
     jc = Job.JobCollection()
     collection = jc.get_job_collection()
     table = prettytable.PrettyTable(
-        ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
+        ["Job Id", "Res Vector", "Job Len", "Enter Time", "Start Time", "Finish Time"]
+    )
     for job in collection:
         table.add_row(job.to_list())
     print(table)
     collection = jc.get_job_collection()
     table = prettytable.PrettyTable(
-        ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
+        ["Job Id", "Res Vector", "Job Len", "Enter Time", "Start Time", "Finish Time"]
+    )
     for job in collection:
         table.add_row(job.to_list())
     print(table)
@@ -105,16 +107,26 @@ def test_jobcollection():
 
 def test_jobcollection_s():
     """
-    Purpose: 
+    Purpose:
     """
     jc = Job.JobCollection()
     collections = jc.get_job_collections()
     for collection in collections:
         table = prettytable.PrettyTable(
-            ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
+            [
+                "Job Id",
+                "Res Vector",
+                "Job Len",
+                "Enter Time",
+                "Start Time",
+                "Finish Time",
+            ]
+        )
         for job in collection:
             table.add_row(job.to_list())
         print(table)
+
+
 # end def
 
 
@@ -122,7 +134,8 @@ def test_compare_job_collection_and_s():
     jc = Job.JobCollection(duration=100)
     collections = jc.get_job_collections()
     table = prettytable.PrettyTable(
-        ['Job Id', 'Res Vector', 'Job Len', 'Enter Time', 'Start Time', 'Finish Time'])
+        ["Job Id", "Res Vector", "Job Len", "Enter Time", "Start Time", "Finish Time"]
+    )
     for collection in collections:
         for job in collection:
             table.add_row(job.to_list())
@@ -139,3 +152,8 @@ def test_job_collection_iter():
         i += 1
         if i == 100:
             break
+
+
+def test_job_priority():
+    jd = Job.JobDistribution()
+    print(jd.priority())

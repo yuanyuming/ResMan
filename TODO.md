@@ -1,9 +1,13 @@
-# TODO
+PriorityPriority# TODO
 
 - [ ] Agents
 - [ ] Users
 - [ ] Servers
-- [x] Jobs
+- [X] Jobs
+
   - [ ] Job Preallocation
-pip install "gymnasium[all]"
-p8t5ommx.dongtaiyuming.net:54007
+    pip install "gymnasium[all]"
+    p8t5ommx.dongtaiyuming.net:54007
+- [ ] Job Priority
+- [ ] Job Utility
+- [ ] Machine Restrict

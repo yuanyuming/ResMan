@@ -44,5 +44,6 @@ class Parameters:
         # Job Iterator
         self.job_iterator = Machine.ListIterator(iter(self.job_collection))
 
+
 class SingleAgentEnvironment(gym.Env):
-    
+    pass
