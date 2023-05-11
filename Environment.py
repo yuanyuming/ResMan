@@ -3,6 +3,8 @@ import numpy as np
 from gymnasium import spaces
 import Job
 import Machine
+import AllocationMechanism
+import Auction
 
 
 class VehicleJobSchedulingParameters:
@@ -32,7 +34,7 @@ class VehicleJobSchedulingParameters:
         self.job_backlog_size = 10
         self.job_slot_size = 10
         self.num_res = len(self.max_job_vec)
-        self.time_horizon = 20
+        self.time_horizon = 10
         self.current_time = 0
 
         # Cluster Generate
@@ -47,7 +49,7 @@ class VehicleJobSchedulingParameters:
         self.cluster.generate_machines_random(self.machine_numbers)
 
         # Machine Restrict Config
-        self.max_machines = 10
+        self.max_machines = 5
         self.min_machines = 3
 
         # Machine Restrict
@@ -57,8 +59,9 @@ class VehicleJobSchedulingParameters:
 
         # Job Iterator
         self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
-        # Network Config
-
+        # Auction
+        self.allocation_mechanism = AllocationMechanism.FirstPrice()
+        self.auction = Auction.ReverseAuction(cluster=self.cluster, allocation_mechanism=self.allocation_mechanism)
     def reset(self):
         self.machine_restrictions.reset()
         self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))

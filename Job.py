@@ -95,11 +95,6 @@ class JobDistribution:
         return nw_len, nw_size
 
 
-class bid:
-    def __init__(self) -> None:
-        pass
-
-
 class Job:
     """
     res_vec:资源需求向量
@@ -121,7 +116,7 @@ class Job:
         self.id = job_id
         self.res_vec = res_vec
         self.len = job_len
-        self.restrict_machines = []
+        self.restrict_machines = [1, 2]
         self.running_machine = 0
         self.enter_time = enter_time
         self.time_restrict = 0
@@ -199,8 +194,8 @@ class Job:
         print("Job Vector")
         print(self.job_vec)
 
-    def get_pay(self, price_set=[5, 7]):
-        pass
+    def get_pay(self, pay=0):
+        self.pay = pay
 
     def __str__(self):
         return "id:{},Res Vector:{},Job Len:{},Restrict Machine:{}".format(

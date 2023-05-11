@@ -64,7 +64,7 @@ class Machine:
         self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
         self.running_job = []
 
-    def get_price(self, job=Job.Job()):
+    def get_bid(self, job=Job.Job()):
         return self.policy(job)
 
     def fixed(self, job=Job.Job(), cost_vector=[4, 6]):
@@ -230,17 +230,19 @@ class Cluster:
         current_time=0,
     ):
         self.number = machine_numbers
-        self.machines = []
         self.job_backlog_size = job_backlog_size
         self.job_slot_size = job_slot_size
         self.num_res = num_res
         self.time_horizon = time_horizon
         self.current_time = current_time
+        self.id = 0
+        self.machines = []
+        self.generate_machines_random(self.number)
 
     def add_machine(self, res_slot, cost_vector):
         self.machines.append(
             Machine(
-                self.number,
+                self.id,
                 self.num_res,
                 self.time_horizon,
                 self.job_slot_size,
@@ -250,7 +252,7 @@ class Cluster:
                 self.current_time,
             )
         )
-        self.number += 1
+        self.id += 1
 
     def generate_machines_random(self, num):
         """
@@ -291,21 +293,25 @@ class Cluster:
 
 
 class Bids:
-    def __init__(self, machines=[1, 3, 5], cluster=Cluster(), job=Job.Job()):
-        self.machines = [cluster.get_machine(i) for i in machines]
+    def __init__(self, cluster=Cluster(), job=Job.Job()):
+        self.machines = [cluster.get_machine(i) for i in job.restrict_machines]
         self.job = job
         self.bids = []
         self.get_bid()
 
-    def add_machine(self, machine=Machine()):
-        """
-        Purpose:
-        """
-        self.machines.append(machine)
-
     def get_bid(self):
         for machine in self.machines:
-            self.bids.append(machine.get_bid(self.job))
+            if machine.can_allocate(self.job):
+                self.bids.append(machine.get_bid(self.job))
+            else:
+                self.bids.append(np.inf)
+
+    def __str__(self):
+        table = prettytable.PrettyTable(
+            ["Machine " + str(machine.id) for machine in self.machines]
+        )
+        table.add_row(self.bids)
+        return table.get_string()
 
 
 class JobCollection:

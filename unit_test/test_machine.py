@@ -132,3 +132,7 @@ def test_Quote():
     jobs = Machine.MachineRestrict(cluster=cluster)
     quote = Machine.Quote(job=jobs.collection[0], cluster=cluster)
     quote.show()
+
+
+def test_restrict():
+    import Environment
