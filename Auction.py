@@ -19,8 +19,10 @@ class ReverseAuction:
         winner_machine, prices, second_prices = self.allocation_mechanism.allocate(bids)
         if prices > bids.job.budget:
             bids.job.pay = 0
+            bids.job.running_machine = -1
             return False
         bids.job.pay = prices
+        bids.job.running_machine = winner_machine.id
         winner_machine.allocate_job(bids.job)
         return True
 

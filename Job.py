@@ -6,6 +6,7 @@ import prettytable
 import numpy as np
 
 from scipy.stats import poisson
+from sympy import false, true
 
 
 """
@@ -54,7 +55,7 @@ class JobDistribution:
     def __str__(self) -> str:
         return f"JobDistribution({self.max_nw_size}, {self.max_job_len}, {self.job_small_chance})"
 
-    def priority(self):
+    def priority_dist(self):
         return np.random.randint(self.priority_range[0], self.priority_range[1] + 1)
 
     def normal_dist(self):
@@ -101,7 +102,7 @@ class Job:
     job_len:任务长度
     job_id:任务id,唯一
     enter_time:进入队列的时间
-    # TODO - 任务优先级
+    # TODO - Job 直接传参Dist
     """
 
     def __init__(
@@ -111,7 +112,7 @@ class Job:
         job_id=0,
         enter_time=0,
         priority=1,
-        budget=0,
+        average_cost_vec=[4,6],
     ):
         self.id = job_id
         self.res_vec = res_vec
@@ -124,7 +125,7 @@ class Job:
         self.finish_time = -1
         self.priority = priority
         self.job_vec = self.generate_job()
-        self.budget = budget
+        self.budget = self.calculate_budget(average_cost_vec)
         self.pay = 0
         self.utility = 0
         self.running_machine = -1
@@ -138,7 +139,11 @@ class Job:
         Purpose:
         """
         return [self.res_vec] * self.len
-
+    def calculate_budget(self, average_cost_vec, var=0.3):
+        """
+        Purpose:
+        """
+        return (np.dot(self.res_vec, average_cost_vec)+var*np.random.normal()) * self.len*self.priority
     def read_job_from_file(self):
         """
         Purpose:
@@ -163,6 +168,7 @@ class Job:
             self.res_vec,
             self.len,
             self.priority,
+            self.budget,
             self.restrict_machines,
             self.enter_time,
             self.start_time,
@@ -180,6 +186,7 @@ class Job:
                 "Res Vector",
                 "Job Len",
                 "Priority",
+                "Budget"
                 "Restrict Machines",
                 "Enter Time",
                 "Start Time",
@@ -211,15 +218,17 @@ class JobCollection:
         enter_time=0,
         duration=10,
         job_dist=JobDistribution().bi_model_dist,
-        job_priority_range=JobDistribution().priority,
+        job_priority_dist=JobDistribution().priority_dist,
+        averge_cost_vec = [4,6]
     ):
         self.average = average
         self.id_start = id_start
         self.enter_time = enter_time
         self.Dist = job_dist
-        self.priority = job_priority_range
+        self.priority = job_priority_dist
         self.now_id = id_start
         self.duration = duration
+        self.average_cost_vec = averge_cost_vec
 
     def reset(self):
         self.now_id = self.id_start
@@ -232,9 +241,11 @@ class JobCollection:
         poi = poisson.rvs(self.average)
         collection = []
         for id in range(self.now_id, self.now_id + poi):
-            job = Job()
+            job_len, job_res_vec = self.Dist()
+            job = Job(job_res_vec, job_len, id, self.enter_time, self.priority(), self.average_cost_vec)
             job.enter_time = self.enter_time
             job.id = id
+            job.priority = self.priority()
             job.random_job(self.Dist)
             collection.append(job)
         self.enter_time += 1

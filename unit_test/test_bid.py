@@ -12,6 +12,7 @@ def test_bid():
             print(job)
             bids = Machine.Bids(para.cluster, job)
             print(bids)
+            print(job.budget)
         if a == 100:
             break
         a += 1

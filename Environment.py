@@ -15,6 +15,7 @@ class VehicleJobSchedulingParameters:
 
         # Job Distribution Config
         self.job_small_chance = 0.8
+        self.job_priority_range = [1, 5]
         self.job_distribution = Job.JobDistribution(
             self.max_job_vec, self.max_job_len, self.job_small_chance
         )
@@ -24,9 +25,9 @@ class VehicleJobSchedulingParameters:
         self.duration = 10
         self.max_job_len = 10
         self.job_small_chance = 0.8
-
+        self.job_average_cost_vec = [4,6]
         self.job_collection = Job.JobCollection(
-            self.average, 0, 0, self.duration, self.job_dist
+            self.average, 0, 0, self.duration, self.job_dist,self.job_distribution.priority_dist,self.job_average_cost_vec
         )
 
         # Machine Config
@@ -36,6 +37,7 @@ class VehicleJobSchedulingParameters:
         self.num_res = len(self.max_job_vec)
         self.time_horizon = 10
         self.current_time = 0
+
 
         # Cluster Generate
         self.cluster = Machine.Cluster(
@@ -61,7 +63,7 @@ class VehicleJobSchedulingParameters:
         self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
         # Auction
         self.allocation_mechanism = AllocationMechanism.FirstPrice()
-        self.auction = Auction.ReverseAuction(cluster=self.cluster, allocation_mechanism=self.allocation_mechanism)
+        self.auction_type = Auction.ReverseAuction(self.cluster, self.allocation_mechanism)
     def reset(self):
         self.machine_restrictions.reset()
         self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))

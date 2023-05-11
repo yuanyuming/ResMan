@@ -67,8 +67,8 @@ class Machine:
     def get_bid(self, job=Job.Job()):
         return self.policy(job)
 
-    def fixed(self, job=Job.Job(), cost_vector=[4, 6]):
-        return np.dot(job.res_vec, cost_vector)
+    def fixed(self, job=Job.Job()):
+        return np.dot(job.res_vec, self.cost_vector)
 
     def fixed_norm(self, job=Job.Job(), var=0.2):
         return (
@@ -235,14 +235,16 @@ class Cluster:
         self.num_res = num_res
         self.time_horizon = time_horizon
         self.current_time = current_time
-        self.id = 0
+        self.now_id = 0
+        self.machine_average_res_vec = [20,40]
+        self.machine_average_cost_vec = [2,4]
         self.machines = []
         self.generate_machines_random(self.number)
 
     def add_machine(self, res_slot, cost_vector):
         self.machines.append(
             Machine(
-                self.id,
+                self.now_id,
                 self.num_res,
                 self.time_horizon,
                 self.job_slot_size,
@@ -252,18 +254,18 @@ class Cluster:
                 self.current_time,
             )
         )
-        self.id += 1
+        self.now_id += 1
 
     def generate_machines_random(self, num):
         """
         Purpose:
         """
         for i in range(num):
-            bias_r = np.random.randint(-5, 5)
-            bias_c = np.random.randint(-2, 2)
+            bias_r = np.random.randint(-5, 5,self.num_res)
+            bias_c = np.random.randint(-2, 2,self.num_res)
             self.add_machine(
-                res_slot=[20 + bias_r, 40 + bias_r],
-                cost_vector=[4 + bias_c, 6 + bias_c],
+                res_slot=self.machine_average_res_vec + bias_r,
+                cost_vector=self.machine_average_cost_vec + bias_c,
             )
 
     def allocate_job(self, machine_id=0, job=Job.Job()):
