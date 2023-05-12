@@ -26,7 +26,10 @@ class FirstPrice(AllocationMechanism):
         winners = np.argsort(bids.bids)[0]
         sorted_bids = np.sort(bids.bids)
         prices = sorted_bids[0]
-        second_prices = sorted_bids[1]
+        if len(sorted_bids) == 1:
+            second_prices = prices
+        else:
+            second_prices = sorted_bids[1]
         return bids.machines[winners], prices, second_prices
 
 

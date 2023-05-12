@@ -4,12 +4,12 @@ def test_auction():
     i,j = 0,0
     for jobs in para.job_iterator:
         for job in jobs:
-            print(job)
+            # print(job)
             j+=1
             if para.auction_type.auction(job):
                 i+=1
-            print(job.pay)
-            print(job.running_machine)
+            # print(job.pay)
+            # print(job.running_machine)
             # print(job)
             # print(para.cluster.machines[job.running_machine])
         para.cluster.step()

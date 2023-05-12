@@ -25,7 +25,7 @@ class VehicleJobSchedulingParameters:
         self.duration = 10
         self.max_job_len = 10
         self.job_small_chance = 0.8
-        self.job_average_cost_vec = [4,6]
+        self.job_average_cost_vec = [8,12]
         self.job_collection = Job.JobCollection(
             self.average, 0, 0, self.duration, self.job_dist,self.job_distribution.priority_dist,self.job_average_cost_vec
         )

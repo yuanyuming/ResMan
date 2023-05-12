@@ -49,6 +49,7 @@ class Machine:
         self.cost_vector = cost_vector
         self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
         self.running_job = []
+        self.request_job = Job.Job()
         self.policy = self.fixed_norm
 
     def add_backlog(self, job=Job.Job()):
@@ -64,19 +65,22 @@ class Machine:
         self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
         self.running_job = []
 
-    def get_bid(self, job=Job.Job()):
-        return self.policy(job)
+    def get_bid(self):
+        return self.policy(self.request_job)
 
     def fixed(self, job=Job.Job()):
         return np.dot(job.res_vec, self.cost_vector)
+    
 
+        
     def fixed_norm(self, job=Job.Job(), var=0.2):
         return (
             (np.dot(job.res_vec, self.cost_vector) + var * np.random.normal())
             * job.len
             * job.priority
         )
-
+    def request_auction(self,job=Job.Job()):
+        self.request_job = job
     def can_allocate(self, job=Job.Job()):
         """
         Check if the Job can be allocated to this Machine
@@ -298,16 +302,20 @@ class Bids:
     def __init__(self, cluster=Cluster(), job=Job.Job()):
         self.machines = [cluster.get_machine(i) for i in job.restrict_machines]
         self.job = job
+        self.can_allocate = []
         self.bids = []
-        self.get_bid()
+        
 
-    def get_bid(self):
+    def get_bids(self):
+        for machine in self.can_allocate:
+            self.bids.append(machine.get_bid())
+
+    def request_bids(self):
         for machine in self.machines:
             if machine.can_allocate(self.job):
-                self.bids.append(machine.get_bid(self.job))
-            else:
-                self.bids.append(np.inf)
-
+                machine.request_auction(self.job)
+                self.can_allocate.append(machine)
+            
     def __str__(self):
         table = prettytable.PrettyTable(
             ["Machine " + str(machine.id) for machine in self.machines]
