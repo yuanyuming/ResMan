@@ -1,6 +1,11 @@
 import gymnasium as gym
+import gymnasium.spaces
 import numpy as np
 from gymnasium import spaces
+from gymnasium.spaces import Space
+from numpy import ndarray
+import pettingzoo
+from pettingzoo.utils.env import AgentID
 import Job
 import Machine
 import AllocationMechanism
@@ -68,29 +73,19 @@ class VehicleJobSchedulingParameters:
         self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
 
 
-class VehicleJobScheduling(gym.Env):
+class VehicleJobScheduling(pettingzoo.ParallelEnv):
     metadata = {"render_modes": ["human", "ascii"]}
 
     def __init__(
         self, render_mode=None, parameter=VehicleJobSchedulingParameters()
     ) -> None:
-        # 初始化环境的参数，可以根据需要添加或修改
-        self.num_agents = ...  # 环境中的智能体数量
-        self.max_cycles = ...  # 环境的最大步数或时间限制
-        self.observation_shape = ...  # 智能体的观测空间形状
-        self.action_size = ...  # 智能体的动作空间大小
-        # 调用父类的构造方法，传入智能体列表和智能体选择器
-        # super().__init__(agents=[f"agent_{i}" for i in range(self.num_agents)],     agent_selector=agent_selector(...=))
-        # 初始化智能体的观测空间和动作空间，可以根据需要添加或修改
-        # self.observation_spaces = {agent: spaces.Box(low=0, high=255, shape=self.   observation_shape, dtype=np.uint8) for agent in self.agents}
-        # self.action_spaces = {agent: spaces.Discrete(self.action_size) for agent in     self.agents}
+        super().__init__()
         self.parameters = parameter
-
+        self.render_mode = render_mode
+        self.agents = [machine.id for machine in self.parameters.cluster.machines]
+        self.possible_agents = self.agents
         self.observation_space = spaces.Dict()
         self.action_space = spaces.Dict()
-
-        assert render_mode is None or render_mode in self.metadata["render_modes"]
-        self.render_mode = render_mode
 
     def reset(self, *, seed=None, options=None):
         #     super().reset(seed=seed)
@@ -130,3 +125,15 @@ class VehicleJobScheduling(gym.Env):
 
     def render(self):
         pass
+    def step(self,actions):
+        pass
+    def seed(self, seed=None):
+        return super().seed(seed)
+    def close(self):
+        return super().close()
+    def state(self) -> ndarray:
+        return super().state()
+    def observation_space(self, agent: AgentID) -> Space:
+        return super().observation_space(agent)
+    def action_space(self, agent: AgentID) -> Space:
+        return super().action_space(agent)
