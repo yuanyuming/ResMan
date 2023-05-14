@@ -21,13 +21,13 @@ class VehicleJobSchedulingParameters:
         )
         self.job_dist = self.job_distribution.bi_model_dist
         # Job Collection Config
-        self.average = 5
+        self.average_per_slot = 100
         self.duration = 10
         self.max_job_len = 10
         self.job_small_chance = 0.8
         self.job_average_cost_vec = [8,12]
         self.job_collection = Job.JobCollection(
-            self.average, 0, 0, self.duration, self.job_dist,self.job_distribution.priority_dist,self.job_average_cost_vec
+            self.average_per_slot, 0, 0, self.duration, self.job_dist,self.job_distribution.priority_dist,self.job_average_cost_vec
         )
 
         # Machine Config
@@ -48,7 +48,6 @@ class VehicleJobSchedulingParameters:
             self.time_horizon,
             self.current_time,
         )
-        self.cluster.generate_machines_random(self.machine_numbers)
 
         # Machine Restrict Config
         self.max_machines = 5

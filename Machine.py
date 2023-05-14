@@ -295,7 +295,9 @@ class Cluster:
             table.add_row(
                 [machine.id, machine.res_slot, machine.reward, machine.cost_vector]
             )
+            machine.show_available_slot()
         print(table)
+        
 
 
 class Bids:
@@ -362,7 +364,7 @@ class MachineRestrict:
                     0, self.cluster.number - self.max_machines
                 )
                 t = np.random.randint(self.min_machines, self.max_machines)
-                array = np.arange(min_machine_num, min_machine_num + self.max_machines)
+                array = np.arange(min_machine_num, min_machine_num + self.max_machines+1)
                 np.random.shuffle(array)
                 # TODO 限制机器的数量,验证是否有空槽位
                 job.restrict_machines = array[:t]
