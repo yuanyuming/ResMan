@@ -71,7 +71,9 @@ class Machine:
     def fixed(self, job=Job.Job()):
         return np.dot(job.res_vec, self.cost_vector)
     
-
+    def observe(self):
+        machine_obs = {'avail_slot':self.avail_slot, 'cost_vector':self.cost_vector,'request_job':self.request_job.observe()}
+        return self.avail_slot, self.job_slot, self.cost_vector, self.running_job, self.job_backlog,self.reward, self.request_job
         
     def fixed_norm(self, job=Job.Job(), var=0.2):
         return (

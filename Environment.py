@@ -1,5 +1,4 @@
 import gymnasium as gym
-import gymnasium.spaces
 import numpy as np
 from gymnasium import spaces
 from gymnasium.spaces import Space
@@ -84,8 +83,13 @@ class VehicleJobScheduling(pettingzoo.ParallelEnv):
         self.render_mode = render_mode
         self.agents = [machine.id for machine in self.parameters.cluster.machines]
         self.possible_agents = self.agents
-        self.observation_space = spaces.Dict()
-        self.action_space = spaces.Dict()
+        
+    def observation_space(self, agent: AgentID) -> Space:
+        return super().observation_space(agent)
+    
+    def action_space(self, agent: AgentID) -> Space:
+        return spaces.Box(low=1/3, high=3
+                          , shape=(1, 1), dtype=np.float32)
 
     def reset(self, *, seed=None, options=None):
         #     super().reset(seed=seed)
@@ -133,7 +137,4 @@ class VehicleJobScheduling(pettingzoo.ParallelEnv):
         return super().close()
     def state(self) -> ndarray:
         return super().state()
-    def observation_space(self, agent: AgentID) -> Space:
-        return super().observation_space(agent)
-    def action_space(self, agent: AgentID) -> Space:
-        return super().action_space(agent)
+

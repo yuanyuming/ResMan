@@ -4,7 +4,7 @@
 from matplotlib import collections
 import prettytable
 import numpy as np
-
+from gymnasium import spaces
 from scipy.stats import poisson
 from sympy import false, true
 
@@ -148,6 +148,12 @@ class Job:
         """
         Purpose:
         """
+    def observe(self):
+        """
+        Purpose:
+        """
+        job_obs = {'res_vec':self.res_vec,'len':self.len,'priority':self.priority,'restrict_machines':self.restrict_machines}
+        return job_obs
 
     def request(self):
         return self.id, self.res_vec, self.len, self.priority, self.restrict_machines
