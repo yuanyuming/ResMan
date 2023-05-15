@@ -17,6 +17,8 @@
         "arange",
         "dtype",
         "matplotlib",
+        "ndarray",
+        "pettingzoo",
         "pyplot"
     ],
     "python.analysis.typeCheckingMode": "basic",
@@ -29,4 +31,6 @@
         }
     },
     "dictCompletion.addSpaceAfterCompletion": false,
+    "python.linting.cwd": "${workspaceFolder}",
+    "python.linting.pylintPath": "/workspaces/ResMan/man/bin/pylint /usr/local/py-utils/bin/pylint",
 }

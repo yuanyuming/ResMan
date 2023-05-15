@@ -48,6 +48,7 @@ class Machine:
         self.reward = 0
         self.cost_vector = cost_vector
         self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
+        self.res_slot_time = self.avail_slot
         self.running_job = []
         self.request_job = Job.Job()
         self.policy = self.fixed_norm
@@ -72,8 +73,8 @@ class Machine:
         return np.dot(job.res_vec, self.cost_vector)
     
     def observe(self):
-        machine_obs = {'avail_slot':self.avail_slot, 'cost_vector':self.cost_vector,'request_job':self.request_job.observe()}
-        return self.avail_slot, self.job_slot, self.cost_vector, self.running_job, self.job_backlog,self.reward, self.request_job
+        machine_obs = {'avail_slot':self.avail_slot, 'request_job':self.request_job.observe()}
+        return machine_obs
         
     def fixed_norm(self, job=Job.Job(), var=0.2):
         return (
@@ -234,6 +235,10 @@ class Cluster:
         num_res=2,
         time_horizon=20,
         current_time=0,
+        machine_average_res_vec=[20, 40],
+        machine_average_cost_vec=[2, 4],
+        bias_r=5,
+        bias_c=2,
     ):
         self.number = machine_numbers
         self.job_backlog_size = job_backlog_size
@@ -242,8 +247,10 @@ class Cluster:
         self.time_horizon = time_horizon
         self.current_time = current_time
         self.now_id = 0
-        self.machine_average_res_vec = [20,40]
-        self.machine_average_cost_vec = [2,4]
+        self.machine_average_res_vec = machine_average_res_vec
+        self.machine_average_cost_vec = machine_average_cost_vec
+        self.bias_r = bias_r
+        self.bias_c = bias_c
         self.machines = []
         self.generate_machines_random(self.number)
 
@@ -267,8 +274,8 @@ class Cluster:
         Purpose:
         """
         for i in range(num):
-            bias_r = np.random.randint(-5, 5,self.num_res)
-            bias_c = np.random.randint(-2, 2,self.num_res)
+            bias_r = np.random.randint(-self.bias_r, self.bias_r,self.num_res)
+            bias_c = np.random.randint(-self.bias_c, self.bias_c,self.num_res)
             self.add_machine(
                 res_slot=self.machine_average_res_vec + bias_r,
                 cost_vector=self.machine_average_cost_vec + bias_c,

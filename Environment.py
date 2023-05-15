@@ -29,9 +29,15 @@ class VehicleJobSchedulingParameters:
         self.duration = 10
         self.max_job_len = 10
         self.job_small_chance = 0.8
-        self.job_average_cost_vec = [8,12]
+        self.job_average_cost_vec = [8, 12]
         self.job_collection = Job.JobCollection(
-            self.average_per_slot, 0, 0, self.duration, self.job_dist,self.job_distribution.priority_dist,self.job_average_cost_vec
+            self.average_per_slot,
+            0,
+            0,
+            self.duration,
+            self.job_dist,
+            self.job_distribution.priority_dist,
+            self.job_average_cost_vec,
         )
 
         # Machine Config
@@ -41,7 +47,8 @@ class VehicleJobSchedulingParameters:
         self.num_res = len(self.max_job_vec)
         self.time_horizon = 10
         self.current_time = 0
-
+        self.machine_average_res_vec = [20, 40]
+        self.machine_average_cost_vec = [2, 4]
 
         # Cluster Generate
         self.cluster = Machine.Cluster(
@@ -51,6 +58,8 @@ class VehicleJobSchedulingParameters:
             self.num_res,
             self.time_horizon,
             self.current_time,
+            self.machine_average_res_vec,
+            self.machine_average_cost_vec,
         )
 
         # Machine Restrict Config
@@ -66,13 +75,16 @@ class VehicleJobSchedulingParameters:
         self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
         # Auction
         self.allocation_mechanism = AllocationMechanism.FirstPrice()
-        self.auction_type = Auction.ReverseAuction(self.cluster, self.allocation_mechanism)
+        self.auction_type = Auction.ReverseAuction(
+            self.cluster, self.allocation_mechanism
+        )
+
     def reset(self):
         self.machine_restrictions.reset()
         self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
 
 
-class VehicleJobScheduling(pettingzoo.ParallelEnv):
+class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
     metadata = {"render_modes": ["human", "ascii"]}
 
     def __init__(
@@ -83,13 +95,23 @@ class VehicleJobScheduling(pettingzoo.ParallelEnv):
         self.render_mode = render_mode
         self.agents = [machine.id for machine in self.parameters.cluster.machines]
         self.possible_agents = self.agents
-        
+
     def observation_space(self, agent: AgentID) -> Space:
-        return super().observation_space(agent)
-    
+        return spaces.Dict(
+            {
+                "avail_slot": spaces.MultiDiscrete(self.parameters.cluster.machines[int(agent)].res_slot_time),
+                "request_job": spaces.Dict(
+                    {
+                        "len": spaces.Discrete(self.parameters.max_job_len),
+                        "res_vec": spaces.MultiDiscrete(self.parameters.max_job_vec),
+                        "priority": spaces.Discrete(self.parameters.job_priority_range[1]),
+                    }
+                ),
+            }
+        )
+
     def action_space(self, agent: AgentID) -> Space:
-        return spaces.Box(low=1/3, high=3
-                          , shape=(1, 1), dtype=np.float32)
+        return spaces.Box(low=1 / 3, high=3, shape=(1, 1), dtype=np.float32)
 
     def reset(self, *, seed=None, options=None):
         #     super().reset(seed=seed)
@@ -129,12 +151,15 @@ class VehicleJobScheduling(pettingzoo.ParallelEnv):
 
     def render(self):
         pass
-    def step(self,actions):
+
+    def step(self, actions):
         pass
+
     def seed(self, seed=None):
         return super().seed(seed)
+
     def close(self):
         return super().close()
+
     def state(self) -> ndarray:
         return super().state()
-

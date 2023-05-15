@@ -51,3 +51,17 @@ def get_job():
 def test_job_show():
     get_job().show()
     print(get_job())
+    
+def test_env_action():
+    import Environment
+    env = Environment.VehicleJobSchedulingEnv()
+    action = env.action_space('0')
+    print("action space:")
+    print(action.sample())
+
+def test_env_obs():
+    import Environment
+    env = Environment.VehicleJobSchedulingEnv()
+    obs = env.observation_space('0')
+    print("observation space:")
+    print(obs.sample())
