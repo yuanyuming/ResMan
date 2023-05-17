@@ -57,7 +57,7 @@ class Machine:
         self.running_job = []
         # Bid
         self.request_job = Job.Job()
-        self.policy = self.fixed_norm
+        self.policy = self.drl_bid
         self.action = 1
         self.bid = 0
 

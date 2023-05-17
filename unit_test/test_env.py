@@ -65,3 +65,34 @@ def test_env_obs():
     obs = env.observation_space('0')
     print("observation space:")
     print(obs.sample())
+
+def init_env():
+    import Environment
+    env = Environment.VehicleJobSchedulingEnv()
+    return env
+def get_jobs_iter():
+    import Environment
+    para = Environment.VehicleJobSchedulingParameters()
+    return para.job_iterator
+
+def jobs_per_round():
+    iter = get_jobs_iter()
+    for i in range(100):
+        jobs = next(iter)
+        print(len(jobs))
+        for job in jobs:
+            yield job
+        print("round: " + str(i))
+        yield None
+        
+def test_env_step():
+    env = init_env()
+    i = 0
+    for job in jobs_per_round():
+        i+=100
+        actions = {agent: env.action_space(
+            agent).sample() for agent in env.agents}
+        env.step(actions)
+        env.parameters.auction_type.auction(job)
+
+    

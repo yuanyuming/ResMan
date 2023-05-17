@@ -157,8 +157,10 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
         if not actions:
             return {},{},{},{},{}
         for machine_id, action in actions.items():
-            print(machine_id, action)
+            self.parameters.cluster.machines[int(machine_id)].action = action
             pass
+        
+        jobs = next(self.parameters.job_iterator)
         pass
 
     def seed(self, seed=None):
