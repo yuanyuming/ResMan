@@ -156,7 +156,9 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
         
         if not actions:
             return {},{},{},{},{}
-        
+        for machine_id, action in actions.items():
+            print(machine_id, action)
+            pass
         pass
 
     def seed(self, seed=None):

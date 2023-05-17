@@ -20,7 +20,11 @@ class SlotShow:
             bar_show = [bars[s] for s in self.percent_slot[:, i]]
             print("- Resources #", i, ":𝄃", "".join(bar_show), "𝄃")
 
-
+class BiderPolicy:
+    def __init__(self) -> None:
+        pass
+    def bid(self,job=Job.Job()):
+        pass
 class Machine:
     def __init__(
         self,
@@ -32,6 +36,7 @@ class Machine:
         res_slot=[20, 40],
         cost_vector=[4, 6],
         current_time=0,
+        policy = 0
     ) -> None:
         """
         Initializes the machine
@@ -50,8 +55,11 @@ class Machine:
         self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
         self.res_slot_time = self.avail_slot
         self.running_job = []
+        # Bid
         self.request_job = Job.Job()
         self.policy = self.fixed_norm
+        self.action = 1
+        self.bid = 0
 
     def add_backlog(self, job=Job.Job()):
         """
@@ -68,7 +76,14 @@ class Machine:
 
     def get_bid(self):
         return self.policy(self.request_job)
-
+    
+    
+    def drl_bid(self,job=Job.Job()):
+        return self.action*(np.dot(job.res_vec, self.cost_vector))* job.len
+        
+    def set_action(self,action=1):
+        self.action = action
+    
     def fixed(self, job=Job.Job()):
         return np.dot(job.res_vec, self.cost_vector)
     
@@ -84,7 +99,18 @@ class Machine:
         )
     def request_auction(self,job=Job.Job()):
         self.request_job = job
+    # async allocate_job, not used
     def can_allocate(self, job=Job.Job()):
+        """
+        Check if the Job can be allocated to this Machine
+        """
+        allocated = False
+        new_avail_res = self.avail_slot[0 : job.len, :]- job.res_vec
+        if np.all(new_avail_res[:] >= 0):
+            allocated = True
+        return allocated
+    # async allocate_job, not used
+    def can_allocate_async(self, job=Job.Job()):
         """
         Check if the Job can be allocated to this Machine
         """
@@ -96,8 +122,24 @@ class Machine:
                 allocated = True
                 break
         return allocated
-
+    
     def allocate_job(self, job=Job.Job()):
+        """
+        Allocate the Job to this Machine
+        """
+        allocated = False
+        new_avail_res = self.avail_slot[0 : job.len, :]- job.res_vec
+        if np.all(new_avail_res[:] >= 0):
+            allocated = True
+            self.avail_slot[0 : job.len] = new_avail_res
+            job.start(self.current_time)
+            self.running_job.append(job)
+            assert job.start_time != -1
+            assert job.finish_time != -1
+            assert job.finish_time > job.start_time
+        return allocated
+    # async allocate job, not used
+    def allocate_job_async(self, job=Job.Job()):
         """
         Allocate the Job to this Machine
         """
@@ -110,7 +152,6 @@ class Machine:
 
                 self.avail_slot[i : i + job.len] = new_avail_res
                 job.start(self.current_time + i)
-                job.finish(job.start_time + job.len)
 
                 self.running_job.append(job)
 

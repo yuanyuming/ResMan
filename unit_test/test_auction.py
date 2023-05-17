@@ -25,7 +25,7 @@ def test_auction2():
     import Environment
     para = Environment.VehicleJobSchedulingParameters()
     i,j = 0,0
-    for k in range(100):
+    for k in range(1000):
         jobs = next(para.job_iterator)
         for job in jobs:
             j+=1

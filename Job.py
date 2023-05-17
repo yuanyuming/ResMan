@@ -158,12 +158,12 @@ class Job:
     def request(self):
         return self.id, self.res_vec, self.len, self.priority, self.restrict_machines
 
-    def start(self, curr_time):
+    def start(self, start_time):
         """
         Purpose:
         """
-        self.start_time = curr_time
-        self.finish(curr_time + self.len)
+        self.start_time = start_time
+        self.finish(start_time + self.len)
 
     def finish(self, finish_time):
         self.finish_time = finish_time
