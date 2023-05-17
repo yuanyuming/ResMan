@@ -114,8 +114,8 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
         return spaces.Box(low=1 / 3, high=3, shape=(1, 1), dtype=np.float32)
 
     def reset(self, *, seed=None, options=None):
-        #     super().reset(seed=seed)
-        #     self.parameters.reset()
+        super().reset(seed=seed)
+        self.parameters.reset()
 
         # def step(self, action):
         #     # 检查当前智能体是否有效
@@ -153,6 +153,10 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
         pass
 
     def step(self, actions):
+        
+        if not actions:
+            return {},{},{},{},{}
+        
         pass
 
     def seed(self, seed=None):
