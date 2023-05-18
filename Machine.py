@@ -51,6 +51,8 @@ class Machine:
         self.job_backlog = Job.JobBacklog(self.job_backlog_size)
         self.res_slot = res_slot
         self.reward = 0
+        self.earning = 0
+        self.finished_job = []
         self.cost_vector = cost_vector
         self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
         self.res_slot_time = self.avail_slot
@@ -70,7 +72,8 @@ class Machine:
     def reset(self):
         self.job_slot = Job.JobSlot(self.job_slot_size)
         self.job_backlog = Job.JobBacklog(self.job_backlog_size)
-        self.reward = 0
+        self.earning = 0
+        self.finished_job = []
         self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
         self.running_job = []
         self.request_job = None
@@ -89,7 +92,8 @@ class Machine:
     
     def fixed(self, job=Job.Job()):
         return np.dot(job.res_vec, self.cost_vector)
-    
+    def clear_job(self):
+        self.request_job = None
     def observe(self):
         if self.request_job is not None:
             machine_obs = {'avail_slot':self.avail_slot, 'request_job':self.request_job.observe()}
@@ -179,8 +183,11 @@ class Machine:
         for job in self.running_job:
             if job.finish_time <= self.current_time:
                 self.reward += job.pay
+                self.finished_job.append(job)
                 self.running_job.remove(job)
         self.current_time += 1
+        self.earning += self.reward
+        self.request_job = None
         return self.reward
 
     def show_running_job(self):
@@ -188,6 +195,7 @@ class Machine:
         print([job.id for job in self.running_job])
 
     def show_available_slot(self):
+        print("Machine #", self.id)
         print("Resource slots:")
         print(self.res_slot)
         print("Available slots:")
@@ -339,7 +347,10 @@ class Cluster:
 
     def observe(self):
         return [machine.observe() for machine in self.machines]
-        pass
+    
+    def clear_job(self):
+        for machine in self.machines:
+            machine.clear_job()
     def reset(self):
         self.current_time = 0
         for machine in self.machines:

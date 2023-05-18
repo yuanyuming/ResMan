@@ -1,3 +1,4 @@
+import functools
 import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
@@ -29,7 +30,7 @@ class VehicleJobSchedulingParameters:
         self.duration = 10
         self.max_job_len = 10
         self.job_small_chance = 0.8
-        self.job_average_cost_vec = [8, 12]
+        self.job_average_cost_vec = [18, 22]
         self.job_collection = Job.JobCollection(
             self.average_per_slot,
             0,
@@ -97,7 +98,12 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
         self.agents = [machine.id for machine in self.parameters.cluster.machines]
         self.possible_agents = self.agents
         self.get_job = self.get_job_next_step()
-
+        self.request_job = None
+        self.render_mode = render_mode
+        self.total_job = 0
+        self.finished_job = 0
+        
+    @functools.lru_cache(maxsize=None)
     def observation_space(self, agent: AgentID) -> Space:
         return spaces.Dict(
             {
@@ -112,22 +118,29 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
             }
         )
 
+    @functools.lru_cache(maxsize=None)
     def action_space(self, agent: AgentID) -> Space:
         return spaces.Box(low=1 / 3, high=3, shape=(1, 1), dtype=np.float32)
 
     def reset(self, seed=None,return_info=False, options=None):
         np.random.seed(seed)
         self.parameters.reset()
+        self.get_job = self.get_job_next_step()
+        self.request_job = None
+        self.total_job = 0
+        self.finished_job = 0
         observation = {agent:self.parameters.cluster.machines[int(agent)].observe() for agent in self.agents}
         return observation
 
     def render(self):
+        print("Current time:",self.parameters.cluster.current_time)
+        self.parameters.cluster.show()
         pass
     def get_job_next_step(self):
         for jobs in self.parameters.job_iterator:
             for job in jobs:
                 yield job, False
-            yield jobs, True
+            yield None, True
             
     def step(self, actions):
         
@@ -136,18 +149,26 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
         for machine_id, action in actions.items():
             self.parameters.cluster.machines[int(machine_id)].action = int(action)
             pass
+        if self.request_job is not None:
+            self.finished_job+=self.parameters.auction_type.auction(self.request_job)
         
         job, done = next(self.get_job)
-        if done and job is None:
+        self.request_job = job
+        if done:
             rw = self.parameters.cluster.step()
             rewards = {agent:rw[int(agent)] for agent in self.agents}
             
             return {},rewards,{},{},{}
-        for machine_id in job.restrict_machines:
-            self.parameters.cluster.machines[int(machine_id)].request_job = job
+        self.parameters.cluster.clear_job()
+        if job is not None:
+            self.total_job+=1
+            for machine_id in job.restrict_machines:
+                self.parameters.cluster.machines[int(machine_id)].request_job = job
             
         observation = {agent:self.parameters.cluster.machines[int(agent)].observe() for agent in self.agents}
         rewards = {agent:0 for agent in self.agents}
+        if self.render_mode == "human":
+            self.render()
         return observation,rewards,{},{},{}
 
     def seed(self, seed=None):

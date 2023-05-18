@@ -106,17 +106,42 @@ def test_env():
     env = init_env()
     from pettingzoo.test import parallel_api_test
     parallel_api_test(env, num_cycles=1000)
+    
+def test_env_benchmark():
+    import random
+    import time
+    import numpy as np
+    env = init_env()
+    print("Starting performance benchmark")
+    cycles = 0
+    turn = 0
+    env.reset()
+    start = time.time()
+    end = 0
+    rewards = np.zeros(len(env.agents))
+
+    while True:
+        actions = {agent: env.action_space(
+            agent).sample() for agent in env.agents}
+        obs, reward, termination, truncation, info= env.step(actions)
+        turn += 1
+        rewards += np.array(list(reward.values()))
+        if time.time() - start > 5:
+            end = time.time()
+            break
+
+    length = end - start
+    cycles = env.parameters.cluster.current_time
+    turns_per_time = turn / length
+    cycles_per_time = cycles / length
+    print(str(turns_per_time) + " turns per second")
+    print(str(cycles_per_time) + " cycles per second")
+    print("Finished performance benchmark")
+    print("Average reward per agent: " + str(rewards / cycles))
+    print("Job Finish Rate: " + str(env.finished_job / env.total_job))
 
         
-def my_generator(n):
-    index = 0
-    while index < n:
-        yield index
-        index += 1
-    yield None
-
-def test_generator():
-    ge = my_generator(2)
-    print(next(ge))
-    print(next(ge))
-    print(next(ge))
+def test_job_per_step():
+    env = init_env()
+    job_generator = env.get_job_next_step()
+    print(next(job_generator)[0])
