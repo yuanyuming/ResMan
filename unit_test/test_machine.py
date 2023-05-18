@@ -53,7 +53,7 @@ def test_machine_allocate():
         for job in collection:
             job.price = np.random.randint(1, 10)
             mac.allocate_job(job)
-        mac.time_proceed()
+        mac.step()
     mac.show()
 
 

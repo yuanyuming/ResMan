@@ -29,7 +29,7 @@ def test_env_single_para():
                 print("Success" + str(job))
                 allocate_jobs += 1
 
-        machine.time_proceed()
+        machine.step()
     print(machine)
     print(
         "All Jobs: "
@@ -81,18 +81,42 @@ def jobs_per_round():
         jobs = next(iter)
         print(len(jobs))
         for job in jobs:
-            yield job
+            yield job,False
         print("round: " + str(i))
-        yield None
+        yield None,True
+        
         
 def test_env_step():
     env = init_env()
     i = 0
-    for job in jobs_per_round():
-        i+=100
+    for job ,done in jobs_per_round():
+        i+=1
+        if done:
+            env.parameters.cluster.step()
+            continue
         actions = {agent: env.action_space(
             agent).sample() for agent in env.agents}
         env.step(actions)
         env.parameters.auction_type.auction(job)
-
+        if i == 1000:
+            break
+    env.parameters.cluster.show()
     
+def test_env():
+    env = init_env()
+    from pettingzoo.test import parallel_api_test
+    parallel_api_test(env, num_cycles=1000)
+
+        
+def my_generator(n):
+    index = 0
+    while index < n:
+        yield index
+        index += 1
+    yield None
+
+def test_generator():
+    ge = my_generator(2)
+    print(next(ge))
+    print(next(ge))
+    print(next(ge))

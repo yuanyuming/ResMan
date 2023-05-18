@@ -275,7 +275,7 @@ class Allocation_Environment:
         """
 
         self.curr_time += 1
-        self.machine.time_proceed(self.curr_time)
+        self.machine.step(self.curr_time)
         self.extra_info.time_proceed()
         # 添加新任务
         self.seq_idx += 1
@@ -326,7 +326,7 @@ class Allocation_Environment:
         status = self.choose_state(a)
         if status == 'MoveOn':
             self.curr_time += 1
-            self.machine.time_proceed(self.curr_time)
+            self.machine.step(self.curr_time)
             self.extra_info.time_proceed()
 
             # 添加新任务

@@ -82,6 +82,7 @@ class VehicleJobSchedulingParameters:
     def reset(self):
         self.machine_restrictions.reset()
         self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
+        self.cluster.reset()
 
 
 class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
@@ -95,6 +96,7 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
         self.render_mode = render_mode
         self.agents = [machine.id for machine in self.parameters.cluster.machines]
         self.possible_agents = self.agents
+        self.get_job = self.get_job_next_step()
 
     def observation_space(self, agent: AgentID) -> Space:
         return spaces.Dict(
@@ -113,55 +115,40 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
     def action_space(self, agent: AgentID) -> Space:
         return spaces.Box(low=1 / 3, high=3, shape=(1, 1), dtype=np.float32)
 
-    def reset(self, *, seed=None, options=None):
-        super().reset(seed=seed)
+    def reset(self, seed=None,return_info=False, options=None):
+        np.random.seed(seed)
         self.parameters.reset()
-
-        # def step(self, action):
-        #     # 检查当前智能体是否有效
-        #     #if self.dones[self.agent_selection]:
-        #         return self._was_done_step(action)
-        #     # 检查动作是否合法
-        #     #if not self.action_spaces[self.agent_selection].contains(action):
-        #         raise ValueError(
-        #             f"Invalid action {action} for agent {self. agent_selection}"
-        #         )
-        #     # 更新环境的状态和智能体的观测、奖励等变量
-        #     # 根据环境的逻辑和规则，编写相应的代码
-        #     # ...
-        #     # 设置终止和截断标志
-        #     #self.dones[self.agent_selection] = ...  # 根据环境的逻辑和规则，判断当前智能体是否   完成
-        #     #self.terminal = ...  # 根据环境的逻辑和规则，判断整个环境是否结束
-        #     #self.truncation = ...  # 根据环境的逻辑和规则，判断是否达到最大步数或时间限制
-        #     # 如果有必要，调用self._was_dead_step(action)函数来处理智能体的死亡或游戏结束的情况
-        #     #if self.dones[self.agent_selection] or self.terminal:
-        #         return self._was_dead_step(action)
-        #     # 切换到下一个智能体
-        #     #self._cumulative_rewards[self.agent_selection] = 0
-        #     #self.agent_selection = self._agent_selector.next()
-        #     # 每Step开始时, 从JobIterator中获取一个JobCollection
-        #     #job_list = next(self.parameters.job_iterator)
-        #     # 然后,
-        #     observation = 1
-        #     reward = 1
-        #     terminated = False
-        #     info = {}
-        #     return observation, reward, terminated, False, info
-        pass
+        observation = {agent:self.parameters.cluster.machines[int(agent)].observe() for agent in self.agents}
+        return observation
 
     def render(self):
         pass
-
+    def get_job_next_step(self):
+        for jobs in self.parameters.job_iterator:
+            for job in jobs:
+                yield job, False
+            yield jobs, True
+            
     def step(self, actions):
         
         if not actions:
             return {},{},{},{},{}
         for machine_id, action in actions.items():
-            self.parameters.cluster.machines[int(machine_id)].action = action
+            self.parameters.cluster.machines[int(machine_id)].action = int(action)
             pass
         
-        jobs = next(self.parameters.job_iterator)
-        pass
+        job, done = next(self.get_job)
+        if done and job is None:
+            rw = self.parameters.cluster.step()
+            rewards = {agent:rw[int(agent)] for agent in self.agents}
+            
+            return {},rewards,{},{},{}
+        for machine_id in job.restrict_machines:
+            self.parameters.cluster.machines[int(machine_id)].request_job = job
+            
+        observation = {agent:self.parameters.cluster.machines[int(agent)].observe() for agent in self.agents}
+        rewards = {agent:0 for agent in self.agents}
+        return observation,rewards,{},{},{}
 
     def seed(self, seed=None):
         return super().seed(seed)

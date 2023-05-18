@@ -73,9 +73,12 @@ class Machine:
         self.reward = 0
         self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
         self.running_job = []
+        self.request_job = None
 
     def get_bid(self):
-        return self.policy(self.request_job)
+        if self.request_job is not None:
+            return self.policy(self.request_job)
+        return 0
     
     
     def drl_bid(self,job=Job.Job()):
@@ -88,7 +91,9 @@ class Machine:
         return np.dot(job.res_vec, self.cost_vector)
     
     def observe(self):
-        machine_obs = {'avail_slot':self.avail_slot, 'request_job':self.request_job.observe()}
+        if self.request_job is not None:
+            machine_obs = {'avail_slot':self.avail_slot, 'request_job':self.request_job.observe()}
+        machine_obs = {'avail_slot':self.avail_slot, 'request_job':None}
         return machine_obs
         
     def fixed_norm(self, job=Job.Job(), var=0.2):
@@ -162,10 +167,11 @@ class Machine:
                 break
         return allocated
 
-    def time_proceed(self):
+    def step(self):
         """
         process time
         """
+        self.reward = 0
 
         self.avail_slot[:-1, :] = self.avail_slot[1:, :]
         self.avail_slot[-1, :] = self.res_slot
@@ -175,6 +181,7 @@ class Machine:
                 self.reward += job.pay
                 self.running_job.remove(job)
         self.current_time += 1
+        return self.reward
 
     def show_running_job(self):
         print("Running Jobs:")
@@ -326,14 +333,17 @@ class Cluster:
         self.machines[machine_id].allocate_job(job)
 
     def step(self):
-        for machine in self.machines:
-            machine.time_proceed()
+        reward = [machine.step() for machine in self.machines]
         self.current_time += 1
-        pass
+        return reward
 
-    def observation(self):
+    def observe(self):
+        return [machine.observe() for machine in self.machines]
         pass
-
+    def reset(self):
+        self.current_time = 0
+        for machine in self.machines:
+            machine.reset()
     def get_machine(self, machine_id):
         return self.machines[machine_id]
 

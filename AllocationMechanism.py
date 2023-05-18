@@ -23,7 +23,7 @@ class FirstPrice(AllocationMechanism):
         super(FirstPrice, self).__init__()
 
     def allocate(self, bids=Machine.Bids()):
-        winners = np.argsort(bids.bids)[0]
+        winners = int(np.argsort(bids.bids)[0])
         sorted_bids = np.sort(bids.bids)
         prices = sorted_bids[0]
         if len(sorted_bids) == 1:
