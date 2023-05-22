@@ -34,4 +34,6 @@
     "python.linting.cwd": "${workspaceFolder}",
     "python.linting.pylintPath": "/workspaces/ResMan/man/bin/pylint /usr/local/py-utils/bin/pylint",
     "AREPL.pythonPath": "/workspaces/ResMan/man/bin/python",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
 }

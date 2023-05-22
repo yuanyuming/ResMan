@@ -51,13 +51,15 @@ def get_job():
 def test_job_show():
     get_job().show()
     print(get_job())
-    
+
+
 def test_env_action():
     import Environment
     env = Environment.VehicleJobSchedulingEnv()
     action = env.action_space('0')
     print("action space:")
     print(action.sample())
+
 
 def test_env_obs():
     import Environment
@@ -66,14 +68,18 @@ def test_env_obs():
     print("observation space:")
     print(obs.sample())
 
+
 def init_env():
     import Environment
     env = Environment.VehicleJobSchedulingEnv()
     return env
+
+
 def get_jobs_iter():
     import Environment
     para = Environment.VehicleJobSchedulingParameters()
     return para.job_iterator
+
 
 def jobs_per_round():
     iter = get_jobs_iter()
@@ -81,16 +87,16 @@ def jobs_per_round():
         jobs = next(iter)
         print(len(jobs))
         for job in jobs:
-            yield job,False
+            yield job, False
         print("round: " + str(i))
-        yield None,True
-        
-        
+        yield None, True
+
+
 def test_env_step():
     env = init_env()
     i = 0
-    for job ,done in jobs_per_round():
-        i+=1
+    for job, done in jobs_per_round():
+        i += 1
         if done:
             env.parameters.cluster.step()
             continue
@@ -101,12 +107,14 @@ def test_env_step():
         if i == 1000:
             break
     env.parameters.cluster.show()
-    
+
+
 def test_env():
     env = init_env()
     from pettingzoo.test import parallel_api_test
     parallel_api_test(env, num_cycles=1000)
-    
+
+
 def test_env_benchmark():
     import random
     import time
@@ -123,7 +131,7 @@ def test_env_benchmark():
     while True:
         actions = {agent: env.action_space(
             agent).sample() for agent in env.agents}
-        obs, reward, termination, truncation, info= env.step(actions)
+        obs, reward, termination, truncation, info = env.step(actions)
         turn += 1
         rewards += np.array(list(reward.values()))
         if time.time() - start > 5:
@@ -140,8 +148,26 @@ def test_env_benchmark():
     print("Average reward per agent: " + str(rewards / cycles))
     print("Job Finish Rate: " + str(env.finished_job / env.total_job))
 
-        
+
 def test_job_per_step():
     env = init_env()
     job_generator = env.get_job_next_step()
     print(next(job_generator)[0])
+
+
+def test_env_agent_selector():
+    import Environment
+    env = Environment.VehicleJobSchedulingEnvACE()
+    env.reset()
+    selector = env._agent_selector()
+    for i in range(100):
+        print(selector.next(), end=" ")
+        if selector.is_last():
+            env.request_job, _ = next(env.get_job)
+
+
+def test_ace_env():
+    import Environment
+    from pettingzoo.test import api_test
+    env = Environment.VehicleJobSchedulingEnvACE()
+    api_test(env, num_cycles=1000)
