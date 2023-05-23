@@ -73,7 +73,7 @@ lazy-object-proxy==1.9.0
 lit==16.0.1
 llvmlite==0.40.0
 locket==1.0.0
--e git+https://github.com/yuanyuming/ResMan@0df5af3728dd8541a1083e21bc94674901135086#egg=MALib&subdirectory=malib
+-e git+https://github.com/yuanyuming/ResMan@2969af52225b53f8fdc6e40744b484e733a5a4ee#egg=MALib&subdirectory=malib
 Markdown==3.4.3
 MarkupSafe==2.1.2
 matplotlib==3.7.1
@@ -114,7 +114,6 @@ parso==0.8.3
 partd==1.4.0
 PettingZoo==1.22.3
 pexpect==4.8.0
-pickle5==0.0.11
 pickleshare==0.7.5
 Pillow==9.3.0
 platformdirs==3.2.0
@@ -133,6 +132,7 @@ pyecharts==2.0.3
 pygame==2.1.0
 Pygments==2.14.0
 pylint==2.17.4
+pymunk==6.4.0
 pynisher==1.0.5
 pyparsing==3.0.8
 pyrfr==0.9.0
@@ -168,6 +168,8 @@ tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.1
 tensorboardX==2.6
 threadpoolctl==3.1.0
+tianshou==0.5.0
+tinyscaler==1.2.6
 tomli==2.0.1
 tomlkit==0.11.8
 toolz==0.12.0
@@ -178,7 +180,7 @@ tornado==6.2
 tqdm==4.64.0
 traitlets==5.9.0
 triton==2.0.0
-typing_extensions==4.2.0
+typing_extensions==4.5.0
 tzdata==2023.3
 urllib3==1.26.15
 virtualenv==20.21.0
