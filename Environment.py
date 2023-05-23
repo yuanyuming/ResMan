@@ -12,12 +12,13 @@ import Machine
 import AllocationMechanism
 import Auction
 from pettingzoo.utils import agent_selector
+from collections import OrderedDict
 
 
 class VehicleJobSchedulingParameters:
     def __init__(self):
         # Job Config
-        self.max_job_vec = [10, 20]
+        self.max_job_vec = [100, 100]
         self.max_job_len = 10
 
         # Job Distribution Config
@@ -76,8 +77,7 @@ class VehicleJobSchedulingParameters:
         )
 
         # Job Iterator
-        self.job_iterator = Machine.ListIterator(
-            iter(self.machine_restrictions))
+        self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
         # Auction
         self.allocation_mechanism = AllocationMechanism.FirstPrice()
         self.auction_type = Auction.ReverseAuction(
@@ -86,8 +86,7 @@ class VehicleJobSchedulingParameters:
 
     def reset(self):
         self.machine_restrictions.reset()
-        self.job_iterator = Machine.ListIterator(
-            iter(self.machine_restrictions))
+        self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
         self.cluster.reset()
 
 
@@ -100,8 +99,7 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
         super().__init__()
         self.parameters = parameter
         self.render_mode = render_mode
-        self.agents = [
-            machine.id for machine in self.parameters.cluster.machines]
+        self.agents = [machine.id for machine in self.parameters.cluster.machines]
         self.possible_agents = self.agents
         self.get_job = self.get_job_next_step()
         self.request_job = None
@@ -116,8 +114,7 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
                 "avail_slot": spaces.Box(
                     low=0,
                     high=self.parameters.machine_max_res_vec,
-                    shape=(self.parameters.num_res,
-                           self.parameters.time_horizon),
+                    shape=(self.parameters.num_res, self.parameters.time_horizon),
                     dtype=np.int8,
                 ),
                 "request_job": spaces.Dict(
@@ -164,12 +161,10 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
         if not actions:
             return {}, {}, {}, {}, {}
         for machine_id, action in actions.items():
-            self.parameters.cluster.machines[int(
-                machine_id)].action = int(action)
+            self.parameters.cluster.machines[int(machine_id)].action = int(action)
             pass
         if self.request_job is not None:
-            self.finished_job += self.parameters.auction_type.auction(
-                self.request_job)
+            self.finished_job += self.parameters.auction_type.auction(self.request_job)
 
         job, done = next(self.get_job)
         self.request_job = job
@@ -182,8 +177,7 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
         if job is not None:
             self.total_job += 1
             for machine_id in job.restrict_machines:
-                self.parameters.cluster.machines[int(
-                    machine_id)].request_job = job
+                self.parameters.cluster.machines[int(machine_id)].request_job = job
 
         observation = {
             agent: self.parameters.cluster.machines[int(agent)].observe()
@@ -216,8 +210,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         super().__init__()
         self.parameters = parameter
         self.render_mode = render_mode
-        self.agents = [
-            machine.id for machine in self.parameters.cluster.machines]
+        self.agents = [machine.id for machine in self.parameters.cluster.machines]
         self.possible_agents = self.agents
         self.get_job = self.get_job_next_step()
         self.request_job = None
@@ -228,24 +221,40 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent: AgentID) -> Space:
         return spaces.Dict(
-            {
-                "avail_slot": spaces.Box(
-                    low=0,
-                    high=self.parameters.machine_max_res_vec,
-                    shape=(self.parameters.num_res,
-                           self.parameters.time_horizon),
-                    dtype=np.int8,
-                ),
-                "request_job": spaces.Dict(
-                    {
-                        "len": spaces.Discrete(self.parameters.max_job_len),
-                        "res_vec": spaces.MultiDiscrete(self.parameters.max_job_vec),
-                        "priority": spaces.Discrete(
-                            self.parameters.job_priority_range[1]
+            OrderedDict(
+                [
+                    (
+                        "avail_slot",
+                        spaces.Box(
+                            low=0,
+                            high=self.parameters.machine_max_res_vec,
+                            shape=(
+                                self.parameters.time_horizon,
+                                self.parameters.num_res,
+                            ),
+                            dtype=np.int8,
                         ),
-                    }
-                ),
-            }
+                    ),
+                    (
+                        "request_job",
+                        OrderedDict(
+                            [
+                                (
+                                    "res_vec",
+                                    spaces.MultiDiscrete(self.parameters.max_job_vec),
+                                ),
+                                ("len", spaces.Discrete(self.parameters.max_job_len)),
+                                (
+                                    "priority",
+                                    spaces.Discrete(
+                                        self.parameters.job_priority_range[1]
+                                    ),
+                                ),
+                            ]
+                        ),
+                    ),
+                ]
+            )
         )
 
     @functools.lru_cache(maxsize=None)
@@ -255,8 +264,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
     def reset(self, seed=None, return_info=False, options=None):
         np.random.seed(seed)
         self.parameters.reset()
-        self.agents = [
-            machine.id for machine in self.parameters.cluster.machines]
+        self.agents = [machine.id for machine in self.parameters.cluster.machines]
         self.rewards = {agent: 0 for agent in self.agents}
         self._cumulative_rewards = {agent: 0 for agent in self.agents}
         self.terminations = {agent: False for agent in self.agents}
@@ -268,11 +276,10 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         }
         self.dones = {agent: False for agent in self.agents}
         self.get_job = self.get_job_next_step()
-        self.request_job, self.done = next(self.get_job)
 
         self.total_job = 0
         self.finished_job = 0
-        self.__agent_selector = self._agent_selector()
+        self.next_job()
         self.agent_selection = self.__agent_selector.next()
 
     def _clear_rewards(self) -> None:
@@ -302,52 +309,50 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             return agent_selector(self.request_job.restrict_machines)
         return agent_selector(None)
 
+    def auction(self):
+        if self.request_job is not None:
+            self.finished_job += self.parameters.auction_type.auction(self.request_job)
+
+    def next_job(self):
+        self.request_job, self.done = next(self.get_job)
+        while self.done:
+            rw = self.parameters.cluster.step()
+            print("Current time:", self.parameters.cluster.current_time)
+            self.rewards = {agent: rw[int(agent)] for agent in self.agents}
+            self.parameters.cluster.clear_job()
+            self.request_job, self.done = next(self.get_job)
+            self.observation = {
+                agent: self.parameters.cluster.machines[int(agent)].observe()
+                for agent in self.agents
+            }
+            self._cumulate_rewards()
+
+        if self.request_job is not None:
+            self.total_job += 1
+            for machine_id in self.request_job.restrict_machines:
+                self.parameters.cluster.machines[
+                    int(machine_id)
+                ].request_job = self.request_job
+                self.observation[machine_id] = self.parameters.cluster.machines[
+                    int(machine_id)
+                ].observe()
+            self.__agent_selector = self._agent_selector()
+
     def step(self, action):
         if not action:
             return
 
         agent = self.agent_selection
-        self.parameters.cluster.machines[int(
-            agent)].action = float(action[0])
+        self.parameters.cluster.machines[int(agent)].action = float(action[0])
 
         if self.__agent_selector.is_last():
-            if self.request_job is not None:
-                self.finished_job += self.parameters.auction_type.auction(
-                    self.request_job
-                )
-            self.request_job, self.done = next(self.get_job)
+            self.auction()
 
-            while self.done:
-                rw = self.parameters.cluster.step()
-                print("Current time:", self.parameters.cluster.current_time)
-                self.rewards = {agent: rw[int(agent)] for agent in self.agents}
-                self.parameters.cluster.clear_job()
-                self.request_job, self.done = next(self.get_job)
-                self.observation = {
-                    agent: self.parameters.cluster.machines[int(
-                        agent)].observe()
-                    for agent in self.agents
-                }
-                self._cumulate_rewards()
-
-            if self.request_job is not None:
-                self.total_job += 1
-                for machine_id in self.request_job.restrict_machines:
-                    self.parameters.cluster.machines[
-                        int(machine_id)
-                    ].request_job = self.request_job
-                    self.observation[machine_id] = self.parameters.cluster.machines[
-                        int(machine_id)
-                    ].observe()
-                self.__agent_selector = self._agent_selector()
+            self.next_job()
 
         # !TODO update observation,reward
         self.agent_selection = self.__agent_selector.next()
-        observation = {
-            agent: self.parameters.cluster.machines[int(agent)].observe()
-            for agent in self.agents
-        }
-        rewards = {agent: 0 for agent in self.agents}
+
         if self.render_mode == "human":
             self.render()
 

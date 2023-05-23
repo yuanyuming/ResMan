@@ -1,5 +1,7 @@
+import Environment
+
 def test_step():
-    import Environment
+    
     import numpy as np
 
     para = Environment.VehicleJobSchedulingParameters()
@@ -62,7 +64,7 @@ def test_env_action():
 
 
 def test_env_obs():
-    import Environment
+    from .. import Environment
     env = Environment.VehicleJobSchedulingEnv()
     obs = env.observation_space('0')
     print("observation space:")

@@ -7,7 +7,7 @@ import numpy as np
 from gymnasium import spaces
 from scipy.stats import poisson
 from sympy import false, true
-
+from collections import OrderedDict
 
 # 导入numpy库
 import numpy as np
@@ -163,8 +163,8 @@ class Job:
 
     # 定义一个方法，返回任务的观察信息，即资源需求向量、时长、优先级和限制机器列表
     def observe(self):
-        job_obs = {'res_vec': self.res_vec, 'len': self.len,
-                   'priority': self.priority}
+        job_obs = OrderedDict({"res_vec": self.res_vec, "len": self.len,
+ "priority": self.priority})
         return job_obs
 
     # 定义一个方法，返回任务的请求信息，即id、资源需求向量、时长、优先级和限制机器列表

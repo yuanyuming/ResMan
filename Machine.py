@@ -1,7 +1,7 @@
 import numpy as np
 import prettytable
 import Job
-
+from collections import OrderedDict
 
 class SlotShow:
     def __init__(
@@ -104,11 +104,9 @@ class Machine:
 
     def observe(self):
         if self.request_job is not None:
-            machine_obs = {'avail_slot': self.avail_slot,
-                           'request_job': self.request_job.observe()}
+            machine_obs = OrderedDict([("avail_slot", self.avail_slot), ("request_job",self.request_job.observe())])
             return machine_obs
-        machine_obs = {'avail_slot': self.avail_slot, 'request_job': {'res_vec': [0, 0], 'len': 0,
-                                                                      'priority': 0}}
+        machine_obs = OrderedDict([("avail_slot", self.avail_slot), ("request_job", OrderedDict([("res_vec", [0, 0]), ("len", 0),("priority", 0)]))])
         return machine_obs
 
     def fixed_norm(self, job=Job.Job(), var=0.2):

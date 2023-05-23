@@ -1,5 +1,4 @@
 {
-    "typewriterAutoScroll.enable": false,
     "python.terminal.activateEnvInCurrentTerminal": true,
     "python.defaultInterpreterPath": "${workspaceFolder}/man/bin/python",
     "python.testing.pytestArgs": [
@@ -22,7 +21,6 @@
         "pyplot"
     ],
     "python.analysis.typeCheckingMode": "basic",
-    "typewriterScrollMode.enable": true,
     "[markdown]": {
         "editor.quickSuggestions": {
             "comments": "on",
@@ -32,8 +30,8 @@
     },
     "dictCompletion.addSpaceAfterCompletion": false,
     "python.linting.cwd": "${workspaceFolder}",
-    "python.linting.pylintPath": "/workspaces/ResMan/man/bin/pylint /usr/local/py-utils/bin/pylint",
-    "AREPL.pythonPath": "/workspaces/ResMan/man/bin/python",
+    "python.linting.pylintPath": "${workspaceFolder}/man/bin/pylint",
+    "AREPL.pythonPath": "${workspaceFolder}/man/bin/python",
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
     "python.analysis.completeFunctionParens": true,
@@ -47,4 +45,8 @@
     "python.languageServer": "Pylance",
     "python.linting.pylintEnabled": true,
     "editor.defaultFormatter": "ms-python.black-formatter",
+    "python.formatting.provider": "black",
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}"
+    ],
 }
