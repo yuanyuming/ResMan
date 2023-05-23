@@ -171,3 +171,23 @@ def test_ace_env():
     from pettingzoo.test import api_test
     env = Environment.VehicleJobSchedulingEnvACE()
     api_test(env, num_cycles=1000)
+
+
+def test_ace_env_step():
+    import Environment
+    env = Environment.VehicleJobSchedulingEnvACE()
+    env.reset()
+    for agent in env.agent_iter(10000):
+
+        action = env.action_space(
+            agent).sample()
+        env.step(action)
+    env.render()
+
+
+def test_ace_env_observe():
+    import Environment
+    env = Environment.VehicleJobSchedulingEnvACE()
+    env.reset()
+    ob, *_ = env.last()
+    print(ob)

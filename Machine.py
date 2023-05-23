@@ -11,7 +11,8 @@ class SlotShow:
     ):
         self.res_slot = res_slot
         self.avail_slot = np.asarray(avial_slot)
-        self.percent_slot = (self.avail_slot / self.res_slot * 8).round().astype(int)
+        self.percent_slot = (
+            self.avail_slot / self.res_slot * 8).round().astype(int)
 
     def compute_chart(self):
         bar = " ▁▂▃▄▅▆▇█"
@@ -20,11 +21,15 @@ class SlotShow:
             bar_show = [bars[s] for s in self.percent_slot[:, i]]
             print("- Resources #", i, ":𝄃", "".join(bar_show), "𝄃")
 
+
 class BiderPolicy:
     def __init__(self) -> None:
         pass
-    def bid(self,job=Job.Job()):
+
+    def bid(self, job=Job.Job()):
         pass
+
+
 class Machine:
     def __init__(
         self,
@@ -36,7 +41,7 @@ class Machine:
         res_slot=[20, 40],
         cost_vector=[4, 6],
         current_time=0,
-        policy = 0
+        policy=0
     ) -> None:
         """
         Initializes the machine
@@ -54,7 +59,8 @@ class Machine:
         self.earning = 0
         self.finished_job = []
         self.cost_vector = cost_vector
-        self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
+        self.avail_slot = np.ones(
+            (self.time_horizon, self.num_res)) * self.res_slot
         self.res_slot_time = self.avail_slot
         self.running_job = []
         # Bid
@@ -74,7 +80,8 @@ class Machine:
         self.job_backlog = Job.JobBacklog(self.job_backlog_size)
         self.earning = 0
         self.finished_job = []
-        self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
+        self.avail_slot = np.ones(
+            (self.time_horizon, self.num_res)) * self.res_slot
         self.running_job = []
         self.request_job = None
 
@@ -82,43 +89,50 @@ class Machine:
         if self.request_job is not None:
             return self.policy(self.request_job)
         return 0
-    
-    
-    def drl_bid(self,job=Job.Job()):
-        return self.action*(np.dot(job.res_vec, self.cost_vector))* job.len
-        
-    def set_action(self,action=1):
+
+    def drl_bid(self, job=Job.Job()):
+        return self.action*(np.dot(job.res_vec, self.cost_vector)) * job.len
+
+    def set_action(self, action=1):
         self.action = action
-    
+
     def fixed(self, job=Job.Job()):
         return np.dot(job.res_vec, self.cost_vector)
+
     def clear_job(self):
         self.request_job = None
+
     def observe(self):
         if self.request_job is not None:
-            machine_obs = {'avail_slot':self.avail_slot, 'request_job':self.request_job.observe()}
-        machine_obs = {'avail_slot':self.avail_slot, 'request_job':None}
+            machine_obs = {'avail_slot': self.avail_slot,
+                           'request_job': self.request_job.observe()}
+            return machine_obs
+        machine_obs = {'avail_slot': self.avail_slot, 'request_job': {'res_vec': [0, 0], 'len': 0,
+                                                                      'priority': 0}}
         return machine_obs
-        
+
     def fixed_norm(self, job=Job.Job(), var=0.2):
         return (
             (np.dot(job.res_vec, self.cost_vector) + var * np.random.normal())
             * job.len
             * job.priority
         )
-    def request_auction(self,job=Job.Job()):
+
+    def request_auction(self, job=Job.Job()):
         self.request_job = job
     # async allocate_job, not used
+
     def can_allocate(self, job=Job.Job()):
         """
         Check if the Job can be allocated to this Machine
         """
         allocated = False
-        new_avail_res = self.avail_slot[0 : job.len, :]- job.res_vec
+        new_avail_res = self.avail_slot[0: job.len, :] - job.res_vec
         if np.all(new_avail_res[:] >= 0):
             allocated = True
         return allocated
     # async allocate_job, not used
+
     def can_allocate_async(self, job=Job.Job()):
         """
         Check if the Job can be allocated to this Machine
@@ -126,21 +140,21 @@ class Machine:
         allocated = False
 
         for i in range(0, self.time_horizon - job.len):
-            new_avail_res = self.avail_slot[i : i + job.len, :] - job.res_vec
+            new_avail_res = self.avail_slot[i: i + job.len, :] - job.res_vec
             if np.all(new_avail_res[:] >= 0):
                 allocated = True
                 break
         return allocated
-    
+
     def allocate_job(self, job=Job.Job()):
         """
         Allocate the Job to this Machine
         """
         allocated = False
-        new_avail_res = self.avail_slot[0 : job.len, :]- job.res_vec
+        new_avail_res = self.avail_slot[0: job.len, :] - job.res_vec
         if np.all(new_avail_res[:] >= 0):
             allocated = True
-            self.avail_slot[0 : job.len] = new_avail_res
+            self.avail_slot[0: job.len] = new_avail_res
             job.start(self.current_time)
             self.running_job.append(job)
             assert job.start_time != -1
@@ -148,6 +162,7 @@ class Machine:
             assert job.finish_time > job.start_time
         return allocated
     # async allocate job, not used
+
     def allocate_job_async(self, job=Job.Job()):
         """
         Allocate the Job to this Machine
@@ -155,11 +170,11 @@ class Machine:
         allocated = False
 
         for i in range(0, self.time_horizon - job.len):
-            new_avail_res = self.avail_slot[i : i + job.len, :] - job.res_vec
+            new_avail_res = self.avail_slot[i: i + job.len, :] - job.res_vec
             if np.all(new_avail_res[:] >= 0):
                 allocated = True
 
-                self.avail_slot[i : i + job.len] = new_avail_res
+                self.avail_slot[i: i + job.len] = new_avail_res
                 job.start(self.current_time + i)
 
                 self.running_job.append(job)
@@ -330,8 +345,8 @@ class Cluster:
         Purpose:
         """
         for i in range(num):
-            bias_r = np.random.randint(-self.bias_r, self.bias_r,self.num_res)
-            bias_c = np.random.randint(-self.bias_c, self.bias_c,self.num_res)
+            bias_r = np.random.randint(-self.bias_r, self.bias_r, self.num_res)
+            bias_c = np.random.randint(-self.bias_c, self.bias_c, self.num_res)
             self.add_machine(
                 res_slot=self.machine_average_res_vec + bias_r,
                 cost_vector=self.machine_average_cost_vec + bias_c,
@@ -347,14 +362,16 @@ class Cluster:
 
     def observe(self):
         return [machine.observe() for machine in self.machines]
-    
+
     def clear_job(self):
         for machine in self.machines:
             machine.clear_job()
+
     def reset(self):
         self.current_time = 0
         for machine in self.machines:
             machine.reset()
+
     def get_machine(self, machine_id):
         return self.machines[machine_id]
 
@@ -368,7 +385,6 @@ class Cluster:
             )
             machine.show_available_slot()
         print(table)
-        
 
 
 class Bids:
@@ -377,7 +393,6 @@ class Bids:
         self.job = job
         self.can_allocate = []
         self.bids = []
-        
 
     def get_bids(self):
         for machine in self.can_allocate:
@@ -388,7 +403,7 @@ class Bids:
             if machine.can_allocate(self.job):
                 machine.request_auction(self.job)
                 self.can_allocate.append(machine)
-            
+
     def __str__(self):
         table = prettytable.PrettyTable(
             ["Machine " + str(machine.id) for machine in self.machines]
@@ -435,7 +450,8 @@ class MachineRestrict:
                     0, self.cluster.number - self.max_machines
                 )
                 t = np.random.randint(self.min_machines, self.max_machines)
-                array = np.arange(min_machine_num, min_machine_num + self.max_machines+1)
+                array = np.arange(
+                    min_machine_num, min_machine_num + self.max_machines+1)
                 np.random.shuffle(array)
                 # TODO 限制机器的数量,验证是否有空槽位
                 job.restrict_machines = array[:t]
@@ -443,7 +459,8 @@ class MachineRestrict:
         return collection
 
     def show(self):
-        table = prettytable.PrettyTable(["Job Id", "Enter Time", "Restrict Machine"])
+        table = prettytable.PrettyTable(
+            ["Job Id", "Enter Time", "Restrict Machine"])
         for jobs in self.collection:
             for job in jobs:
                 table.add_row([job.id, job.enter_time, job.restrict_machines])

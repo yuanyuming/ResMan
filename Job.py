@@ -13,6 +13,8 @@ from sympy import false, true
 import numpy as np
 
 # 定义一个类，表示任务分配的参数
+
+
 class JobDistribution:
     # 初始化方法，接受以下参数：
     # max_job_vec: 一个列表，表示每种资源的最大任务数量
@@ -26,24 +28,26 @@ class JobDistribution:
         job_small_chance=0.8,
         job_priority_range=[1, 5],
     ):
-        self.num_res = len(max_job_vec) # 资源的种类数
-        self.max_nw_size = max_job_vec # 每种资源的最大任务数量
-        self.max_job_len = max_job_len # 任务的最大时长
+        self.num_res = len(max_job_vec)  # 资源的种类数
+        self.max_nw_size = max_job_vec  # 每种资源的最大任务数量
+        self.max_job_len = max_job_len  # 任务的最大时长
 
-        self.job_small_chance = job_small_chance # 任务是小任务的概率
+        self.job_small_chance = job_small_chance  # 任务是小任务的概率
 
-        self.job_len_big_lower = int(max_job_len * 2 / 3) # 大任务的最小时长
-        self.job_len_big_upper = max_job_len # 大任务的最大时长
+        self.job_len_big_lower = int(max_job_len * 2 / 3)  # 大任务的最小时长
+        self.job_len_big_upper = max_job_len  # 大任务的最大时长
 
-        self.job_len_small_lower = 1 # 小任务的最小时长
-        self.job_len_small_upper = int(max_job_len / 5) # 小任务的最大时长
+        self.job_len_small_lower = 1  # 小任务的最小时长
+        self.job_len_small_upper = int(max_job_len / 5)  # 小任务的最大时长
 
-        self.dominant_res_lower = np.divide(np.array(max_job_vec), 2) # 占主导地位的资源的最小请求量
-        self.dominant_res_upper = max_job_vec # 占主导地位的资源的最大请求量
+        self.dominant_res_lower = np.divide(
+            np.array(max_job_vec), 2)  # 占主导地位的资源的最小请求量
+        self.dominant_res_upper = max_job_vec  # 占主导地位的资源的最大请求量
 
-        self.other_res_lower = 1 # 其他资源的最小请求量
-        self.other_res_upper = np.divide(np.array(max_job_vec), 5) # 其他资源的最大请求量
-        self.priority_range = job_priority_range # 任务的优先级范围
+        self.other_res_lower = 1  # 其他资源的最小请求量
+        self.other_res_upper = np.divide(
+            np.array(max_job_vec), 5)  # 其他资源的最大请求量
+        self.priority_range = job_priority_range  # 任务的优先级范围
 
     # 定义一个方法，返回类的字符串表示
     def __str__(self) -> str:
@@ -56,40 +60,42 @@ class JobDistribution:
     # 定义一个方法，返回一个正态分布生成的任务时长和资源请求量
     def normal_dist(self):
         # NOTE - 新任务时长
-        nw_len = np.random.randint(1, self.max_job_len + 1) # 随机生成一个整数作为任务时长
+        nw_len = np.random.randint(1, self.max_job_len + 1)  # 随机生成一个整数作为任务时长
 
-        nw_size = np.zeros(self.num_res) # 创建一个零向量作为资源请求量
+        nw_size = np.zeros(self.num_res)  # 创建一个零向量作为资源请求量
 
         for i in range(self.num_res):
-            nw_size[i] = np.random.randint(1, self.max_nw_size[i] + 1) # 随机生成每种资源的请求量
-        
-        return nw_len, nw_size # 返回任务时长和资源请求量
+            nw_size[i] = np.random.randint(
+                1, self.max_nw_size[i] + 1)  # 随机生成每种资源的请求量
+
+        return nw_len, nw_size  # 返回任务时长和资源请求量
 
     # 定义一个方法，返回一个双峰分布生成的任务时长和资源请求量
     def bi_model_dist(self):
         # NOTE - 新任务时长
-        if np.random.rand() < self.job_small_chance: # 如果随机数小于小任务概率，则生成一个小任务
+        if np.random.rand() < self.job_small_chance:  # 如果随机数小于小任务概率，则生成一个小任务
             nw_len = np.random.randint(
                 self.job_len_small_lower, self.job_len_small_upper + 1
-            ) # 随机生成一个整数作为小任务时长
-        else: # 否则生成一个大任务
-            nw_len = np.random.randint(self.job_len_big_lower, self.job_len_big_upper) # 随机生成一个整数作为大任务时长
+            )  # 随机生成一个整数作为小任务时长
+        else:  # 否则生成一个大任务
+            nw_len = np.random.randint(
+                self.job_len_big_lower, self.job_len_big_upper)  # 随机生成一个整数作为大任务时长
 
         # NOTE - 任务资源请求量
-        dominant_res = np.random.randint(0, self.num_res) # 随机选择一种资源作为占主导地位的资源
-        nw_size = np.zeros([self.num_res]) # 创建一个零向量作为资源请求量
-        
+        dominant_res = np.random.randint(0, self.num_res)  # 随机选择一种资源作为占主导地位的资源
+        nw_size = np.zeros([self.num_res])  # 创建一个零向量作为资源请求量
+
         for i in range(self.num_res):
-            if i == dominant_res: # 如果是占主导地位的资源，则生成较高的请求量
+            if i == dominant_res:  # 如果是占主导地位的资源，则生成较高的请求量
                 nw_size[i] = np.random.randint(
                     self.dominant_res_lower[i], self.dominant_res_upper[i] + 1
                 )
-            else: # 如果是其他资源，则生成较低的请求量
+            else:  # 如果是其他资源，则生成较低的请求量
                 nw_size[i] = np.random.randint(
                     self.other_res_lower, self.other_res_upper[i] + 1
                 )
 
-        return nw_len, nw_size # 返回任务时长和资源请求量
+        return nw_len, nw_size  # 返回任务时长和资源请求量
 
 
 # 导入numpy库
@@ -158,7 +164,7 @@ class Job:
     # 定义一个方法，返回任务的观察信息，即资源需求向量、时长、优先级和限制机器列表
     def observe(self):
         job_obs = {'res_vec': self.res_vec, 'len': self.len,
-                   'priority': self.priority, 'restrict_machines': self.restrict_machines}
+                   'priority': self.priority}
         return job_obs
 
     # 定义一个方法，返回任务的请求信息，即id、资源需求向量、时长、优先级和限制机器列表
@@ -168,8 +174,9 @@ class Job:
     # 定义一个方法，设置任务的开始时间，并根据时长计算结束时间，并更新效用值为预算减去支付金额除以时长乘以优先级（暂定）
     def start(self, start_time):
         self.start_time = start_time
-        self.finish(start_time + self.len) # 设置结束时间
-        self.utility = (self.budget - self.pay) / self.len * self.priority # 更新效用值
+        self.finish(start_time + self.len)  # 设置结束时间
+        self.utility = (self.budget - self.pay) / \
+            self.len * self.priority  # 更新效用值
 
     # 定义一个方法，设置任务的结束时间
     def finish(self, finish_time):
@@ -188,40 +195,40 @@ class Job:
             self.start_time,
             self.finish_time,
             self.utility,
-         ]
+        ]
 
     # 定义一个方法，打印出任务信息（用于展示）
     def show(self):
-         table = prettytable.PrettyTable(
-             [
-                 "Job Id",
-                 "Res Vector",
-                 "Job Len",
-                 "Priority",
-                 "Budget",
-                 "Restrict Machines",
-                 "Enter Time",
-                 "Start Time",
-                 "Finish Time",
-                 "Utility",
-             ]
-         )
-         table.add_row(self.to_list())
-         table.set_style(prettytable.MSWORD_FRIENDLY)
-         table.title = "Job Info"
-         print(table)
-         print("Job Vector")
-         print(self.job_vec)
+        table = prettytable.PrettyTable(
+            [
+                "Job Id",
+                "Res Vector",
+                "Job Len",
+                "Priority",
+                "Budget",
+                "Restrict Machines",
+                "Enter Time",
+                "Start Time",
+                "Finish Time",
+                "Utility",
+            ]
+        )
+        table.add_row(self.to_list())
+        table.set_style(prettytable.MSWORD_FRIENDLY)
+        table.title = "Job Info"
+        print(table)
+        print("Job Vector")
+        print(self.job_vec)
 
     # 定义一个方法，设置任务的支付金额（暂未实现）
     def get_pay(self, pay=0):
-         self.pay = pay
+        self.pay = pay
 
     # 定义一个方法，返回任务的字符串表示（用于调试）
     def __str__(self):
-         return "id:{},Res Vector:{},Job Len:{},Restrict Machine:{}".format(
-             self.id, self.res_vec, self.len, self.restrict_machines
-         )
+        return "id:{},Res Vector:{},Job Len:{},Restrict Machine:{}".format(
+            self.id, self.res_vec, self.len, self.restrict_machines
+        )
 
 
 class JobCollection:
@@ -233,7 +240,7 @@ class JobCollection:
         duration=10,
         job_dist=JobDistribution().bi_model_dist,
         job_priority_dist=JobDistribution().priority_dist,
-        averge_cost_vec = [4,6]
+        averge_cost_vec=[4, 6]
     ):
         self.average = average
         self.id_start = id_start
@@ -256,7 +263,8 @@ class JobCollection:
         collection = []
         for id in range(self.now_id, self.now_id + poi):
             job_len, job_res_vec = self.Dist()
-            job = Job(job_res_vec, job_len, id, self.enter_time, self.priority(), self.average_cost_vec)
+            job = Job(job_res_vec, job_len, id, self.enter_time,
+                      self.priority(), self.average_cost_vec)
             job.enter_time = self.enter_time
             job.id = id
             job.priority = self.priority()
