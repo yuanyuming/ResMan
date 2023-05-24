@@ -136,3 +136,15 @@ def test_Quote():
 
 def test_restrict():
     import Environment
+
+
+def test_machine_observe():
+    import Machine
+    import Environment
+    machine = Machine.Machine()
+    machine.reset()
+    print(machine.observe())
+    env = Environment.VehicleJobSchedulingEnvACE()
+    env.reset()
+    env.step(0)
+    env.observe()

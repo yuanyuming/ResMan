@@ -1,7 +1,7 @@
 import Environment
 
+
 def test_step():
-    
     import numpy as np
 
     para = Environment.VehicleJobSchedulingParameters()
@@ -16,8 +16,9 @@ def test_step():
 
 
 def test_env_single_para():
-    import Environment_single
     import numpy as np
+
+    import Environment_single
 
     para = Environment_single.Parameters()
     machine = para.machine
@@ -57,28 +58,32 @@ def test_job_show():
 
 def test_env_action():
     import Environment
+
     env = Environment.VehicleJobSchedulingEnv()
-    action = env.action_space('0')
+    action = env.action_space("0")
     print("action space:")
     print(action.sample())
 
 
 def test_env_obs():
     from .. import Environment
+
     env = Environment.VehicleJobSchedulingEnv()
-    obs = env.observation_space('0')
+    obs = env.observation_space("0")
     print("observation space:")
     print(obs.sample())
 
 
 def init_env():
     import Environment
+
     env = Environment.VehicleJobSchedulingEnv()
     return env
 
 
 def get_jobs_iter():
     import Environment
+
     para = Environment.VehicleJobSchedulingParameters()
     return para.job_iterator
 
@@ -102,8 +107,7 @@ def test_env_step():
         if done:
             env.parameters.cluster.step()
             continue
-        actions = {agent: env.action_space(
-            agent).sample() for agent in env.agents}
+        actions = {agent: env.action_space(agent).sample() for agent in env.agents}
         env.step(actions)
         env.parameters.auction_type.auction(job)
         if i == 1000:
@@ -114,13 +118,16 @@ def test_env_step():
 def test_env():
     env = init_env()
     from pettingzoo.test import parallel_api_test
+
     parallel_api_test(env, num_cycles=1000)
 
 
 def test_env_benchmark():
     import random
     import time
+
     import numpy as np
+
     env = init_env()
     print("Starting performance benchmark")
     cycles = 0
@@ -131,8 +138,7 @@ def test_env_benchmark():
     rewards = np.zeros(len(env.agents))
 
     while True:
-        actions = {agent: env.action_space(
-            agent).sample() for agent in env.agents}
+        actions = {agent: env.action_space(agent).sample() for agent in env.agents}
         obs, reward, termination, truncation, info = env.step(actions)
         turn += 1
         rewards += np.array(list(reward.values()))
@@ -159,6 +165,7 @@ def test_job_per_step():
 
 def test_env_agent_selector():
     import Environment
+
     env = Environment.VehicleJobSchedulingEnvACE()
     env.reset()
     selector = env._agent_selector()
@@ -169,26 +176,26 @@ def test_env_agent_selector():
 
 
 def test_ace_env():
-    import Environment
     from pettingzoo.test import api_test
+
+    import Environment
+
     env = Environment.VehicleJobSchedulingEnvACE()
     api_test(env, num_cycles=1000)
 
 
 def test_ace_env_step():
     import Environment
+
     env = Environment.VehicleJobSchedulingEnvACE()
     env.reset()
-    for agent in env.agent_iter(10000):
-
-        action = env.action_space(
-            agent).sample()
-        env.step(action)
-    env.render()
+    for agent in env.agent_iter(100):
+        print(agent)
 
 
 def test_ace_env_observe():
     import Environment
+
     env = Environment.VehicleJobSchedulingEnvACE()
     env.reset()
     ob, *_ = env.last()
