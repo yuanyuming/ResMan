@@ -1,7 +1,9 @@
+from collections import OrderedDict
+
 import numpy as np
 import prettytable
+
 import Job
-from collections import OrderedDict
 
 
 class SlotShow:
@@ -389,11 +391,17 @@ class Cluster:
 
     def show(self):
         table = prettytable.PrettyTable(
-            ["id", "Resource Slot", "Reward", "Cost Vector"]
+            ["id", "Resource Slot", "Reward", "Cost Vector", "Running Job"]
         )
         for machine in self.machines:
             table.add_row(
-                [machine.id, machine.res_slot, machine.reward, machine.cost_vector]
+                [
+                    machine.id,
+                    machine.res_slot,
+                    machine.reward,
+                    machine.cost_vector,
+                    machine.running_job,
+                ]
             )
             machine.show_available_slot()
         print(table)

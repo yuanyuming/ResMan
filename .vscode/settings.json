@@ -115,5 +115,12 @@
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
     },
-  },
+},
+"git.autofetch": true,
+"git.autoStash": true,
+"git.enableSmartCommit": true,
+"git.fetchOnPull": true,
+"git.followTagsWhenSync": true,
+"git.pruneOnFetch": false,
+"python.testing.pytestPath": "/home/yuan/ResMan/man/bin/pytest",
 }

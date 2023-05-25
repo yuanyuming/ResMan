@@ -180,7 +180,9 @@ def test_ace_env():
 
     import Environment
 
+    # env = Environment.VehicleJobSchedulingEnvACE(render_mode="human")
     env = Environment.VehicleJobSchedulingEnvACE()
+    env.reset()
     api_test(env, num_cycles=1000)
 
 
@@ -190,7 +192,7 @@ def test_ace_env_step():
     env = Environment.VehicleJobSchedulingEnvACE()
     env.reset()
     for agent in env.agent_iter(100):
-        print(agent)
+        env.step(env.action_space(agent).sample())
 
 
 def test_ace_env_observe():
