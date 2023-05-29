@@ -1,6 +1,6 @@
 from pettingzoo.utils.wrappers import BaseWrapper
 from tianshou.data import Collector
-from tianshou.env import DummyVectorEnv, PettingZooEnv
+from tianshou.env import ContinuousToDiscrete, DummyVectorEnv, PettingZooEnv
 from tianshou.policy import DQNPolicy, MultiAgentPolicyManager, RandomPolicy
 
 import Environment
@@ -12,11 +12,13 @@ if __name__ == "__main__":
     env = BaseWrapper(env)
     agents = env.num_agents
     env = PettingZooEnv(env)
+    policies = MultiAgentPolicyManager([RandomPolicy() for _ in range(10)], env)
+    env = ContinuousToDiscrete(env, action_per_dim=10)
+    env = DummyVectorEnv([lambda: env])
     # action_space = env.action_spaces[env.agents[0]]
     # 3. Create policy
-    policies = MultiAgentPolicyManager([RandomPolicy() for _ in range(10)], env)
+
     # Runtime Environment
-    env = DummyVectorEnv([lambda: env])
 
     # 4. Create collector
     collector = Collector(policies, env)

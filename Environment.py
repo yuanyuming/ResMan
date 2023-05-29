@@ -314,6 +314,9 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         self.round_jobs = None
         self.pay = [0 for _ in range(len(self.agents))]
 
+    def action_mask(self, agent: AgentID) -> ndarray:
+        return np.array([1])
+
     def observe(self, agent: AgentID) -> Any:
         return self.observation[agent]
 
@@ -412,7 +415,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         if self.round_start and self.__agent_selector.is_last():
             self.round_start = False
 
-        self.parameters.cluster.machines[int(agent[8:])].action = float(action[0])
+        self.parameters.cluster.machines[int(agent[8:])].action = float(action)
 
         if self.__agent_selector.is_last():
             # self._clear_rewards()
