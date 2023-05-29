@@ -6,6 +6,7 @@ from urllib import request
 import gymnasium as gym
 import numpy as np
 import pettingzoo
+import prettytable
 from gymnasium import spaces
 from gymnasium.spaces import Space
 from numpy import ndarray
@@ -32,7 +33,7 @@ class VehicleJobSchedulingParameters:
         )
         self.job_dist = self.job_distribution.bi_model_dist
         # Job Collection Config
-        self.average_per_slot = 3
+        self.average_per_slot = 100
         self.duration = 10
         self.max_job_len = 10
         self.job_small_chance = 0.8
@@ -48,7 +49,7 @@ class VehicleJobSchedulingParameters:
         )
 
         # Machine Config
-        self.machine_numbers = 5
+        self.machine_numbers = 10
         self.job_backlog_size = 10
         self.job_slot_size = 10
         self.num_res = len(self.max_job_vec)
@@ -71,8 +72,8 @@ class VehicleJobSchedulingParameters:
         )
 
         # Machine Restrict Config
-        self.max_machines = 4
-        self.min_machines = 2
+        self.max_machines = 5
+        self.min_machines = 3
 
         # Machine Restrict
         self.machine_restrictions = Machine.MachineRestrict(
@@ -317,6 +318,11 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         return self.observation[agent]
 
     def render(self):
+        if self.round_start and self.__agent_selector.is_last():
+            table = prettytable.PrettyTable([agent for agent in self.agents])
+            table.add_row([self.pay[int(agent[8:])] for agent in self.agents])
+            print(table)
+
         if self.auction_start:
             print(self.agent_selection + " is biding")
         if self.__agent_selector.is_last():
@@ -381,27 +387,35 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
     def round_start_get_pay(self):
         pass
 
+    def set_truncations(self):
+        # self.truncations = {}
+        pass
+
     def round_end(self):
         self.pay = self.parameters.cluster.step()
         # print("Current time:", self.parameters.cluster.current_time)
         self.parameters.cluster.clear_job()
 
     def step(self, action):
+        if action is None:
+            return
         agent = self.agent_selection
         if not self.round_start:
             self._clear_rewards()
+            self._cumulative_rewards[agent] = 0
         if self.round_start:
-            print(agent, "get pay", self.pay[int(agent[8:])])
+            # print(agent, "get pay", self.pay[int(agent[8:])])
             self._clear_rewards()
             self.rewards[agent] = self.pay[int(agent[8:])]
+            self._cumulative_rewards[agent] = 0
             self._accumulate_rewards()
         if self.round_start and self.__agent_selector.is_last():
             self.round_start = False
 
         self.parameters.cluster.machines[int(agent[8:])].action = float(action[0])
 
-        if not self.round_start and self.__agent_selector.is_last():
-            self._clear_rewards()
+        if self.__agent_selector.is_last():
+            # self._clear_rewards()
             # print(self.request_job)
             self.auction()
 

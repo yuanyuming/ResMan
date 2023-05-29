@@ -1,3 +1,5 @@
+from typing import Optional
+
 import Environment
 
 
@@ -180,10 +182,17 @@ def test_ace_env():
 
     import Environment
 
-    # env = Environment.VehicleJobSchedulingEnvACE(render_mode="human")
-    env = Environment.VehicleJobSchedulingEnvACE()
+    env = Environment.VehicleJobSchedulingEnvACE(render_mode="human")
+    # env = Environment.VehicleJobSchedulingEnvACE()
     env.reset()
     api_test(env, num_cycles=1000)
+
+
+def test_aec_preformce():
+    env = init_env()
+    from pettingzoo.test import performance_benchmark
+
+    performance_benchmark(env)
 
 
 def test_ace_env_step():
@@ -202,3 +211,60 @@ def test_ace_env_observe():
     env.reset()
     ob, *_ = env.last()
     print(ob)
+
+
+import pettingzoo
+from gymnasium import spaces
+from pettingzoo import AECEnv
+from pettingzoo.utils import agent_selector
+
+
+class reward_class(pettingzoo.AECEnv):
+    def __init__(self):
+        super().__init__()
+        self.agents = ["agent_0", "agent_1"]
+        self.possible_agents = self.agents[:]
+        self.observation_spaces = {
+            "agent_0": spaces.Discrete(1),
+            "agent_1": spaces.Discrete(1),
+        }
+        self.action_spaces = {
+            "agent_0": spaces.Discrete(1),
+            "agent_1": spaces.Discrete(1),
+        }
+        self.rewards = {"agent_0": 0, "agent_1": 0}
+        self.dones = {"agent_0": False, "agent_1": False}
+        self._agent_selector = agent_selector(self.agents)
+        self.observation = {"agent_0": 0, "agent_1": 0}
+        self.truncations = {"agent_0": False, "agent_1": False}
+        self.terminations = {"agent_0": False, "agent_1": False}
+        self.agent_selection = self._agent_selector.next()
+        self._cumulative_rewards = {"agent_0": 0, "agent_1": 0}
+        self.infos = {"agent_0": {}, "agent_1": {}}
+
+    def reset(self, seed=None, return_info=False, options=None) -> None:
+        self.rewards = {"agent_0": 0, "agent_1": 0}
+        self.dones = {"agent_0": False, "agent_1": False}
+        self.truncations = {"agent_0": False, "agent_1": False}
+        self.terminations = {"agent_0": False, "agent_1": False}
+
+    def step(self, action) -> None:
+        agent = self.agent_selection
+
+        self._clear_rewards()
+        self.rewards[agent] = 1
+        self.observation[agent] = int(action)
+        self.agent_selection = self._agent_selector.next()
+        self._cumulative_rewards[agent] = 0
+        self._accumulate_rewards()
+        print(self._cumulative_rewards)
+
+    def observe(self, agent: str):
+        return self.observation[agent]
+
+
+def test_reward():
+    env = reward_class()
+    from pettingzoo.test import api_test
+
+    api_test(env, num_cycles=10)
