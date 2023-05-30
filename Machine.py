@@ -60,12 +60,13 @@ class Machine:
         self.reward = 0
         self.earning = 0
         self.finished_job = []
+        self.finished_job_num = 0
         self.cost_vector = cost_vector
         self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
         self.res_slot_time = self.avail_slot
         self.running_job = []
         # Bid
-        self.request_job = Job.Job()
+        self.request_job = None
         self.policy = self.drl_bid
         self.action = 1
         self.bid = 0
@@ -213,6 +214,7 @@ class Machine:
             if job.finish_time <= self.current_time:
                 self.reward += job.pay
                 self.finished_job.append(job)
+                self.finished_job_num += 1
                 self.running_job.remove(job)
         self.current_time += 1
         self.earning += self.reward
@@ -373,6 +375,9 @@ class Cluster:
         reward = [machine.step() for machine in self.machines]
         self.current_time += 1
         return reward
+
+    def get_finish_job_total(self):
+        return sum([machine.finished_job_num for machine in self.machines])
 
     def observe(self):
         return [machine.observe() for machine in self.machines]

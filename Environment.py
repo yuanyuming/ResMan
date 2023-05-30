@@ -88,10 +88,43 @@ class VehicleJobSchedulingParameters:
             self.cluster, self.allocation_mechanism
         )
 
+        # Runtime Configure
+        self.total_job = 0
+        self.total_job_restrict = 1000
+        self.finished_job = 0
+        self.finished_job_restrict = 10000
+        self.time_step = 0
+        self.time_step_restrict = 1000
+        self.stop_condition = self.stop_condition_total_job
+
     def reset(self):
+        """
+        Reset the environment
+        """
         self.machine_restrictions.reset()
         self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
         self.cluster.reset()
+
+    def stop_condition_total_job(self):
+        """
+        Check if the total job is enough
+        """
+
+        return self.total_job >= self.total_job_restrict
+
+    def stop_condition_finished_job(self):
+        """
+        Check if the finished job is enough
+        """
+        self.finished_job = self.cluster.get_finish_job_total()
+        return self.finished_job >= self.finished_job_restrict
+
+    def stop_condition_time_step(self):
+        """
+        Check if the time step is enough
+        """
+        self.time_step = self.cluster.current_time
+        return self.time_step >= self.time_step_restrict
 
 
 class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
@@ -314,9 +347,6 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         self.round_jobs = None
         self.pay = [0 for _ in range(len(self.agents))]
 
-    def action_mask(self, agent: AgentID) -> ndarray:
-        return np.array([1])
-
     def observe(self, agent: AgentID) -> Any:
         return self.observation[agent]
 
@@ -390,16 +420,24 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
     def round_start_get_pay(self):
         pass
 
-    def set_truncations(self):
-        # self.truncations = {}
-        pass
-
     def round_end(self):
         self.pay = self.parameters.cluster.step()
         # print("Current time:", self.parameters.cluster.current_time)
+        self.finished_job = self.parameters.cluster.get_finish_job_total()
+        self.parameters.finished_job = self.finished_job
+        self.parameters.total_job = self.total_job
+        self.parameters.time_step = self.parameters.cluster.current_time
+        if self.parameters.stop_condition():
+            self.terminations = {agent: True for agent in self.agents}
+            # print("Finished!!!")
         self.parameters.cluster.clear_job()
 
     def step(self, action):
+        if (
+            self.terminations[self.agent_selection]
+            or self.truncations[self.agent_selection]
+        ):
+            return self._was_dead_step(action)
         if action is None:
             return
         agent = self.agent_selection
