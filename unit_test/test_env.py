@@ -191,8 +191,9 @@ def test_ace_env():
 def test_aec_preformce():
     env = Environment.VehicleJobSchedulingEnvACE()
     from pettingzoo.test import performance_benchmark
+    import cProfile
 
-    performance_benchmark(env)
+    cProfile.run("performance_benchmark(env)")
 
 
 def test_ace_env_step():

@@ -22,7 +22,7 @@ if __name__ == "__main__":
     agents = env.num_agents
     env = PettingZooEnv(env)
     policies = MultiAgentPolicyManager([RandomPolicy() for _ in range(10)], env)
-    env = SubprocVectorEnv([lambda: env for _ in range(10)])
+    env = SubprocVectorEnv([lambda: env for _ in range(1000)])
     # env = DummyVectorEnv([lambda: env for _ in range(10)])
     # action_space = env.action_spaces[env.agents[0]]
     # 3. Create policy
@@ -32,5 +32,5 @@ if __name__ == "__main__":
     # 4. Create collector
     collector = Collector(policies, env)
     # 5. Execute one episode
-    result = collector.collect(n_episode=100, random=True)
+    result = collector.collect(n_episode=1000, random=True)
     print(f"Collector return: {result}")

@@ -34,7 +34,7 @@ class VehicleJobSchedulingParameters:
         self.job_dist = self.job_distribution.bi_model_dist
         # Job Collection Config
         self.average_per_slot = 100
-        self.duration = 10
+        self.duration = 30
         self.max_job_len = 10
         self.job_small_chance = 0.8
         self.job_average_cost_vec = [18, 22]
@@ -90,7 +90,7 @@ class VehicleJobSchedulingParameters:
 
         # Runtime Configure
         self.total_job = 0
-        self.total_job_restrict = 1000
+        self.total_job_restrict = 10000
         self.finished_job = 0
         self.finished_job_restrict = 10000
         self.time_step = 0

@@ -1,16 +1,13 @@
 """
 定义任务Job相关结构
 """
-from matplotlib import collections
-import prettytable
-import numpy as np
-from gymnasium import spaces
-from scipy.stats import poisson
-from sympy import false, true
 from collections import OrderedDict
 
 # 导入numpy库
 import numpy as np
+import prettytable
+from gymnasium import spaces
+from scipy.stats import poisson
 
 # 定义一个类，表示任务分配的参数
 
@@ -40,13 +37,11 @@ class JobDistribution:
         self.job_len_small_lower = 1  # 小任务的最小时长
         self.job_len_small_upper = int(max_job_len / 5)  # 小任务的最大时长
 
-        self.dominant_res_lower = np.divide(
-            np.array(max_job_vec), 2)  # 占主导地位的资源的最小请求量
+        self.dominant_res_lower = np.divide(np.array(max_job_vec), 2)  # 占主导地位的资源的最小请求量
         self.dominant_res_upper = max_job_vec  # 占主导地位的资源的最大请求量
 
         self.other_res_lower = 1  # 其他资源的最小请求量
-        self.other_res_upper = np.divide(
-            np.array(max_job_vec), 5)  # 其他资源的最大请求量
+        self.other_res_upper = np.divide(np.array(max_job_vec), 5)  # 其他资源的最大请求量
         self.priority_range = job_priority_range  # 任务的优先级范围
 
     # 定义一个方法，返回类的字符串表示
@@ -65,8 +60,7 @@ class JobDistribution:
         nw_size = np.zeros(self.num_res)  # 创建一个零向量作为资源请求量
 
         for i in range(self.num_res):
-            nw_size[i] = np.random.randint(
-                1, self.max_nw_size[i] + 1)  # 随机生成每种资源的请求量
+            nw_size[i] = np.random.randint(1, self.max_nw_size[i] + 1)  # 随机生成每种资源的请求量
 
         return nw_len, nw_size  # 返回任务时长和资源请求量
 
@@ -79,7 +73,8 @@ class JobDistribution:
             )  # 随机生成一个整数作为小任务时长
         else:  # 否则生成一个大任务
             nw_len = np.random.randint(
-                self.job_len_big_lower, self.job_len_big_upper)  # 随机生成一个整数作为大任务时长
+                self.job_len_big_lower, self.job_len_big_upper
+            )  # 随机生成一个整数作为大任务时长
 
         # NOTE - 任务资源请求量
         dominant_res = np.random.randint(0, self.num_res)  # 随机选择一种资源作为占主导地位的资源
@@ -101,6 +96,7 @@ class JobDistribution:
 # 导入numpy库
 
 # 定义一个类，表示一个任务
+
 
 class Job:
     """
@@ -155,7 +151,12 @@ class Job:
 
     # 定义一个方法，根据每种资源的平均成本和方差计算任务的预算，并保证预算不为负数
     def calculate_budget(self, average_cost_vec, var=0.3):
-        return max(0, (np.dot(self.res_vec, average_cost_vec)+var*np.random.normal()) * self.len*self.priority)
+        return max(
+            0,
+            (np.dot(self.res_vec, average_cost_vec) + var * np.random.normal())
+            * self.len
+            * self.priority,
+        )
 
     # 定义一个方法，从文件中读取任务信息（暂未实现）
     def read_job_from_file(self):
@@ -163,8 +164,9 @@ class Job:
 
     # 定义一个方法，返回任务的观察信息，即资源需求向量、时长、优先级和限制机器列表
     def observe(self):
-        job_obs = OrderedDict({"res_vec": self.res_vec, "len": self.len,
- "priority": self.priority})
+        job_obs = OrderedDict(
+            {"res_vec": self.res_vec, "len": self.len, "priority": self.priority}
+        )
         return job_obs
 
     # 定义一个方法，返回任务的请求信息，即id、资源需求向量、时长、优先级和限制机器列表
@@ -175,8 +177,7 @@ class Job:
     def start(self, start_time):
         self.start_time = start_time
         self.finish(start_time + self.len)  # 设置结束时间
-        self.utility = (self.budget - self.pay) / \
-            self.len * self.priority  # 更新效用值
+        self.utility = (self.budget - self.pay) / self.len * self.priority  # 更新效用值
 
     # 定义一个方法，设置任务的结束时间
     def finish(self, finish_time):
@@ -240,7 +241,7 @@ class JobCollection:
         duration=10,
         job_dist=JobDistribution().bi_model_dist,
         job_priority_dist=JobDistribution().priority_dist,
-        averge_cost_vec=[4, 6]
+        averge_cost_vec=[4, 6],
     ):
         self.average = average
         self.id_start = id_start
@@ -263,12 +264,14 @@ class JobCollection:
         collection = []
         for id in range(self.now_id, self.now_id + poi):
             job_len, job_res_vec = self.Dist()
-            job = Job(job_res_vec, job_len, id, self.enter_time,
-                      self.priority(), self.average_cost_vec)
-            job.enter_time = self.enter_time
-            job.id = id
-            job.priority = self.priority()
-            job.random_job(self.Dist)
+            job = Job(
+                job_res_vec,
+                job_len,
+                id,
+                self.enter_time,
+                self.priority(),
+                self.average_cost_vec,
+            )
             collection.append(job)
         self.enter_time += 1
         self.now_id += poi
@@ -288,11 +291,15 @@ class JobCollection:
         collections = []
         for t in range(self.duration):
             for id in range(self.now_id, self.now_id + int(poi[t])):
-                job = Job()
-                job.enter_time = self.enter_time
-                job.id = id
-                job.random_job(self.Dist)
-                job.priority = self.priority()
+                job_len, job_res_vec = self.Dist()
+                job = Job(
+                    job_res_vec,
+                    job_len,
+                    id,
+                    self.enter_time,
+                    self.priority(),
+                    self.average_cost_vec,
+                )
                 collection.append(job)
             self.enter_time += 1
             self.now_id += poi[t]
