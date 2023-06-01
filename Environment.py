@@ -240,15 +240,14 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
 
 
 class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
-    metadata = {
-        "name": "VehicleJobSchedulingEnvACE",
-        "render_modes": ["human", "ascii"],
-    }
-
     def __init__(
         self, render_mode=None, parameter=VehicleJobSchedulingParameters()
     ) -> None:
         super().__init__()
+        self.metadata = {
+            "name": "VehicleJobSchedulingEnvACE",
+            "render_modes": ["human", "ascii"],
+        }
         self.parameters = parameter
         self.render_mode = render_mode
         self.agents = [
@@ -346,6 +345,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         self.round_start = True
         self.round_jobs = None
         self.pay = [0 for _ in range(len(self.agents))]
+        return self.observation[self.agent_selection], {}
 
     def observe(self, agent: AgentID) -> Any:
         return self.observation[agent]
