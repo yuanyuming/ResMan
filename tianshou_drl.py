@@ -1,7 +1,8 @@
 from typing import Any, Dict, Optional, Union
 
 import numpy as np
-from pettingzoo.utils.wrappers import BaseWrapper, 
+import supersuit
+from pettingzoo.utils.wrappers import BaseWrapper
 from tianshou.data import Batch, Collector
 from tianshou.env import (
     ContinuousToDiscrete,
@@ -14,15 +15,13 @@ from tianshou.policy import BasePolicy, DQNPolicy, MultiAgentPolicyManager, Rand
 from tianshou.utils.net.common import Net
 
 import Environment
-import supersuit
 
 
 def get_env():
     env = Environment.VehicleJobSchedulingEnvACE()
     env = BaseWrapper(env)
     env = PettingZooEnv(env)
-    
-    
+
     return env
 
 
