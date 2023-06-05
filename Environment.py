@@ -272,50 +272,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
 
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent: AgentID) -> Space:
-        return spaces.Dict(
-            OrderedDict(
-                [
-                    (
-                        "avail_slot",
-                        spaces.Box(
-                            low=0,
-                            high=self.parameters.machine_max_res_vec,
-                            shape=(
-                                self.parameters.time_horizon,
-                                self.parameters.num_res,
-                            ),
-                            dtype=np.int8,
-                        ),
-                    ),
-                    (
-                        "request_job",
-                        spaces.Dict(
-                            OrderedDict(
-                                [
-                                    (
-                                        "res_vec",
-                                        spaces.MultiDiscrete(
-                                            self.parameters.max_job_vec
-                                        ),
-                                    ),
-                                    (
-                                        "len",
-                                        spaces.Discrete(self.parameters.max_job_len),
-                                    ),
-                                    (
-                                        "priority",
-                                        spaces.Discrete(
-                                            self.parameters.job_priority_range[1] + 1
-                                        ),
-                                    ),
-                                ]
-                            ),
-                        ),
-                    ),
-                ]
-            )
-        )
-
+        return spaces.Dict( OrderedDict( [ ( “avail_slot”, spaces.Box( low=0, high=self.parameters.machine_max_res_vec, shape=( self.parameters.time_horizon, self.parameters.num_res, ), dtype=np.int8, ), ), ( “request_res_vec”, spaces.MultiDiscrete( self.parameters.max_job_vec ), ), ( “request_len”, spaces.Discrete(self.parameters.max_job_len), ), ( “request_priority”, spaces.Discrete( self.parameters.job_priority_range[1] + 1 ), ), ] ) )
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent: AgentID) -> Space:
         return spaces.Box(low=1 / 3, high=3, shape=(1,), dtype=np.float32)
