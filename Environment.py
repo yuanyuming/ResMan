@@ -272,7 +272,38 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
 
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent: AgentID) -> Space:
-        return spaces.Dict( OrderedDict( [ ( “avail_slot”, spaces.Box( low=0, high=self.parameters.machine_max_res_vec, shape=( self.parameters.time_horizon, self.parameters.num_res, ), dtype=np.int8, ), ), ( “request_res_vec”, spaces.MultiDiscrete( self.parameters.max_job_vec ), ), ( “request_len”, spaces.Discrete(self.parameters.max_job_len), ), ( “request_priority”, spaces.Discrete( self.parameters.job_priority_range[1] + 1 ), ), ] ) )
+        obs = spaces.Dict(
+            OrderedDict(
+                [
+                    (
+                        "avail_slot",
+                        spaces.Box(
+                            low=0,
+                            high=self.parameters.machine_max_res_vec,
+                            shape=(
+                                self.parameters.time_horizon,
+                                self.parameters.num_res,
+                            ),
+                            dtype=np.int8,
+                        ),
+                    ),
+                    (
+                        "request_res_vec",
+                        spaces.MultiDiscrete(self.parameters.max_job_vec),
+                    ),
+                    (
+                        "request_len",
+                        spaces.Discrete(self.parameters.max_job_len),
+                    ),
+                    (
+                        "request_priority",
+                        spaces.Discrete(self.parameters.job_priority_range[1] + 1),
+                    ),
+                ]
+            )
+        )
+        return spaces.Dict({"observation": obs})
+
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent: AgentID) -> Space:
         return spaces.Box(low=1 / 3, high=3, shape=(1,), dtype=np.float32)
@@ -305,7 +336,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         return self.observation[self.agent_selection], {}
 
     def observe(self, agent: AgentID) -> Any:
-        return self.observation[agent]
+        return {"observation": self.observation[agent]}
 
     def render(self):
         if self.round_start and self.__agent_selector.is_last():
@@ -390,13 +421,6 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         self.parameters.cluster.clear_job()
 
     def step(self, action):
-        if (
-            self.terminations[self.agent_selection]
-            or self.truncations[self.agent_selection]
-        ):
-            return self._was_dead_step(action)
-        if action is None:
-            return
         agent = self.agent_selection
         if not self.round_start:
             self._clear_rewards()

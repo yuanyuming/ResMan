@@ -108,7 +108,18 @@ class Machine:
             machine_obs = OrderedDict(
                 [
                     ("avail_slot", np.array(self.avail_slot, dtype=np.int8)),
-                    ("request_job", self.request_job.observe()),
+                    (
+                        "request_res_vec",
+                        self.request_job.res_vec,
+                    ),
+                    (
+                        "request_len",
+                        self.request_job.len,
+                    ),
+                    (
+                        "request_priority",
+                        self.request_job.priority,
+                    ),
                 ]
             )
             return machine_obs
@@ -116,8 +127,16 @@ class Machine:
             [
                 ("avail_slot", np.array(self.avail_slot, dtype=np.int8)),
                 (
-                    "request_job",
-                    OrderedDict([("res_vec", [0, 0]), ("len", 0), ("priority", 0)]),
+                    "request_res_vec",
+                    [0, 0],
+                ),
+                (
+                    "request_len",
+                    0,
+                ),
+                (
+                    "request_priority",
+                    0,
                 ),
             ]
         )

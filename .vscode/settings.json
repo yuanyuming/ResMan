@@ -47,6 +47,7 @@
     "editor.defaultFormatter": "ms-python.black-formatter",
     "python.formatting.provider": "black",
     "python.autoComplete.extraPaths": [
+    
         "${workspaceFolder}"
     ],
     "python.analysis.extraPaths": [
@@ -110,7 +111,7 @@
     "AllAutocomplete.updateOnlyOnSave": true,
     "vsintellicode.features.python.deepLearning": "enabled",
     "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.defaultFormatter": "ms-python.python",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
@@ -123,4 +124,6 @@
 "git.followTagsWhenSync": true,
 "git.pruneOnFetch": false,
 "python.testing.pytestPath": "/home/yuan/ResMan/man/bin/pytest",
+"python.analysis.enableSyncServer": true,
+"python.analysis.pylanceLspClientEnabled": false,
 }
