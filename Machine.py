@@ -110,7 +110,7 @@ class Machine:
                     ("avail_slot", np.array(self.avail_slot, dtype=np.int8)),
                     (
                         "request_res_vec",
-                        self.request_job.res_vec,
+                        np.array(self.request_job.res_vec),
                     ),
                     (
                         "request_len",
@@ -128,7 +128,7 @@ class Machine:
                 ("avail_slot", np.array(self.avail_slot, dtype=np.int8)),
                 (
                     "request_res_vec",
-                    [0, 0],
+                    np.array([0, 0]),
                 ),
                 (
                     "request_len",

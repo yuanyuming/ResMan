@@ -1,14 +1,14 @@
 import functools
+import re
 from collections import OrderedDict
 from typing import Any, Dict, Optional, Tuple
-from urllib import request
 
-import gymnasium as gym
 import numpy as np
 import pettingzoo
 import prettytable
 from gymnasium import spaces
 from gymnasium.spaces import Space
+from gymnasium.spaces.utils import flatten, flatten_space
 from numpy import ndarray
 from pettingzoo.utils import agent_selector
 from pettingzoo.utils.env import AgentID
@@ -33,7 +33,7 @@ class VehicleJobSchedulingParameters:
         )
         self.job_dist = self.job_distribution.bi_model_dist
         # Job Collection Config
-        self.average_per_slot = 100
+        self.average_per_slot = 10
         self.duration = 30
         self.max_job_len = 10
         self.job_small_chance = 0.8
@@ -90,12 +90,12 @@ class VehicleJobSchedulingParameters:
 
         # Runtime Configure
         self.total_job = 0
-        self.total_job_restrict = 10000
+        self.total_job_restrict = 1000
         self.finished_job = 0
         self.finished_job_restrict = 10000
         self.time_step = 0
-        self.time_step_restrict = 1000
-        self.stop_condition = self.stop_condition_total_job
+        self.time_step_restrict = 100
+        self.stop_condition = self.stop_condition_time_step
 
     def reset(self):
         """
@@ -264,22 +264,20 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             for agent in self.agents
         }
         self.dones = {agent: False for agent in self.agents}
+        self.truncates = {agent: False for agent in self.agents}
         self.done = False
         self.auction_start = False
         self.round_start = True
         self.round_jobs = None
         self.pay = [0 for _ in range(len(self.agents))]
-
-    @functools.lru_cache(maxsize=None)
-    def observation_space(self, agent: AgentID) -> Space:
-        obs = spaces.Dict(
+        self.obs = spaces.Dict(
             OrderedDict(
                 [
                     (
                         "avail_slot",
                         spaces.Box(
                             low=0,
-                            high=self.parameters.machine_max_res_vec,
+                            high=self.parameters.machine_max_res_vec + 1,
                             shape=(
                                 self.parameters.time_horizon,
                                 self.parameters.num_res,
@@ -289,7 +287,11 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
                     ),
                     (
                         "request_res_vec",
-                        spaces.MultiDiscrete(self.parameters.max_job_vec),
+                        spaces.Box(
+                            low=0,
+                            high=np.max(self.parameters.max_job_vec),
+                            shape=(self.parameters.num_res,),
+                        ),
                     ),
                     (
                         "request_len",
@@ -302,7 +304,11 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
                 ]
             )
         )
-        return spaces.Dict({"observation": obs})
+
+    @functools.lru_cache(maxsize=None)
+    def observation_space(self, agent: AgentID):
+        obs = flatten_space(self.obs)
+        return obs
 
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent: AgentID) -> Space:
@@ -320,7 +326,9 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         self.truncations = {agent: False for agent in self.agents}
         self.infos = {agent: {} for agent in self.agents}
         self.observation = {
-            agent: self.parameters.cluster.machines[int(agent[8:])].observe()
+            agent: flatten(
+                self.obs, self.parameters.cluster.machines[int(agent[8:])].observe()
+            )
             for agent in self.agents
         }
         self.dones = {agent: False for agent in self.agents}
@@ -336,7 +344,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         return self.observation[self.agent_selection], {}
 
     def observe(self, agent: AgentID) -> Any:
-        return {"observation": self.observation[agent]}
+        return self.observation[agent]
 
     def render(self):
         if self.round_start and self.__agent_selector.is_last():
@@ -349,6 +357,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         if self.__agent_selector.is_last():
             print(self.request_job)
         if self.done:
+            self.done = False
             print("Current time:", self.parameters.cluster.current_time)
             if self.round_jobs is not None:
                 for job in self.round_jobs:
@@ -363,8 +372,8 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         for jobs in self.parameters.job_iterator:
             self.round_jobs = jobs
             for job in jobs:
-                yield job, False
-            yield None, True
+                yield job
+            yield None
 
     def _agent_selector(self):
         if self.request_job is not None:
@@ -381,18 +390,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             self.finished_job += self.parameters.auction_type.auction(self.request_job)
 
     def next_job(self):
-        self.request_job, self.done = next(self.get_job)
-        if self.done:
-            self.auction_start = False
-            self.round_end()
-            self.observation = {
-                agent: self.parameters.cluster.machines[int(agent[8:])].observe()
-                for agent in self.agents
-            }
-
-            self.__agent_selector = self._agent_selector()
-            self.round_start = True
-
+        self.request_job = next(self.get_job)
         if self.request_job is not None:
             self.auction_start = True
             self.total_job += 1
@@ -400,10 +398,24 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
                 self.parameters.cluster.machines[
                     int(machine_id)
                 ].request_job = self.request_job
-                self.observation[machine_id] = self.parameters.cluster.machines[
-                    int(machine_id)
-                ].observe()
+                self.observation["Machine_" + str(machine_id)] = flatten(
+                    self.obs,
+                    self.parameters.cluster.machines[int(machine_id)].observe(),
+                )
             self.__agent_selector = self._agent_selector()
+        if self.request_job is None:
+            self.done = True
+            self.auction_start = False
+            self.round_end()
+            self.observation = {
+                agent: flatten(
+                    self.obs, self.parameters.cluster.machines[int(agent[8:])].observe()
+                )
+                for agent in self.agents
+            }
+
+            self.__agent_selector = self._agent_selector()
+            self.round_start = True
 
     def round_start_get_pay(self):
         pass
@@ -416,12 +428,17 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         self.parameters.total_job = self.total_job
         self.parameters.time_step = self.parameters.cluster.current_time
         if self.parameters.stop_condition():
+            self.truncates = {agent: True for agent in self.agents}
             self.terminations = {agent: True for agent in self.agents}
-            # print("Finished!!!")
+        # print("Finished!!!")
         self.parameters.cluster.clear_job()
 
     def step(self, action):
+        if action is None:
+            return
         agent = self.agent_selection
+        if self.terminations[agent]:
+            return
         if not self.round_start:
             self._clear_rewards()
             self._cumulative_rewards[agent] = 0

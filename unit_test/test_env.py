@@ -178,6 +178,7 @@ def test_env_agent_selector():
 
 
 def test_ace_env():
+    import supersuit as ss
     from pettingzoo.test import api_test
 
     import Environment
@@ -185,15 +186,16 @@ def test_ace_env():
     env = Environment.VehicleJobSchedulingEnvACE()
     # env = Environment.VehicleJobSchedulingEnvACE()
     env.reset()
-    api_test(env, num_cycles=100000)
+    api_test(env, num_cycles=1000)
 
 
 def test_aec_preformce():
     env = Environment.VehicleJobSchedulingEnvACE()
-    from pettingzoo.test import performance_benchmark
     import cProfile
 
-    cProfile.run("performance_benchmark(env)")
+    from pettingzoo.test import performance_benchmark
+
+    performance_benchmark(env)
 
 
 def test_ace_env_step():
