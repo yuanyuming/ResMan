@@ -424,7 +424,7 @@ class Cluster:
                     machine.res_slot,
                     machine.reward,
                     machine.cost_vector,
-                    machine.running_job,
+                    [job.id for job in machine.running_job],
                 ]
             )
             machine.show_available_slot()

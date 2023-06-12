@@ -23,7 +23,6 @@ def get_env():
     env = Environment.VehicleJobSchedulingEnvACE()
     env = BaseWrapper(env)
     env = PettingZooEnv(env)
-    env = ContinuousToDiscrete(env, 30)
     return env
 
 
@@ -67,7 +66,7 @@ if __name__ == "__main__":
     env = PettingZooEnv(env)
     policies = MultiAgentPolicyManager([RandomPolicy() for _ in range(10)], env)
     # env = SubprocVectorEnv([lambda: env for _ in range(5)])
-    env = DummyVectorEnv([lambda: env for _ in range(60)])
+    env = DummyVectorEnv([lambda: env for _ in range(1)])
     # action_space = env.action_spaces[env.agents[0]]
     # 3. Create policy
 
@@ -77,5 +76,5 @@ if __name__ == "__main__":
     collector = Collector(policies, env)
     # 5. Execute one episode
 
-    result = collector.collect(n_episode=100, random=True)
+    result = collector.collect(n_episode=1)
     print(f"Collector return: {result}")

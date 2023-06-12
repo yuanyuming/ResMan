@@ -227,8 +227,14 @@ class Job:
 
     # 定义一个方法，返回任务的字符串表示（用于调试）
     def __str__(self):
-        return "id:{},Res Vector:{},Job Len:{},Restrict Machine:{}".format(
-            self.id, self.res_vec, self.len, self.restrict_machines
+        return "Job id:{},Res Vector:{},Job Len:{},Restrict Machine:{},Budget:{},Pay:{},Running:{}".format(
+            self.id,
+            self.res_vec,
+            self.len,
+            self.restrict_machines,
+            self.budget,
+            self.pay,
+            self.running_machine,
         )
 
 

@@ -7,7 +7,7 @@ import numpy as np
 import pettingzoo
 import prettytable
 from gymnasium import spaces
-from gymnasium.spaces import Space
+from gymnasium.spaces import Box, Space
 from gymnasium.spaces.utils import flatten, flatten_space
 from numpy import ndarray
 from pettingzoo.utils import agent_selector
@@ -87,6 +87,11 @@ class VehicleJobSchedulingParameters:
         self.auction_type = Auction.ReverseAuction(
             self.cluster, self.allocation_mechanism
         )
+        # observation, action space
+        self.action_space_continuous = False
+        self.action_discrete_space = 30
+        self.action_space_low = 1 / 3
+        self.action_space_high = 3
 
         # Runtime Configure
         self.total_job = 0
@@ -94,7 +99,7 @@ class VehicleJobSchedulingParameters:
         self.finished_job = 0
         self.finished_job_restrict = 10000
         self.time_step = 0
-        self.time_step_restrict = 100
+        self.time_step_restrict = 10
         self.stop_condition = self.stop_condition_time_step
 
     def reset(self):
@@ -312,7 +317,14 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
 
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent: AgentID) -> Space:
-        return spaces.Box(low=1 / 3, high=3, shape=(1,), dtype=np.float32)
+        if self.parameters.action_space_continuous:
+            return Box(
+                low=self.parameters.action_space_low,
+                high=self.parameters.action_space_high,
+                shape=(1,),
+                dtype=np.float32,
+            )
+        return spaces.Discrete(self.parameters.action_discrete_space)
 
     def reset(self, seed=None, return_info=False, options=None):
         np.random.seed(seed)
@@ -353,11 +365,18 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             print(table)
 
         if self.auction_start:
-            print(self.agent_selection + " is biding")
+            print(
+                self.agent_selection
+                + " is biding "
+                + str(
+                    self.parameters.cluster.machines[
+                        int(self.agent_selection[8:])
+                    ].get_bid()
+                )
+            )
         if self.__agent_selector.is_last():
-            print(self.request_job)
-            if self.auction_start:
-                print(self.parameters.auction_type.bids)
+            if self.request_job is not None:
+                print(self.request_job.id, " is requesting")
         if self.done:
             self.done = False
             print("Current time:", self.parameters.cluster.current_time)
@@ -367,7 +386,6 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             else:
                 print("No job this round")
             self.parameters.cluster.show()
-            print(self._cumulative_rewards)
         pass
 
     def get_job_next_step(self):
@@ -432,15 +450,27 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         if self.parameters.stop_condition():
             self.truncates = {agent: True for agent in self.agents}
             self.terminations = {agent: True for agent in self.agents}
+            self.done = True
         # print("Finished!!!")
         self.parameters.cluster.clear_job()
+
+    @functools.lru_cache(maxsize=1000)
+    def action(self, action):
+        if self.parameters.action_space_continuous:
+            return float(action)
+        else:
+            return (
+                self.parameters.action_space_high - self.parameters.action_space_low
+            ) / self.parameters.action_discrete_space * float(
+                action
+            ) + self.parameters.action_space_low
 
     def step(self, action):
         if action is None:
             return
         agent = self.agent_selection
-        if self.terminations[agent]:
-            return
+        if self.terminations[agent] or self.truncations[agent]:
+            return self._was_dead_step(action)
         if not self.round_start:
             self._clear_rewards()
             self._cumulative_rewards[agent] = 0
@@ -453,7 +483,9 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         if self.round_start and self.__agent_selector.is_last():
             self.round_start = False
 
-        self.parameters.cluster.machines[int(agent[8:])].action = float(action)
+        self.parameters.cluster.machines[int(agent[8:])].action = self.action(
+            float(action)
+        )
 
         if self.__agent_selector.is_last():
             # self._clear_rewards()
