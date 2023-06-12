@@ -158,10 +158,6 @@ class Job:
             * self.priority,
         )
 
-    # 定义一个方法，从文件中读取任务信息（暂未实现）
-    def read_job_from_file(self):
-        pass
-
     # 定义一个方法，返回任务的观察信息，即资源需求向量、时长、优先级和限制机器列表
     def observe(self):
         job_obs = OrderedDict(
@@ -197,6 +193,22 @@ class Job:
             self.finish_time,
             self.utility,
         ]
+
+    def static_info(self):
+        return {
+            "id": self.id,
+            "res_vec": self.res_vec,
+            "len": self.len,
+            "priority": self.priority,
+            "budget": self.budget,
+            "restrict_machines": self.restrict_machines,
+        }
+
+    def info(self):
+        return {
+            "pay": self.pay,
+            "utility": self.utility,
+        }
 
     # 定义一个方法，打印出任务信息（用于展示）
     def show(self):

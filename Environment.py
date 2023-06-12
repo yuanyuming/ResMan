@@ -269,7 +269,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             for agent in self.agents
         }
         self.dones = {agent: False for agent in self.agents}
-        self.truncates = {agent: False for agent in self.agents}
+        self.truncations = {agent: False for agent in self.agents}
         self.done = False
         self.auction_start = False
         self.round_start = True
@@ -448,7 +448,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         self.parameters.total_job = self.total_job
         self.parameters.time_step = self.parameters.cluster.current_time
         if self.parameters.stop_condition():
-            self.truncates = {agent: True for agent in self.agents}
+            self.truncations = {agent: True for agent in self.agents}
             self.terminations = {agent: True for agent in self.agents}
             self.done = True
         # print("Finished!!!")
@@ -466,11 +466,11 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             ) + self.parameters.action_space_low
 
     def step(self, action):
-        if action is None:
-            return
         agent = self.agent_selection
         if self.terminations[agent] or self.truncations[agent]:
-            return self._was_dead_step(action)
+            self._was_dead_step(action)
+            self.agent_selection = self.__agent_selector.next()
+            return
         if not self.round_start:
             self._clear_rewards()
             self._cumulative_rewards[agent] = 0

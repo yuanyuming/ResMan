@@ -12,16 +12,36 @@ class SlotShow:
         res_slot=[10, 15],
         avial_slot=[[0, 1], [2, 1], [7, 10], [0, 1], [2, 1], [7, 10]],
     ):
-        self.res_slot = res_slot
+        self.res_slot = np.asarray(res_slot)  # convert to numpy array for vectorization
         self.avail_slot = np.asarray(avial_slot)
-        self.percent_slot = (self.avail_slot / self.res_slot * 8).round().astype(int)
+        # use vectorize function to apply the calculation to each element
+        # generate bars using list comprehension and store it as a class attribute
+        self.bars = [char for char in " ▁▂▃▄▅▆▇█"]
+        self.percent_slot = np.vectorize(lambda x, y: int(x / y * 8))(
+            self.avail_slot, self.res_slot
+        )
 
-    def compute_chart(self):
-        bar = " ▁▂▃▄▅▆▇█"
-        bars = [char for char in bar]
+    def compute_chart(self, avail_slot):
+        self.avail_slot = np.asarray(avail_slot)
+        self.percent_slot = np.vectorize(lambda x, y: int(x / y * 8))(
+            self.avail_slot, self.res_slot
+        )
         for i in range(len(self.res_slot)):
-            bar_show = [bars[s] for s in self.percent_slot[:, i]]
-            print("- Resources #", i, ":𝄃", "".join(bar_show), "𝄃")
+            bar_show = [self.bars[s] for s in self.percent_slot[:, i]]
+            # use f-string to format the output
+            print(self.percent_slot[:, i])
+            print(f"- Resources #{i}:𝄃{''.join(bar_show)}𝄃")
+
+    def compute_dict(self, avail_slot):
+        self.avail_slot = np.asarray(avail_slot)
+        self.percent_slot = np.vectorize(lambda x, y: int(x / y * 8))(
+            self.avail_slot, self.res_slot
+        )
+        # use a dictionary comprehension to generate a dictionary with the same functionality as compute_chart
+        return {
+            f"Resource {i}": "".join([self.bars[s] for s in self.percent_slot[:, i]])
+            for i in range(len(self.res_slot))
+        }
 
 
 class BiderPolicy:
@@ -70,6 +90,7 @@ class Machine:
         self.policy = self.drl_bid
         self.action = 1
         self.bid = 0
+        self.slot_show = SlotShow(self.res_slot, self.avail_slot)
 
     def add_backlog(self, job=Job.Job()):
         """
@@ -88,7 +109,8 @@ class Machine:
 
     def get_bid(self):
         if self.request_job is not None:
-            return self.policy(self.request_job)
+            self.bid = self.policy(self.request_job)
+            return self.bid
         return 0
 
     def drl_bid(self, job=Job.Job()):
@@ -249,8 +271,25 @@ class Machine:
         print("Resource slots:")
         print(self.res_slot)
         print("Available slots:")
-        slot_show = SlotShow(self.res_slot, self.avail_slot)
-        slot_show.compute_chart()
+        self.slot_show.compute_chart(self.avail_slot)
+
+    def static_info(self):
+        return {
+            "id": self.id,
+            "res_slot": self.res_slot,
+            "cost_vector": self.cost_vector,
+        }
+
+    def info(self):
+        return {
+            "reward": self.reward,
+            "earning": self.earning,
+            "slot": self.slot_show.compute_dict(self.avail_slot),
+            "action": self.action,
+            "bid": self.bid,
+            "finished_job_num": self.finished_job_num,
+            "running_job": self.running_job,
+        }
 
     def show_res_vec(self):
         """

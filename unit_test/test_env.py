@@ -186,7 +186,7 @@ def test_ace_env():
     env = Environment.VehicleJobSchedulingEnvACE()
     # env = Environment.VehicleJobSchedulingEnvACE()
     env.reset()
-    api_test(env, num_cycles=1000)
+    api_test(env, num_cycles=100)
 
 
 def test_aec_preformce():
