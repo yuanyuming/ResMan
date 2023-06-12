@@ -47,6 +47,7 @@
     "editor.defaultFormatter": "ms-python.black-formatter",
     "python.formatting.provider": "black",
     "python.autoComplete.extraPaths": [
+    
         "${workspaceFolder}"
     ],
     "python.analysis.extraPaths": [
@@ -86,7 +87,7 @@
     "files.insertFinalNewline": true,
     "workbench.editor.sharedViewState": true,
     "window.autoDetectColorScheme": true,
-    "workbench.colorTheme": "GitHub Dark",
+    "workbench.colorTheme": "Default Light Modern",
     "workbench.preferredDarkColorTheme": "GitHub Dark",
     "workbench.tree.renderIndentGuides": "always",
     "workbench.view.alwaysShowHeaderActions": true,
@@ -123,4 +124,12 @@
 "git.followTagsWhenSync": true,
 "git.pruneOnFetch": false,
 "python.testing.pytestPath": "/home/yuan/ResMan/man/bin/pytest",
+"python.analysis.enableSyncServer": true,
+"python.analysis.pylanceLspClientEnabled": false,
+"black-formatter.path": [
+    "/home/yuan/ResMan/man/bin/black"
+],
+"black-formatter.interpreter": [
+    "${workspaceFolder}/man/bin/python"
+],
 }

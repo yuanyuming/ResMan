@@ -1,8 +1,10 @@
+import timeit
+from calendar import c
 from typing import Any, Dict, Optional, Union
 
 import numpy as np
-import supersuit
 from pettingzoo.utils.wrappers import BaseWrapper
+from supersuit import clip_actions_v0
 from tianshou.data import Batch, Collector
 from tianshou.env import (
     ContinuousToDiscrete,
@@ -21,7 +23,7 @@ def get_env():
     env = Environment.VehicleJobSchedulingEnvACE()
     env = BaseWrapper(env)
     env = PettingZooEnv(env)
-
+    env = ContinuousToDiscrete(env, 30)
     return env
 
 
@@ -34,6 +36,28 @@ def get_agents(agent_learn, optim):
     )
 
 
+def test_env_time():
+    for i in range(10):
+        i += 1
+        envt = SubprocVectorEnv([lambda: env for _ in range(i * 10)])
+        collector = Collector(policies, envt)
+        start = timeit.default_timer()
+        collector.collect(n_episode=100, random=True)
+        end = timeit.default_timer()
+        print(f"Time taken for {i} SubprocVectorEnv envs: {end - start}")
+
+
+def test_vec_env_time():
+    for i in range(3, 10):
+        i += 1
+        envd = DummyVectorEnv([lambda: env for _ in range(i * 10)])
+        collector = Collector(policies, envd)
+        start = timeit.default_timer()
+        collector.collect(n_episode=100, random=True)
+        end = timeit.default_timer()
+        print(f"Time taken for {i} DummyVectorEnv envs: {end - start}")
+
+
 if __name__ == "__main__":
     # 1. Load environment
     env = Environment.VehicleJobSchedulingEnvACE()
@@ -42,8 +66,8 @@ if __name__ == "__main__":
     agents = env.num_agents
     env = PettingZooEnv(env)
     policies = MultiAgentPolicyManager([RandomPolicy() for _ in range(10)], env)
-    env = SubprocVectorEnv([lambda: env for _ in range(1000)])
-    # env = DummyVectorEnv([lambda: env for _ in range(10)])
+    # env = SubprocVectorEnv([lambda: env for _ in range(5)])
+    env = DummyVectorEnv([lambda: env for _ in range(60)])
     # action_space = env.action_spaces[env.agents[0]]
     # 3. Create policy
 
@@ -52,5 +76,6 @@ if __name__ == "__main__":
     # 4. Create collector
     collector = Collector(policies, env)
     # 5. Execute one episode
-    result = collector.collect(n_episode=1000, random=True)
+
+    result = collector.collect(n_episode=100, random=True)
     print(f"Collector return: {result}")
