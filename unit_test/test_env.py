@@ -201,9 +201,9 @@ def test_aec_preformce():
 def test_ace_env_step():
     import Environment
 
-    env = Environment.VehicleJobSchedulingEnvACE()
+    env = Environment.VehicleJobSchedulingEnvACE(render_mode="human")
     env.reset()
-    for agent in env.agent_iter(100):
+    for agent in env.agent_iter(10000):
         env.step(env.action_space(agent).sample())
 
 

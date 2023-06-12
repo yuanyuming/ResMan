@@ -356,6 +356,8 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             print(self.agent_selection + " is biding")
         if self.__agent_selector.is_last():
             print(self.request_job)
+            if self.auction_start:
+                print(self.parameters.auction_type.bids)
         if self.done:
             self.done = False
             print("Current time:", self.parameters.cluster.current_time)
