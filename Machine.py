@@ -280,11 +280,14 @@ class Machine:
             "cost_vector": self.cost_vector,
         }
 
+    def slot(self):
+        return self.slot_show.compute_dict(self.avail_slot)
+
     def info(self):
         return {
+            "id": self.id,
             "reward": self.reward,
             "earning": self.earning,
-            "slot": self.slot_show.compute_dict(self.avail_slot),
             "action": self.action,
             "bid": self.bid,
             "finished_job_num": self.finished_job_num,

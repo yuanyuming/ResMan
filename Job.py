@@ -196,12 +196,12 @@ class Job:
 
     def static_info(self):
         return {
-            "id": self.id,
-            "res_vec": self.res_vec,
-            "len": self.len,
-            "priority": self.priority,
-            "budget": self.budget,
-            "restrict_machines": self.restrict_machines,
+            "id": str(self.id),
+            "res_vec": str(self.res_vec),
+            "len": str(self.len),
+            "priority": str(self.priority),
+            "budget": f"{self.budget:.2f}",
+            "restrict_machines": str(self.restrict_machines),
         }
 
     def info(self):
