@@ -39,7 +39,7 @@ class SlotShow:
         )
         # use a dictionary comprehension to generate a dictionary with the same functionality as compute_chart
         return {
-            f"Resource {i}": "".join([self.bars[s] for s in self.percent_slot[:, i]])
+            f"Res {i}": "".join([self.bars[s] for s in self.percent_slot[:, i]])
             for i in range(len(self.res_slot))
         }
 
@@ -90,7 +90,7 @@ class Machine:
         self.policy = self.drl_bid
         self.action = 1
         self.bid = 0
-        self.slot_show = SlotShow(self.res_slot, self.avail_slot)
+        # self.slot_show = SlotShow(self.res_slot, self.avail_slot)
 
     def add_backlog(self, job=Job.Job()):
         """
@@ -280,8 +280,8 @@ class Machine:
             "cost_vector": self.cost_vector,
         }
 
-    def slot(self):
-        return self.slot_show.compute_dict(self.avail_slot)
+    def slots(self):
+        return SlotShow(self.res_slot, self.avail_slot).compute_dict(self.avail_slot)
 
     def info(self):
         return {

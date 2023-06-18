@@ -1,3 +1,6 @@
+import rich_layout
+
+
 def get_jobs_iter():
     import Environment
 
@@ -39,11 +42,14 @@ def test_layout():
     import rich.console
 
     cs = rich.console.Console()
-    for i in range(3):
+    for i in range(1):
         # time.sleep(0.2)
         jobs = next(iter)
+
         for job in jobs:
-            ml.update(job.static_info(), "cluster", "log")
+            cl = get_cluster()
+            clt = rich_layout.ClusterTable(cl)
+            ml.update(job.static_info(), clt.update(), "log")
             ml.show()
 
 
@@ -74,10 +80,38 @@ def get_cluster():
 
     para = Environment.VehicleJobSchedulingParameters()
     env = Environment.VehicleJobSchedulingEnvACE(para)
-    from pettingzoo.test import api_test
+    from pettingzoo.test import api_test, performance_benchmark
 
-    api_test(env)
+    # performance_benchmark(env)
+    api_test(env, num_cycles=1)
     return env.parameters.cluster
+
+
+def test_cluster_table():
+    import rich_layout
+
+    cl = get_cluster()
+    clt = rich_layout.ClusterTable(cl)
+    import rich.console
+
+    cs = rich.console.Console()
+    cs.print(clt.update())
+
+
+def test_machine_slots():
+    cluster = get_cluster()
+    from rich.console import Console
+    from rich.panel import Panel
+
+    import rich_layout
+
+    console = Console()
+    slots = [
+        rich_layout.MachineSlots(machine.id, machine.slots())
+        for machine in cluster.machines
+    ]
+    panel = rich_layout.ClusterGirds(slots, 4)
+    console.print(panel.get_gird())
 
 
 def test_machine_info_table():
@@ -114,3 +148,12 @@ def test_machine_info_table():
 
     # Print the info table to the console
     info_table.print()
+    from rich.console import Console
+    from rich.layout import Layout
+
+    layout = Layout()
+    layout.split_row(Layout(name="Static", ratio=1), Layout(name="Info", ratio=2))
+    layout["Static"].update(static_table.get_table())
+    layout["Info"].update(info_table.get_table())
+    console = Console()
+    console.print(layout)

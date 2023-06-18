@@ -88,15 +88,33 @@ class MachineInfo:
             str(i)
             for i in [
                 self.id,
-                self.reward,
-                self.earning,
+                f"{self.reward:.2f}",
+                f"{self.earning:.2f}",
                 # self.slot,
-                self.action,
-                self.bid,
+                f"{self.action:.2f}",
+                f"{self.bid:.2f}",
                 self.finished_job_num,
                 self.running_job,
             ]
         ]
+
+
+class MachineSlots:
+    def __init__(
+        self, id=0, slots={"Resource 0": "██████████", "Resource 1": "██████████"}
+    ) -> None:
+        self.slots = slots
+        self.title = "Machine " + str(id)
+        self.table = Table(
+            title=self.title, show_header=False, border_style="none", box=None
+        )
+        self.table.add_column("Resource", style="cyan", justify="right")
+        self.table.add_column("Slot", style="magenta", justify="right")
+        for key, values in self.slots.items():
+            self.table.add_row(key, values)
+
+    def get_table(self):
+        return self.table
 
 
 class MachineTable:
@@ -130,6 +148,9 @@ class MachineTable:
 
         # Print the table object to the console
         console.print(self.table)
+
+    def get_table(self):
+        return self.table
 
 
 # Define the subclasses of MachineTable for the static table and the info table
@@ -166,6 +187,78 @@ class MachineInfoTable(MachineTable):
         )
 
 
+class ClusterGirds:
+    def __init__(self, cluster_slot, columns) -> None:
+        self.cluster = cluster_slot
+        self.gird = Table.grid(expand=True)
+        for i in range(columns):
+            self.gird.add_column(justify="center")
+        for i in range(int(len(cluster_slot) / columns + 1)):
+            if i * columns >= len(cluster_slot) - columns:
+                self.gird.add_row(
+                    *[
+                        MachineSlots(
+                            id=i * columns + j,
+                            slots=cluster_slot[i * columns + j].slots,
+                        ).get_table()
+                        for j in range(len(cluster_slot) - i * columns)
+                    ]
+                )
+                break
+            if i * columns >= len(cluster_slot):
+                break
+            self.gird.add_row(
+                *[
+                    MachineSlots(
+                        id=i * columns + j, slots=cluster_slot[i * columns + j].slots
+                    ).get_table()
+                    for j in range(columns)
+                ]
+            )
+
+    def get_gird(self):
+        return self.gird
+
+
+class ClusterTable:
+    def __init__(self, cluster) -> None:
+        self.cluster = cluster
+        # 创建一个layout对象
+        self.layout = Layout()
+        # 将layout上下分割，比例为2:1
+        self.layout.split_column(
+            Layout(name="top", ratio=3), Layout(name="bottom", ratio=1)
+        )
+        # 将top部分左右分割，比例为1:1
+        self.layout["top"].split_row(
+            Layout(name="left", ratio=1), Layout(name="right", ratio=3)
+        )
+
+    def update(self):
+        static_info = [
+            MachineStaticInfo(**machine.static_info())
+            for machine in self.cluster.machines
+        ]
+        info = [MachineInfo(**machine.info()) for machine in self.cluster.machines]
+        slot = [
+            MachineSlots(machine.id, machine.slots())
+            for machine in self.cluster.machines
+        ]
+        static_table = MachineStaticTable()
+        static_table.add_rows(static_info)
+        info_table = MachineInfoTable()
+        info_table.add_rows(info)
+        cluster_gird = ClusterGirds(slot, 5)
+        # 将static_table放在left部分
+        self.layout["left"].update(static_table.get_table())
+        # 将info_table放在right部分
+        self.layout["right"].update(info_table.get_table())
+        # 将cluster_gird放在bottom部分
+        self.layout["bottom"].update(cluster_gird.get_gird())
+        # 返回layout对象
+        return self.layout
+
+
 class MyLayout:
     def __init__(self):
         # 创建一个控制台对象
@@ -197,6 +290,7 @@ class MyLayout:
         self.layout["bottom"].update(
             Panel(Log, border_style="black", title="Log", title_align="center")
         )
+        return self.layout
 
     def show(self):
         # 在控制台上显示layout
