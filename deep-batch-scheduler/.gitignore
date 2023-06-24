@@ -1,0 +1,9 @@
+.vscode/*
+*.pyc
+*.DS_Store
+.idea/*
+*.*~
+__pycache__/*
+**/*.egg-info
+.python-version
+data/logs
