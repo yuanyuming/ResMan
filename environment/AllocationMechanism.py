@@ -1,5 +1,6 @@
 import numpy as np
-import Machine
+
+from . import Machine
 
 
 class AllocationMechanism:

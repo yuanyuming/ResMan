@@ -19,22 +19,6 @@ from tianshou.utils.net.common import Net
 import Environment
 
 
-def get_env():
-    env = Environment.VehicleJobSchedulingEnvACE()
-    env = BaseWrapper(env)
-    env = PettingZooEnv(env)
-    return env
-
-
-def get_agents(agent_learn, optim):
-    env = get_env()
-    observation_space = env.observation_space
-    net = Net(
-        state_shape=observation_space.shape,
-        action_shape=env.action_space.shape,
-    )
-
-
 def test_env_time():
     for i in range(10):
         i += 1

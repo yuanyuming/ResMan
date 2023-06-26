@@ -1,4 +1,4 @@
-import rich_layout
+# import rich_layout
 
 
 def get_jobs_iter():
@@ -100,10 +100,9 @@ def test_cluster_table():
 
 def test_machine_slots():
     cluster = get_cluster()
+    import rich_layout
     from rich.console import Console
     from rich.panel import Panel
-
-    import rich_layout
 
     console = Console()
     slots = [

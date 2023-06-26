@@ -1,8 +1,10 @@
+import sys
 import timeit
+
 import prettytable
 from matplotlib.pyplot import table
-import Job
-import sys
+
+from environment import Job
 
 sys.path.append(".")
 

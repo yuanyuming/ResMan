@@ -1,6 +1,6 @@
-import Job
-import Machine
 import gymnasium as gym
+
+from . import Job, Machine
 
 
 class Parameters:

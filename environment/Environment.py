@@ -13,10 +13,7 @@ from numpy import ndarray
 from pettingzoo.utils import agent_selector
 from pettingzoo.utils.env import AgentID
 
-import AllocationMechanism
-import Auction
-import Job
-import Machine
+from . import AllocationMechanism, Auction, Job, Machine
 
 
 class VehicleJobSchedulingParameters:

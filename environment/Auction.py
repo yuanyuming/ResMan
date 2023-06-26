@@ -1,7 +1,6 @@
-import AllocationMechanism
-import Job
-import Machine
 import numpy as np
+
+from . import AllocationMechanism, Job, Machine
 
 
 class ReverseAuction:
@@ -25,7 +24,7 @@ class ReverseAuction:
             bids.job.running_machine = -1
             return False
         winner_machine, prices, second_prices = self.allocation_mechanism.allocate(bids)
-        
+
         if prices > bids.job.budget:
             bids.job.pay = 0
             bids.job.running_machine = -1
@@ -34,11 +33,13 @@ class ReverseAuction:
         bids.job.running_machine = winner_machine.id
         winner_machine.allocate_job(bids.job)
         return True
-    def request_auction(self,job=Job.Job()):
+
+    def request_auction(self, job=Job.Job()):
         self.current_job = job
         self.bids = Machine.Bids(self.cluster, self.current_job)
         self.bids.request_bids()
         pass
+
 
 # 接收请求
 # 找出可以执行的服务器

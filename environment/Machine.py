@@ -3,7 +3,7 @@ from collections import OrderedDict
 import numpy as np
 import prettytable
 
-import Job
+from . import Job
 
 
 class SlotShow:

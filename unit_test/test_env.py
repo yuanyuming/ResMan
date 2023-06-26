@@ -1,6 +1,6 @@
 from typing import Optional
 
-import Environment
+from environment import Environment
 
 
 def test_step():
@@ -18,9 +18,8 @@ def test_step():
 
 
 def test_env_single_para():
-    import numpy as np
-
     import Environment_single
+    import numpy as np
 
     para = Environment_single.Parameters()
     machine = para.machine
@@ -77,7 +76,7 @@ def test_env_obs():
 
 
 def init_env():
-    import Environment
+    from environment import Environment
 
     env = Environment.VehicleJobSchedulingEnv()
     return env
@@ -178,10 +177,9 @@ def test_env_agent_selector():
 
 
 def test_ace_env():
+    import Environment
     import supersuit as ss
     from pettingzoo.test import api_test
-
-    import Environment
 
     env = Environment.VehicleJobSchedulingEnvACE()
     # env = Environment.VehicleJobSchedulingEnvACE()

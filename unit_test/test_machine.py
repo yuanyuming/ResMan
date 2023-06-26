@@ -7,8 +7,7 @@ def:
     time_proceed
     show
 """
-import Machine
-import Job
+from environment import Job, Machine
 
 
 def test_Machine_init():
@@ -139,8 +138,9 @@ def test_restrict():
 
 
 def test_machine_observe():
-    import Machine
     import Environment
+    import Machine
+
     machine = Machine.Machine()
     machine.reset()
     print(machine.observe())
