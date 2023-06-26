@@ -8,6 +8,7 @@ unit_test\__pycache__
 train
 roms
 datasets
+log
 ### LaTeX ###
 ## Core latex/pdflatex auxiliary files:
 *.aux
