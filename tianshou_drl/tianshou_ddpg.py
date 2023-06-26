@@ -5,16 +5,15 @@ import pprint
 import gymnasium as gym
 import numpy as np
 import torch
-from torch.utils.tensorboard import SummaryWriter
-
 from tianshou.data import Collector, VectorReplayBuffer
 from tianshou.env import DummyVectorEnv
 from tianshou.exploration import GaussianNoise
-from tianshou.policy import DDPGPolicy
+from tianshou.policy import DDPGPolicy, MultiAgentPolicyManager
 from tianshou.trainer import offpolicy_trainer
 from tianshou.utils import TensorboardLogger
 from tianshou.utils.net.common import Net
 from tianshou.utils.net.continuous import Actor, Critic
+from torch.utils.tensorboard import SummaryWriter
 
 
 class Args:
@@ -67,57 +66,62 @@ class Args:
         self.device = device
 
 
-def test_ddpg(args=Args()):
-    env = gym.make(args.task)
-    args.state_shape = env.observation_space.shape or env.observation_space.n
-    args.action_shape = env.action_space.shape or env.action_space.n
-    args.max_action = env.action_space.high[0]
-    if args.reward_threshold is None:
-        default_reward_threshold = {"Pendulum-v0": -250, "Pendulum-v1": -250}
-        args.reward_threshold = default_reward_threshold.get(
-            args.task, env.spec.reward_threshold
+def _get_agents(get_env, args=Args()):
+    env = get_env()
+    state_shape = env.observation_space.shape or env.observation_space.n
+    action_shape = env.action_space.shape or env.action_space.n
+    max_action = env.action_space.high[0]
+    agents = []
+    for i in range(env.num_agents):
+        # model
+        net = Net(state_shape, hidden_sizes=args.hidden_sizes, device=args.device)
+        actor = Actor(net, action_shape, max_action=max_action, device=args.device).to(
+            args.device
         )
+        actor_optim = torch.optim.Adam(actor.parameters(), lr=args.actor_lr)
+        net = Net(
+            state_shape,
+            action_shape,
+            hidden_sizes=args.hidden_sizes,
+            concat=True,
+            device=args.device,
+        )
+        critic = Critic(net, device=args.device).to(args.device)
+        critic_optim = torch.optim.Adam(critic.parameters(), lr=args.critic_lr)
+        policy = DDPGPolicy(
+            actor,
+            actor_optim,
+            critic,
+            critic_optim,
+            tau=args.tau,
+            gamma=args.gamma,
+            exploration_noise=GaussianNoise(sigma=args.exploration_noise),
+            reward_normalization=args.rew_norm,
+            estimation_step=args.n_step,
+            action_space=env.action_space,
+        )
+        agents.append(policy)
+    policy = MultiAgentPolicyManager(agents, env)
+    return policy, env.agents
+
+
+def train_ddpg(get_env, args=Args()):
+    env = get_env()
+
+    default_reward_threshold = {"Pendulum-v0": -250, "Pendulum-v1": -250}
+    args.reward_threshold = 1000
     # you can also use tianshou.env.SubprocVectorEnv
     # train_envs = gym.make(args.task)
-    train_envs = DummyVectorEnv(
-        [lambda: gym.make(args.task) for _ in range(args.training_num)]
-    )
+    train_envs = DummyVectorEnv([get_env for _ in range(args.training_num)])
     # test_envs = gym.make(args.task)
-    test_envs = DummyVectorEnv(
-        [lambda: gym.make(args.task) for _ in range(args.test_num)]
-    )
+    test_envs = DummyVectorEnv([get_env for _ in range(args.test_num)])
     # seed
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
     train_envs.seed(args.seed)
     test_envs.seed(args.seed)
-    # model
-    net = Net(args.state_shape, hidden_sizes=args.hidden_sizes, device=args.device)
-    actor = Actor(
-        net, args.action_shape, max_action=args.max_action, device=args.device
-    ).to(args.device)
-    actor_optim = torch.optim.Adam(actor.parameters(), lr=args.actor_lr)
-    net = Net(
-        args.state_shape,
-        args.action_shape,
-        hidden_sizes=args.hidden_sizes,
-        concat=True,
-        device=args.device,
-    )
-    critic = Critic(net, device=args.device).to(args.device)
-    critic_optim = torch.optim.Adam(critic.parameters(), lr=args.critic_lr)
-    policy = DDPGPolicy(
-        actor,
-        actor_optim,
-        critic,
-        critic_optim,
-        tau=args.tau,
-        gamma=args.gamma,
-        exploration_noise=GaussianNoise(sigma=args.exploration_noise),
-        reward_normalization=args.rew_norm,
-        estimation_step=args.n_step,
-        action_space=env.action_space,
-    )
+    # policy
+    policy, agents = _get_agents(get_env, args)
     # collector
     train_collector = Collector(
         policy,
@@ -157,7 +161,7 @@ def test_ddpg(args=Args()):
     if __name__ == "__main__":
         pprint.pprint(result)
         # Let's watch its performance!
-        env = gym.make(args.task)
+        env = env
         policy.eval()
         collector = Collector(policy, env)
         result = collector.collect(n_episode=1, render=args.render)
@@ -166,4 +170,4 @@ def test_ddpg(args=Args()):
 
 
 if __name__ == "__main__":
-    test_ddpg()
+    pass

@@ -16,3 +16,12 @@ def get_env():
     env = BaseWrapper(env)
     env = PettingZooEnv(env)
     return env
+
+
+def get_env_continous():
+    para = Environment.VehicleJobSchedulingParameters()
+    para.action_space_continuous = True
+    env = Environment.VehicleJobSchedulingEnvACE(parameter=para)
+    env = BaseWrapper(env)
+    env = PettingZooEnv(env)
+    return env

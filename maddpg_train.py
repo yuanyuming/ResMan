@@ -1,0 +1,4 @@
+import tianshou_setup
+from tianshou_drl import tianshou_ddpg
+
+tianshou_ddpg.train_ddpg(tianshou_setup.get_env_continous)

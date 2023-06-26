@@ -248,7 +248,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         super().__init__()
         self.metadata = {
             "name": "VehicleJobSchedulingEnvACE",
-            "render_modes": ["human", "ascii"],
+            "render_modes": ["human", "ascii", "rich_layout"],
         }
         self.parameters = parameter
         self.render_mode = render_mode
