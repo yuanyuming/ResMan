@@ -93,7 +93,7 @@ def train_dqn(get_env):
         step_per_epoch=10000,
         step_per_collect=500,
         episode_per_test=10,
-        batch_size=64,
+        batch_size=6400,
         save_best_fn=save_best_fn,
         update_per_step=0.1,
         test_in_train=True,
