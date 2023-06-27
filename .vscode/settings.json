@@ -9,9 +9,7 @@
     "python.testing.pytestEnabled": true,
     "cSpell.language": "en,en-US",
     "files.autoSave": "onFocusChange",
-    "python.terminal.launchArgs": [
-    
-    ],
+    "python.terminal.launchArgs": [],
     "cSpell.words": [
         "arange",
         "dtype",
@@ -37,25 +35,22 @@
     "python.analysis.completeFunctionParens": true,
     "python.analysis.autoFormatStrings": true,
     "python.analysis.autoImportCompletions": true,
+    "python.analysis.autoSearchPaths": true,
     "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.extraPaths": [
+        "./environment",
+        "./tianshou_drl"
+    ],
     "python.analysis.inlayHints.callArgumentNames": true,
     "python.analysis.inlayHints.functionReturnTypes": true,
     "python.analysis.inlayHints.pytestParameters": true,
     "python.analysis.inlayHints.variableTypes": true,
     "python.languageServer": "Pylance",
     "python.linting.pylintEnabled": true,
-    "editor.defaultFormatter": "ms-python.black-formatter",
     "python.formatting.provider": "black",
-    "python.autoComplete.extraPaths": [
-    
-        "${workspaceFolder}"
-    ],
-    "python.analysis.extraPaths": [
-        "${workspaceFolder}"
-    ],
     "black-formatter.importStrategy": "fromEnvironment",
     "bookmarks.useWorkaroundForFormatters": true,
-    "python.formatting.blackPath": "/home/yuan/ResMan/man/bin/black",
+    "python.formatting.blackPath": "${workspaceFolder}/man/bin/black",
     "editor.cursorSmoothCaretAnimation": "on",
     "editor.smoothScrolling": true,
     "workbench.list.smoothScrolling": true,
@@ -107,29 +102,31 @@
     "notebook.outline.showCodeCells": true,
     "application.experimental.rendererProfiling": false,
     "ipynb.pasteImagesAsAttachments.enabled": true,
-    "bookmarks.saveBookmarksInProject": false,
     "AllAutocomplete.updateOnlyOnSave": true,
-    "vsintellicode.features.python.deepLearning": "enabled",
     "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        "source.organizeImports": true
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        },
     },
-},
-"git.autofetch": true,
-"git.autoStash": true,
-"git.enableSmartCommit": true,
-"git.fetchOnPull": true,
-"git.followTagsWhenSync": true,
-"git.pruneOnFetch": false,
-"python.testing.pytestPath": "/home/yuan/ResMan/man/bin/pytest",
-"python.analysis.enableSyncServer": true,
-"python.analysis.pylanceLspClientEnabled": false,
-"black-formatter.path": [
-    "/home/yuan/ResMan/man/bin/black"
-],
-"black-formatter.interpreter": [
-    "${workspaceFolder}/man/bin/python"
-],
+    "git.autofetch": true,
+    "git.autoStash": true,
+    "git.enableSmartCommit": true,
+    "git.fetchOnPull": true,
+    "git.followTagsWhenSync": true,
+    "git.pruneOnFetch": false,
+    "python.testing.pytestPath": "${workspaceFolder}/man/bin/pytest",
+    "python.analysis.enableSyncServer": true,
+    "python.analysis.pylanceLspClientEnabled": false,
+    "black-formatter.path": [
+        "${workspaceFolder}/man/bin/black"
+    ],
+    "black-formatter.interpreter": [
+        "${workspaceFolder}/man/bin/python"
+    ],
+    "python.analysis.userFileIndexingLimit": -1,
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
 }

@@ -177,14 +177,15 @@ def test_env_agent_selector():
 
 
 def test_ace_env():
-    import Environment
     import supersuit as ss
     from pettingzoo.test import api_test
+
+    from environment import Environment
 
     env = Environment.VehicleJobSchedulingEnvACE()
     # env = Environment.VehicleJobSchedulingEnvACE()
     env.reset()
-    api_test(env, num_cycles=100)
+    api_test(env, num_cycles=10000)
 
 
 def test_aec_preformce():
