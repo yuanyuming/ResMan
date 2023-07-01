@@ -91,6 +91,7 @@ class VehicleJobSchedulingParameters:
         self.action_space_high = 3
 
         # Runtime Configure
+        self.max_step = 100000
         self.total_job = 0
         self.total_job_restrict = 1000
         self.finished_job = 0
@@ -265,6 +266,9 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             agent: self.parameters.cluster.machines[int(agent[8:])].observe()
             for agent in self.agents
         }
+        self.cnt = 0
+        self.max_step = self.parameters.max_step
+        self.episode_meta_info = {"max_step": self.max_step}
         self.dones = {agent: False for agent in self.agents}
         self.truncations = {agent: False for agent in self.agents}
         self.done = False
