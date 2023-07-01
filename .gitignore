@@ -9,6 +9,7 @@ train
 roms
 datasets
 log
+logs
 ### LaTeX ###
 ## Core latex/pdflatex auxiliary files:
 *.aux

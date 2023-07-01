@@ -32,7 +32,7 @@ from malib.utils.typing import AgentID
 from malib.rollout.envs.env import Environment
 
 
-class PettingZooEnv(Environment):
+class PettingZooEnv(Envirocd nment):
     def __init__(self, **configs):
         super(PettingZooEnv, self).__init__(**configs)
 
