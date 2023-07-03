@@ -8,7 +8,7 @@ from tianshou.data import Collector, VectorReplayBuffer
 from tianshou.env import DummyVectorEnv
 from tianshou.exploration import GaussianNoise
 from tianshou.policy import DDPGPolicy, MultiAgentPolicyManager
-from tianshou.trainer import offpolicy_trainer
+from tianshou.trainer import offpolicy_trainer, onpolicy_trainer
 from tianshou.utils import TensorboardLogger
 from tianshou.utils.net.common import Net
 from tianshou.utils.net.continuous import Actor, Critic
@@ -18,7 +18,6 @@ from torch.utils.tensorboard import SummaryWriter
 class Args:
     def __init__(
         self,
-        task="Pendulum-v1",
         reward_threshold=None,
         seed=0,
         buffer_size=20000,
@@ -27,21 +26,21 @@ class Args:
         gamma=0.99,
         tau=0.005,
         exploration_noise=0.1,
-        epoch=5,
-        step_per_epoch=20000,
-        step_per_collect=8,
+        epoch=10,
+        step_per_epoch=2000,
+        step_per_collect=1000,
         update_per_step=0.125,
-        batch_size=128,
+        batch_size=1280,
         hidden_sizes=[128, 128],
-        training_num=8,
-        test_num=100,
+        training_num=10,
+        test_num=5,
         logdir="log",
         render=0.0,
         rew_norm=False,
         n_step=3,
         device="cuda" if torch.cuda.is_available() else "cpu",
     ):
-        self.task = task
+        self.task = "VJS"
         self.reward_threshold = reward_threshold
         self.seed = seed
         self.buffer_size = buffer_size
@@ -65,12 +64,12 @@ class Args:
         self.device = device
 
 
-# 假设这是一个用于训练和评估DDPG算法的类
+# 这是一个用于训练和评估DDPG算法的类
 class DDPGTrainer:
     def __init__(self, get_env, args=Args()):
         self.get_env = get_env
         self.args = args
-        self.policy, self.agents = self._get_agents()
+        self.policy_manager, self.polices = self._get_agents()
         self.train_collector, self.test_collector = self.construct_collector()
         # log
         log_path = os.path.join(args.logdir, args.task, "ddpg")
@@ -99,6 +98,7 @@ class DDPGTrainer:
             # model
             net = Net(
                 state_shape,
+                action_shape,
                 hidden_sizes=self.args.hidden_sizes,
                 device=self.args.device,
             )
@@ -106,6 +106,7 @@ class DDPGTrainer:
                 net, action_shape, max_action=max_action, device=self.args.device
             ).to(self.args.device)
             actor_optim = torch.optim.Adam(actor.parameters(), lr=self.args.actor_lr)
+
             net = Net(
                 state_shape,
                 action_shape,
@@ -120,12 +121,12 @@ class DDPGTrainer:
                 actor_optim,
                 critic,
                 critic_optim,
-                tau=self.args.tau,
-                gamma=self.args.gamma,
-                exploration_noise=GaussianNoise(sigma=self.args.exploration_noise),
-                reward_normalization=self.args.rew_norm,
-                estimation_step=self.args.n_step,
-                action_space=env.action_space,
+                # tau=self.args.tau,
+                # gamma=self.args.gamma,
+                # exploration_noise=GaussianNoise(sigma=self.args.exploration_noise),
+                # reward_normalization=self.args.rew_norm,
+                # estimation_step=self.args.n_step,
+                # action_space=env.action_space,
             )
             agents.append(policy)
         policy = MultiAgentPolicyManager(agents, env)
@@ -146,25 +147,26 @@ class DDPGTrainer:
 
         # collector
         train_collector = Collector(
-            self.policy,
+            self.policy_manager,
             train_envs,
             VectorReplayBuffer(self.args.buffer_size, len(train_envs)),
             exploration_noise=True,
         )
-        test_collector = Collector(self.policy, test_envs)
+        test_collector = Collector(self.policy_manager, test_envs)
+        # train_collector.collect(n_step=64 * 1000)
         return train_collector, test_collector
 
     def train(self):
         # trainer
         self.result = offpolicy_trainer(
-            self.policy,
-            self.train_collector,
-            self.test_collector,
-            self.args.epoch,
-            self.args.step_per_epoch,
-            self.args.step_per_collect,
-            self.args.test_num,
-            self.args.batch_size,
+            policy=self.policy_manager,
+            train_collector=self.train_collector,
+            test_collector=self.test_collector,
+            max_epoch=self.args.epoch,
+            step_per_epoch=self.args.step_per_epoch,
+            step_per_collect=self.args.step_per_collect,
+            episode_per_test=self.args.test_num,
+            batch_size=self.args.batch_size,
             update_per_step=self.args.update_per_step,
             stop_fn=self.stop_fn,
             save_best_fn=self.save_best_fn,
@@ -172,12 +174,30 @@ class DDPGTrainer:
         )
         assert self.stop_fn(self.result["best_reward"])
 
+    def onploicy_train(self):
+        # trainer
+        self.result = onpolicy_trainer(
+            policy=self.policy_manager,
+            train_collector=self.train_collector,
+            test_collector=self.test_collector,
+            max_epoch=self.args.epoch,
+            step_per_epoch=self.args.step_per_epoch,
+            step_per_collect=self.args.step_per_collect,
+            repeat_per_collect=2,
+            episode_per_test=self.args.test_num,
+            batch_size=self.args.batch_size,
+            update_per_step=self.args.update_per_step,
+            stop_fn=self.stop_fn,
+            save_best_fn=self.save_best_fn,
+            logger=self.logger,
+        )
+
     def eval(self):
         pprint.pprint(self.result)
         # Let's watch its performance!
         env = self.get_env()
-        self.policy.eval()
-        collector = Collector(self.policy, env)
+        self.policy_manager.eval()
+        collector = Collector(self.policy_manager, env)
         result = collector.collect(n_episode=1, render=self.args.render)
         rews, lens = result["rews"], result["lens"]
         print(f"Final reward: {rews.mean()}, length: {lens.mean()}")
@@ -186,7 +206,7 @@ class DDPGTrainer:
 # 使用这个类的示例代码
 if __name__ == "__main__":
     # 创建一个环境函数，例如gym.make("Pendulum-v0")
-    get_env = lambda: gym.make("Pendulum-v0")
+    get_env = lambda: gym.make("Pendulum-v1")
     # 创建一个参数对象，可以设置一些超参数，例如hidden_sizes=[128, 128], actor_lr=1e-3等
     args = Args(hidden_sizes=[128, 128], actor_lr=1e-3)
     # 创建一个DDPGTrainer对象，传入环境函数和参数对象

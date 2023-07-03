@@ -71,9 +71,9 @@ def train_dqn(get_env):
         VectorReplayBuffer(20_000, len(train_envs)),
         exploration_noise=True,
     )
-    test_collector = Collector(policy, test_envs, exploration_noise=True)
+    test_collector = Collector(policy, train_envs, exploration_noise=True)
     # policy.set_eps(1)
-    train_collector.collect(n_step=64 * 10000)  # batch size * training_num
+    # train_collector.collect(n_step=64 * 10000)  # batch size * training_num
 
     # ======== Step 4: Callback functions setup =========
     def save_best_fn(policy):

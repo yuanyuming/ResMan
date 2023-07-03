@@ -97,7 +97,7 @@ class VehicleJobSchedulingParameters:
         self.finished_job = 0
         self.finished_job_restrict = 10000
         self.time_step = 0
-        self.time_step_restrict = 1000
+        self.time_step_restrict = 100
         self.stop_condition = self.stop_condition_time_step
 
     def reset(self):
@@ -452,7 +452,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             self.truncations = {agent: True for agent in self.agents}
             self.terminations = {agent: True for agent in self.agents}
             self.done = True
-            print("Finished!!!")
+            # print("Finished!!!")
         self.parameters.cluster.clear_job()
 
     @functools.lru_cache(maxsize=1000)

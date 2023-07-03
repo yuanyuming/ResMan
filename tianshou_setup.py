@@ -24,5 +24,5 @@ def get_env_continous():
     env = Environment.VehicleJobSchedulingEnvACE(parameter=para)
     env = BaseWrapper(env)
     env = PettingZooEnv(env)
-
+    # env.agents = [i + 1 for i in range(env.num_agents)]
     return env
