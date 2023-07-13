@@ -327,7 +327,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             )
         return spaces.Discrete(self.parameters.action_discrete_space)
 
-    def reset(self, seed=None, return_info=False, options=None):
+    def reset(self, return_info=False, seed=None, options=None):
         np.random.seed(seed)
         self.parameters.reset()
         self.agents = [
@@ -354,7 +354,10 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         self.round_start = True
         self.round_jobs = None
         self.pay = [0 for _ in range(len(self.agents))]
-        return self.observation[self.agent_selection], {}
+        infos = {k: {} for k in self.observation.keys()}
+        if return_info:
+            return {}
+        return self.observation[self.agent_selection], infos
 
     def observe(self, agent: AgentID) -> Any:
         return self.observation[agent]
@@ -469,7 +472,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
     def step(self, action):
         agent = self.agent_selection
         if self.terminations[agent] or self.truncations[agent]:
-            self._was_dead_step(action)
+            self._was_dead_step(None)
             self.agent_selection = self.__agent_selector.next()
             return
         if not self.round_start:
