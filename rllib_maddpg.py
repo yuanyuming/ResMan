@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--run", type=str, default="PG", help="The RLlib-registered algorithm to use."
+    "--run", type=str, default="MADDPG", help="The RLlib-registered algorithm to use."
 )
 parser.add_argument(
     "--framework",
@@ -71,7 +71,10 @@ if __name__ == "__main__":
 
     ray.init(num_cpus=args.num_cpus or None, local_mode=args.local_mode)
     env_name = "VJS"
-
+    register_env(
+        env_name,
+        lambda config: rllib_setup.get_env(),
+    )
     config = (
         get_trainable_cls(args.run)
         .get_default_config()
@@ -80,7 +83,7 @@ if __name__ == "__main__":
         # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
         .resources(num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0")))
     )
-    test_env = rllib_setup.get_env_continuous()
+    test_env = rllib_setup.get_env()
     obs_space = test_env.observation_space
     act_space = test_env.action_space
 
@@ -95,15 +98,13 @@ if __name__ == "__main__":
         }
 
     grouping = {"group": [agent for agent in test_env._agent_ids]}
-    register_env(
-        env_name,
-        lambda config: rllib_setup.get_env_continuous(),
-    )
+
     if args.run == "MADDPG":
         (
             config.framework("tf")
-            # .environment(env_config={"actions_are_logits": True})
-            .training(num_steps_sampled_before_learning_starts=100).multi_agent(
+            .environment(env_config={"actions_are_logits": True})
+            .training(num_steps_sampled_before_learning_starts=100)
+            .multi_agent(
                 policies=policies(test_env._agent_ids),
                 policy_mapping_fn=lambda agent_id, episode, worker, **kwargs: str(
                     agent_id

@@ -12,6 +12,7 @@ from gymnasium.spaces.utils import flatten, flatten_space
 from numpy import ndarray
 from pettingzoo.utils import agent_selector
 from pettingzoo.utils.env import AgentID
+from rich import print
 
 from . import AllocationMechanism, Auction, Job, Machine
 
@@ -486,10 +487,11 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             self._accumulate_rewards()
         if self.round_start and self.__agent_selector.is_last():
             self.round_start = False
+        if type(action) is not int:
+            action = np.argmax(action)
+        # print(agent, "action", action)
 
-        self.parameters.cluster.machines[int(agent[8:])].action = self.action(
-            float(action)
-        )
+        self.parameters.cluster.machines[int(agent[8:])].action = self.action(action)
 
         if self.__agent_selector.is_last():
             # self._clear_rewards()
