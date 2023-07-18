@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     config = (
         PPOConfig()
-        .environment(env=env_name, disable_env_checking=True)
+        .environment(env=env_name)
         .rollouts(num_rollout_workers=4, rollout_fragment_length=128)
         .training(
             train_batch_size=512,

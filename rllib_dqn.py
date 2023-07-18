@@ -87,13 +87,13 @@ if __name__ == "__main__":
 
     config = (
         DQNConfig()
-        .environment(env=env_name)
+        .environment(env=env_name, disable_env_checking=True)
         .rollouts(num_rollout_workers=1, rollout_fragment_length=30)
         .training(
             train_batch_size=200,
             hiddens=[],
             dueling=False,
-            model={"custom_model": "pa_model"},
+            model={"custom_model": "DQNTorchModel"},
         )
         .multi_agent(
             policies={

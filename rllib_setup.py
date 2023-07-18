@@ -9,7 +9,7 @@ from environment import Environment
 
 def get_env():
     env = Environment.VehicleJobSchedulingEnvACE()
-    env = BaseWrapper(env)
+    # env = BaseWrapper(env)
     env = PettingZooEnv(env)
     # env = MultiAgentEnvCompatibility(env)
     return env

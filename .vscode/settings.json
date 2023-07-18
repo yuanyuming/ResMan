@@ -82,7 +82,7 @@
     "files.insertFinalNewline": true,
     "workbench.editor.sharedViewState": true,
     "window.autoDetectColorScheme": true,
-    "workbench.colorTheme": "Default Light Modern",
+    "workbench.colorTheme": "GitHub Light",
     "workbench.preferredDarkColorTheme": "GitHub Dark",
     "workbench.tree.renderIndentGuides": "always",
     "workbench.view.alwaysShowHeaderActions": true,

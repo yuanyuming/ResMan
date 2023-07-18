@@ -93,8 +93,6 @@ class JobDistribution:
         return nw_len, nw_size  # 返回任务时长和资源请求量
 
 
-# 导入numpy库
-
 # 定义一个类，表示一个任务
 
 
