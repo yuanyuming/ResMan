@@ -10,6 +10,8 @@ mappo modify
 - [ ] PolicyLearningPolicy
 - [ ] DoublyRobustPolicy
 - [ ] DQNPolicy
+- [ ] A2C
+- [ ] A3C
 - [ ] MAPPOPolicy
 - [ ] MADDPGPolicy
 - [ ] SACPolicy

@@ -197,7 +197,7 @@ def train_agent(
         return False
 
     def reward_metric(rews):
-        return rews[:, 0]
+        return rews
 
     # trainer
     result = onpolicy_trainer(

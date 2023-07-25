@@ -1,7 +1,8 @@
 """
 定义任务Job相关结构
 """
-from collections import OrderedDict
+from collections import Callable, OrderedDict
+from typing import List, Tuple
 
 # 导入numpy库
 import numpy as np
@@ -20,10 +21,10 @@ class JobDistribution:
     # job_priority_range: 一个列表，表示任务的优先级范围
     def __init__(
         self,
-        max_job_vec=[10, 20],
-        max_job_len=10,
-        job_small_chance=0.8,
-        job_priority_range=[1, 5],
+        max_job_vec: List[int] = [10, 20],
+        max_job_len: int = 10,
+        job_small_chance: float = 0.8,
+        job_priority_range: List[int] = [1, 5],
     ):
         self.num_res = len(max_job_vec)  # 资源的种类数
         self.max_nw_size = max_job_vec  # 每种资源的最大任务数量
@@ -114,12 +115,12 @@ class Job:
     # average_cost_vec: 一个列表，表示每种资源的平均成本
     def __init__(
         self,
-        res_vec=[2, 3],
-        job_len=5,
-        job_id=0,
-        enter_time=0,
-        priority=1,
-        average_cost_vec=[4, 6],
+        res_vec: List[int] = [2, 3],
+        job_len: int = 5,
+        job_id: int = 0,
+        enter_time: int = 0,
+        priority: int = 1,
+        average_cost_vec: List[int] = [4, 6],
     ):
         self.id = job_id  # 任务id
         self.res_vec = res_vec  # 资源需求向量
@@ -138,7 +139,7 @@ class Job:
         self.utility = 0  # 效用值
 
     # 定义一个方法，根据给定的分布函数随机生成任务时长和资源需求向量，并更新预算和任务向量
-    def random_job(self, dist=JobDistribution().bi_model_dist):
+    def random_job(self, dist= JobDistribution().bi_model_dist) -> None:
         self.len, self.res_vec = dist()  # 调用分布函数生成时长和需求向量
         self.budget = self.calculate_budget(self.average_cost_vec)  # 更新预算
         self.job_vec = self.generate_job()  # 更新任务向量

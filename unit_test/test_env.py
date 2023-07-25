@@ -1,5 +1,3 @@
-from typing import Optional
-
 from environment import Environment
 
 
