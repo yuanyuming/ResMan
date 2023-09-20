@@ -115,12 +115,12 @@ class Job:
     # average_cost_vec: 一个列表，表示每种资源的平均成本
     def __init__(
         self,
-        res_vec: List[int] = [2, 3],
-        job_len: int = 5,
+        res_vec: List[int] = [1, 1],
+        job_len: int = 1,
         job_id: int = 0,
         enter_time: int = 0,
-        priority: int = 1,
-        average_cost_vec: List[int] = [4, 6],
+        priority: int = 0,
+        average_cost_vec: List[int] = [1, 10],
     ):
         self.id = job_id  # 任务id
         self.res_vec = res_vec  # 资源需求向量
@@ -131,7 +131,7 @@ class Job:
         self.time_restrict = 0  # 时间限制
         self.start_time = -1  # 开始时间
         self.finish_time = -1  # 结束时间
-        self.priority = priority  # 优先级
+        self.priority = 1 + priority / 10  # 优先级
         self.job_vec = self.generate_job()  # 生成的任务向量
         self.average_cost_vec = average_cost_vec  # 平均成本向量
         self.budget = self.calculate_budget(average_cost_vec)  # 计算的预算
@@ -139,7 +139,7 @@ class Job:
         self.utility = 0  # 效用值
 
     # 定义一个方法，根据给定的分布函数随机生成任务时长和资源需求向量，并更新预算和任务向量
-    def random_job(self, dist= JobDistribution().bi_model_dist) -> None:
+    def random_job(self, dist=JobDistribution().bi_model_dist) -> None:
         self.len, self.res_vec = dist()  # 调用分布函数生成时长和需求向量
         self.budget = self.calculate_budget(self.average_cost_vec)  # 更新预算
         self.job_vec = self.generate_job()  # 更新任务向量
@@ -149,12 +149,12 @@ class Job:
         return [self.res_vec] * self.len
 
     # 定义一个方法，根据每种资源的平均成本和方差计算任务的预算，并保证预算不为负数
-    def calculate_budget(self, average_cost_vec, var=0.3):
+    def calculate_budget(self, average_cost_vec, var=0.03):
         return max(
             0,
-            (np.dot(self.res_vec, average_cost_vec) + var * np.random.normal())
+            np.dot(self.res_vec, average_cost_vec)
             * self.len
-            * self.priority,
+            * (self.priority + var * np.random.normal()),
         )
 
     # 定义一个方法，返回任务的观察信息，即资源需求向量、时长、优先级和限制机器列表

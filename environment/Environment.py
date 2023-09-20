@@ -20,12 +20,12 @@ from . import AllocationMechanism, Auction, Job, Machine
 class VehicleJobSchedulingParameters:
     def __init__(self):
         # Job Config
-        self.max_job_vec = [20, 30]
-        self.max_job_len = 10
+        self.max_job_vec = [8, 100]
+        self.max_job_len = 20
 
         # Job Distribution Config
         self.job_small_chance = 0.8
-        self.job_priority_range = [1, 5]
+        self.job_priority_range = [0, 10]
         self.job_distribution = Job.JobDistribution(
             self.max_job_vec, self.max_job_len, self.job_small_chance
         )
@@ -87,9 +87,9 @@ class VehicleJobSchedulingParameters:
         )
         # observation, action space
         self.action_space_continuous = False
-        self.action_discrete_space = 30
-        self.action_space_low = 1 / 3
-        self.action_space_high = 3
+        self.action_discrete_space = 20
+        self.action_space_low = 1 / 2
+        self.action_space_high = 2
 
         # Runtime Configure
         self.max_step = 100000

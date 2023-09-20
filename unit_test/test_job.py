@@ -11,7 +11,6 @@ sys.path.append(".")
 
 def test_job():
     job = Job.Job()
-    job.random_job()
     job.show()
 
 
