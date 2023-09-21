@@ -54,7 +54,7 @@ class JobDistribution:
         return np.random.randint(self.priority_range[0], self.priority_range[1] + 1)
 
     # 定义一个方法，返回一个正态分布生成的任务时长和资源请求量
-    def normal_dist(self):
+    def uniform_dist(self):
         # NOTE - 新任务时长
         nw_len = np.random.randint(1, self.max_job_len + 1)  # 随机生成一个整数作为任务时长
 

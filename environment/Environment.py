@@ -1,3 +1,4 @@
+import dis
 import functools
 import re
 from collections import OrderedDict
@@ -18,24 +19,32 @@ from . import AllocationMechanism, Auction, Job, Machine
 
 
 class VehicleJobSchedulingParameters:
-    def __init__(self):
+    def __init__(self, distribution="bi_model_dist"):
         # Job Config
-        self.max_job_vec = [8, 100]
+        self.max_job_vec = [24, 100]
         self.max_job_len = 20
+        self.average_cost_vec = [18, 22]
 
         # Job Distribution Config
         self.job_small_chance = 0.8
         self.job_priority_range = [0, 10]
         self.job_distribution = Job.JobDistribution(
-            self.max_job_vec, self.max_job_len, self.job_small_chance
+            self.max_job_vec,
+            self.max_job_len,
+            self.job_small_chance,
+            self.job_priority_range,
         )
-        self.job_dist = self.job_distribution.bi_model_dist
+        if distribution == "bi_model_dist":
+            self.job_dist = self.job_distribution.bi_model_dist
+        else:
+            self.job_dist = self.job_distribution.uniform_dist
+
         # Job Collection Config
         self.average_per_slot = 10
         self.duration = 30
         self.max_job_len = 10
         self.job_small_chance = 0.8
-        self.job_average_cost_vec = [18, 22]
+
         self.job_collection = Job.JobCollection(
             self.average_per_slot,
             0,
@@ -43,19 +52,26 @@ class VehicleJobSchedulingParameters:
             self.duration,
             self.job_dist,
             self.job_distribution.priority_dist,
-            self.job_average_cost_vec,
+            self.average_cost_vec,
         )
 
         # Machine Config
         self.machine_numbers = 10
-        self.job_backlog_size = 10
-        self.job_slot_size = 10
         self.num_res = len(self.max_job_vec)
-        self.time_horizon = 10
+        self.time_horizon = self.max_job_len
         self.current_time = 0
+        self.big_machine = Machine.MachineType(192, 2048, 29.05)
+        self.middle_machine = Machine.MachineType(112, 768, 17.45)
+        self.small_machine = Machine.MachineType(72, 144, 10.25)
+        self.machine_types = {
+            "small": self.small_machine,
+            "middle": self.middle_machine,
+            "big": self.big_machine,
+        }
         self.machine_average_res_vec = [20, 40]
         self.machine_max_res_vec = 100
-        self.machine_average_cost_vec = [2, 4]
+        self.job_backlog_size = 10
+        self.job_slot_size = 10
 
         # Cluster Generate
         self.cluster = Machine.Cluster(
@@ -66,7 +82,7 @@ class VehicleJobSchedulingParameters:
             self.time_horizon,
             self.current_time,
             self.machine_average_res_vec,
-            self.machine_average_cost_vec,
+            self.average_cost_vec,
         )
 
         # Machine Restrict Config
