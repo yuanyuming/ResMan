@@ -196,7 +196,7 @@ def test_aec_preformce():
 
 
 def test_ace_env_step():
-    import Environment
+    from environment import Environment
 
     env = Environment.VehicleJobSchedulingEnvACE(render_mode="human")
     env.reset()

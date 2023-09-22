@@ -131,7 +131,7 @@ class Job:
         self.time_restrict = 0  # 时间限制
         self.start_time = -1  # 开始时间
         self.finish_time = -1  # 结束时间
-        self.priority = 1 + priority / 10  # 优先级
+        self.priority = priority  # 优先级
         self.job_vec = self.generate_job()  # 生成的任务向量
         self.average_cost_vec = average_cost_vec  # 平均成本向量
         self.budget = self.calculate_budget(average_cost_vec)  # 计算的预算
@@ -154,7 +154,7 @@ class Job:
             0,
             np.dot(self.res_vec, average_cost_vec)
             * self.len
-            * (self.priority + var * np.random.normal()),
+            * ((1 + self.priority / 10) + var * np.random.normal()),
         )
 
     # 定义一个方法，返回任务的观察信息，即资源需求向量、时长、优先级和限制机器列表

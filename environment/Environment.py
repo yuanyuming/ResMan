@@ -42,7 +42,6 @@ class VehicleJobSchedulingParameters:
         # Job Collection Config
         self.average_per_slot = 10
         self.duration = 30
-        self.max_job_len = 10
         self.job_small_chance = 0.8
 
         self.job_collection = Job.JobCollection(

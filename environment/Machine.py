@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from dataclasses import dataclass
+
 import numpy as np
 import prettytable
 
@@ -51,12 +52,14 @@ class BiderPolicy:
     def bid(self, job=Job.Job()):
         pass
 
+
 @dataclass
 class MachineType:
     vCPUs: int
     memory: int
     price: float
-    
+
+
 class Machine:
     def __init__(
         self,
@@ -95,7 +98,7 @@ class Machine:
         self.policy = self.drl_bid
         self.action = 1
         self.bid = 0
-        # self.slot_show = SlotShow(self.res_slot, self.avail_slot)
+        self.slot_show = SlotShow(self.res_slot, self.avail_slot)
 
     def add_backlog(self, job=Job.Job()):
         """
@@ -477,7 +480,6 @@ class Cluster:
             machine.show_available_slot()
         print(table)
 
-class ClusterFixed:
 
 class Bids:
     def __init__(self, cluster=Cluster(), job=Job.Job()):
