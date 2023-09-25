@@ -132,7 +132,7 @@ class Job:
         self.start_time = -1  # 开始时间
         self.finish_time = -1  # 结束时间
         self.priority = priority  # 优先级
-        self.job_vec = self.generate_job()  # 生成的任务向量
+        # self.job_vec = self.generate_job()  # 生成的任务向量
         self.average_cost_vec = average_cost_vec  # 平均成本向量
         self.budget = self.calculate_budget(average_cost_vec)  # 计算的预算
         self.pay = 0  # 支付金额
@@ -142,7 +142,7 @@ class Job:
     def random_job(self, dist=JobDistribution().bi_model_dist) -> None:
         self.len, self.res_vec = dist()  # 调用分布函数生成时长和需求向量
         self.budget = self.calculate_budget(self.average_cost_vec)  # 更新预算
-        self.job_vec = self.generate_job()  # 更新任务向量
+        # self.job_vec = self.generate_job()  # 更新任务向量
 
     # 定义一个方法，根据资源需求向量生成任务向量，即每个时刻需要的资源数量
     def generate_job(self):
@@ -230,7 +230,7 @@ class Job:
         table.title = "Job Info"
         print(table)
         print("Job Vector")
-        print(self.job_vec)
+        print(self.generate_job())
 
     # 定义一个方法，设置任务的支付金额（暂未实现）
     def get_pay(self, pay=0):
@@ -360,7 +360,7 @@ class JobSlot:
                 table.add_row(
                     [
                         job.id,
-                        job.res_vec,
+                        job.generate_job(),
                         job.len,
                         job.enter_time,
                         job.start_time,
@@ -405,7 +405,7 @@ class JobSlot:
                 table.add_row(
                     [
                         job.id,
-                        job.res_vec,
+                        job.generate_job(),
                         job.len,
                         job.enter_time,
                         job.start_time,
@@ -440,7 +440,7 @@ class JobBacklog:
                 table.add_row(
                     [
                         job.id,
-                        job.res_vec,
+                        job.generate_job(),
                         job.enter_time,
                         job.start_time,
                         job.finish_time,

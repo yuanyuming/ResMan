@@ -510,6 +510,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
 
     def step(self, action):
         agent = self.agent_selection
+
         if self.terminations[agent] or self.truncations[agent]:
             self._was_dead_step(None)
             self.agent_selection = self.__agent_selector.next()
@@ -525,12 +526,10 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             self._accumulate_rewards()
         if self.round_start and self.__agent_selector.is_last():
             self.round_start = False
-        if type(action) is not int:
-            action = np.argmax(action)
         # print(agent, "action", action)
 
         self.parameters.cluster.machines[int(agent[8:])].action = self.action(action)
-
+        print("Agent:", agent, ", Action:", action)
         if self.__agent_selector.is_last():
             # self._clear_rewards()
             # print(self.request_job)

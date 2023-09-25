@@ -523,10 +523,10 @@ class Bids:
         self.job = job
         self.can_allocate = []
         self.bids = []
+        self.request_bids()
 
     def get_bids(self):
-        for machine in self.can_allocate:
-            self.bids.append(machine.get_bid())
+        self.bids = [machine.get_bid() for machine in self.can_allocate]
 
     def request_bids(self):
         for machine in self.machines:
@@ -536,9 +536,9 @@ class Bids:
 
     def __str__(self):
         table = prettytable.PrettyTable(
-            ["Machine " + str(machine.id) for machine in self.machines]
+            ["Machine " + str(machine.id) for machine in self.can_allocate]
         )
-        table.add_row(self.bids)
+        table.add_row([f"{bid:.2f}" for bid in self.bids])
         return table.get_string()
 
 
