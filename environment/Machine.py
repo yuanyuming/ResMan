@@ -71,7 +71,7 @@ class Machine:
         res_slot=[20, 40],
         cost_vector=[4, 6],
         current_time=0,
-        policy=0,
+        price=0.0,
     ) -> None:
         """
         Initializes the machine
@@ -82,6 +82,7 @@ class Machine:
         self.current_time = current_time
         self.job_slot_size = job_slot_size
         self.job_backlog_size = job_backlog_size
+        self.price = price
         self.job_slot = Job.JobSlot(self.job_slot_size)
         self.job_backlog = Job.JobBacklog(self.job_backlog_size)
         self.res_slot = res_slot
@@ -137,7 +138,7 @@ class Machine:
         if self.request_job is not None:
             machine_obs = OrderedDict(
                 [
-                    ("avail_slot", np.array(self.avail_slot, dtype=np.int8)),
+                    ("avail_slot", np.array(self.avail_slot, dtype=np.int16)),
                     (
                         "request_res_vec",
                         np.array(self.request_job.res_vec),
@@ -155,7 +156,7 @@ class Machine:
             return machine_obs
         machine_obs = OrderedDict(
             [
-                ("avail_slot", np.array(self.avail_slot, dtype=np.int8)),
+                ("avail_slot", np.array(self.avail_slot, dtype=np.int16)),
                 (
                     "request_res_vec",
                     np.array([0, 0]),
@@ -225,11 +226,10 @@ class Machine:
             assert job.finish_time > job.start_time
         return allocated
 
-    # async allocate job, not used
-
     def allocate_job_async(self, job=Job.Job()):
         """
         Allocate the Job to this Machine
+        async allocate job, not used
         """
         allocated = False
 
@@ -385,32 +385,22 @@ class Machine:
 class Cluster:
     def __init__(
         self,
-        machine_numbers=20,
         job_backlog_size=10,
         job_slot_size=10,
         num_res=2,
         time_horizon=20,
         current_time=0,
-        machine_average_res_vec=[20, 40],
-        machine_average_cost_vec=[2, 4],
-        bias_r=5,
-        bias_c=2,
     ):
-        self.number = machine_numbers
+        self.number = 0
         self.job_backlog_size = job_backlog_size
         self.job_slot_size = job_slot_size
         self.num_res = num_res
         self.time_horizon = time_horizon
         self.current_time = current_time
         self.now_id = 0
-        self.machine_average_res_vec = machine_average_res_vec
-        self.machine_average_cost_vec = machine_average_cost_vec
-        self.bias_r = bias_r
-        self.bias_c = bias_c
         self.machines = []
-        self.generate_machines_random(self.number)
 
-    def add_machine(self, res_slot, cost_vector):
+    def add_machine(self, res_slot, cost_vector, price):
         self.machines.append(
             Machine(
                 self.now_id,
@@ -421,21 +411,67 @@ class Cluster:
                 res_slot,
                 cost_vector,
                 self.current_time,
+                price=price,
             )
         )
         self.now_id += 1
 
-    def generate_machines_random(self, num):
+    def add_typed_machine(self, machine_type=MachineType(1, 2, 1), cost_vector=[2, 4]):
+        res_slot = [machine_type.vCPUs, machine_type.memory]
+        price = machine_type.price
+        self.machines.append(
+            Machine(
+                self.now_id,
+                self.num_res,
+                self.time_horizon,
+                self.job_slot_size,
+                self.job_backlog_size,
+                res_slot,
+                cost_vector,
+                self.current_time,
+                price=price,
+            )
+        )
+        self.now_id += 1
+
+    def generate_machines_random(
+        self,
+        num,
+        machine_average_res_vec=[20, 40],
+        machine_average_cost_vec=[2, 4],
+        bias_r=5,
+    ):
         """
-        Purpose:
+        Purpose: Randomly generate machines
         """
         for i in range(num):
-            bias_r = np.random.randint(-self.bias_r, self.bias_r, self.num_res)
-            bias_c = np.random.randint(-self.bias_c, self.bias_c, self.num_res)
+            bias_r = np.random.randint(-bias_r, bias_r, self.num_res)
+            res_slot = machine_average_res_vec + bias_r
+            price = np.dot(machine_average_cost_vec, res_slot)
             self.add_machine(
-                res_slot=self.machine_average_res_vec + bias_r,
-                cost_vector=self.machine_average_cost_vec + bias_c,
+                res_slot=res_slot, cost_vector=machine_average_cost_vec, price=price
             )
+        self.number = len(self.machines)
+
+    def generate_machines_fixed(
+        self,
+        groups=12,
+        machine_types={
+            "small": MachineType(1, 2, 1),
+            "middle": MachineType(2, 4, 2),
+            "big": MachineType(4, 8, 4),
+        },
+        machine_average_cost_vec=[2, 4],
+    ):
+        """
+        Purpose: Fixed generate machines
+        """
+        for i in range(groups):
+            self.add_typed_machine(machine_types["small"], machine_average_cost_vec)
+            self.add_typed_machine(machine_types["big"], machine_average_cost_vec)
+            self.add_typed_machine(machine_types["middle"], machine_average_cost_vec)
+
+        self.number = len(self.machines)
 
     def allocate_job(self, machine_id=0, job=Job.Job()):
         self.machines[machine_id].allocate_job(job)

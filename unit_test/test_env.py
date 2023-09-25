@@ -1,6 +1,3 @@
-from environment import Environment
-
-
 def test_step():
     import numpy as np
 
@@ -186,12 +183,28 @@ def test_ace_env():
     api_test(env, num_cycles=10000)
 
 
-def test_aec_preformce():
+def get_ace_env():
+    from environment import Environment
+
     env = Environment.VehicleJobSchedulingEnvACE()
+    env.reset()
+    return env
+
+
+def test_ace_observation():
+    env = get_ace_env()
+    env.reset()
+    print(env.observation_space(env.agent_selection))
+
+
+def test_aec_preformce():
     import cProfile
 
     from pettingzoo.test import performance_benchmark
 
+    from environment import Environment
+
+    env = Environment.VehicleJobSchedulingEnvACE()
     performance_benchmark(env)
 
 
@@ -200,12 +213,12 @@ def test_ace_env_step():
 
     env = Environment.VehicleJobSchedulingEnvACE(render_mode="human")
     env.reset()
-    for agent in env.agent_iter(10000):
+    for agent in env.agent_iter(1000):
         env.step(env.action_space(agent).sample())
 
 
 def test_ace_env_observe():
-    import Environment
+    from environment import Environment
 
     env = Environment.VehicleJobSchedulingEnvACE()
     env.reset()
@@ -268,3 +281,11 @@ def test_reward():
     from pettingzoo.test import api_test
 
     api_test(env, num_cycles=10)
+
+
+def test_cluster_generate():
+    from environment import Environment
+
+    env = Environment.VehicleJobSchedulingEnv()
+    env.reset()
+    print(env.parameters.cluster)

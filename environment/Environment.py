@@ -19,11 +19,18 @@ from . import AllocationMechanism, Auction, Job, Machine
 
 
 class VehicleJobSchedulingParameters:
-    def __init__(self, distribution="bi_model_dist"):
+    def __init__(
+        self,
+        distribution="bi_model_dist",
+        average_per_slot=10,
+        duration=30,
+        machine_numbers=12,
+        random_cluster=False,
+    ):
         # Job Config
         self.max_job_vec = [24, 100]
         self.max_job_len = 20
-        self.average_cost_vec = [18, 22]
+        self.average_cost_vec = [40.5, 4.5]
 
         # Job Distribution Config
         self.job_small_chance = 0.8
@@ -40,8 +47,8 @@ class VehicleJobSchedulingParameters:
             self.job_dist = self.job_distribution.uniform_dist
 
         # Job Collection Config
-        self.average_per_slot = 10
-        self.duration = 30
+        self.average_per_slot = average_per_slot
+        self.duration = duration
         self.job_small_chance = 0.8
 
         self.job_collection = Job.JobCollection(
@@ -55,34 +62,50 @@ class VehicleJobSchedulingParameters:
         )
 
         # Machine Config
-        self.machine_numbers = 10
+        self.machine_numbers = machine_numbers
         self.num_res = len(self.max_job_vec)
         self.time_horizon = self.max_job_len
         self.current_time = 0
-        self.big_machine = Machine.MachineType(192, 2048, 29.05)
-        self.middle_machine = Machine.MachineType(112, 768, 17.45)
-        self.small_machine = Machine.MachineType(72, 144, 10.25)
-        self.machine_types = {
-            "small": self.small_machine,
-            "middle": self.middle_machine,
-            "big": self.big_machine,
-        }
-        self.machine_average_res_vec = [20, 40]
-        self.machine_max_res_vec = 100
         self.job_backlog_size = 10
         self.job_slot_size = 10
-
         # Cluster Generate
         self.cluster = Machine.Cluster(
-            self.machine_numbers,
             self.job_backlog_size,
             self.job_slot_size,
             self.num_res,
             self.time_horizon,
             self.current_time,
-            self.machine_average_res_vec,
-            self.average_cost_vec,
         )
+
+        if random_cluster:
+            self.machine_average_res_vec = [20, 40]
+            self.machine_max_res_vec = 100
+
+            self.bias_r = 5
+            self.bias_c = 2
+            # Add Machine
+            self.cluster.generate_machines_random(
+                self.machine_numbers,
+                self.machine_average_res_vec,
+                self.average_cost_vec,
+                self.bias_r,
+            )
+
+        else:
+            self.big_machine = Machine.MachineType(192, 2048, 29.05)
+            self.middle_machine = Machine.MachineType(112, 768, 17.45)
+            self.small_machine = Machine.MachineType(72, 144, 10.25)
+            self.machine_max_res_vec = 4096
+            self.machine_types = {
+                "small": self.small_machine,
+                "middle": self.middle_machine,
+                "big": self.big_machine,
+            }
+            self.cluster.generate_machines_fixed(
+                groups=int(self.machine_numbers / 3),
+                machine_types=self.machine_types,
+                machine_average_cost_vec=self.average_cost_vec,
+            )
 
         # Machine Restrict Config
         self.max_machines = 5
@@ -174,7 +197,7 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
                     low=0,
                     high=self.parameters.machine_max_res_vec,
                     shape=(self.parameters.num_res, self.parameters.time_horizon),
-                    dtype=np.int8,
+                    dtype=np.int16,
                 ),
                 "request_job": spaces.Dict(
                     {
@@ -304,7 +327,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
                                 self.parameters.time_horizon,
                                 self.parameters.num_res,
                             ),
-                            dtype=np.int8,
+                            dtype=np.int16,
                         ),
                     ),
                     (

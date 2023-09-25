@@ -1,9 +1,8 @@
-import ray
-
-from rllib_setup import get_env_continuous
-
-
 def test_env():
+    import ray
+
+    from rllib_setup import get_env_continuous
+
     ray.init()
     env = get_env_continuous()
     env_name = "VJS"
