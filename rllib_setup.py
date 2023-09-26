@@ -1,3 +1,4 @@
+import ray
 from pettingzoo.utils.wrappers import BaseWrapper
 from ray.rllib.env.wrappers.multi_agent_env_compatibility import (
     MultiAgentEnvCompatibility,
@@ -30,11 +31,16 @@ def get_env():
     return env
 
 
-def get_env_continuous():
-    para = Environment.VehicleJobSchedulingParameters()
+def get_env_continuous(average_per_slot=50):
+    para = Environment.VehicleJobSchedulingParameters(average_per_slot=average_per_slot)
     para.action_space_continuous = True
     env = Environment.VehicleJobSchedulingEnvACE(parameter=para)
     # env = BaseWrapper(env)
     env = PettingZooEnv(env)
     # env = MultiAgentEnvCompatibility(env)
     return env
+
+
+if __name__ == "__main__":
+    env = get_env_continuous()
+    ray.rllib.utils.check_env(env)

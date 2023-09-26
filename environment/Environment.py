@@ -497,10 +497,10 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             # print("Finished!!!")
         self.parameters.cluster.clear_job()
 
-    @functools.lru_cache(maxsize=1000)
+    # @functools.lru_cache(maxsize=1000)
     def action(self, action):
         if self.parameters.action_space_continuous:
-            return float(action)
+            return float(action[0])
         else:
             return (
                 self.parameters.action_space_high - self.parameters.action_space_low
@@ -529,7 +529,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         # print(agent, "action", action)
 
         self.parameters.cluster.machines[int(agent[8:])].action = self.action(action)
-        print("Agent:", agent, ", Action:", action)
+        # print("Agent:", agent, ", Action:", action)
         if self.__agent_selector.is_last():
             # self._clear_rewards()
             # print(self.request_job)

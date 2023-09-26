@@ -20,7 +20,15 @@ def get_SubprocVectorEnv_n(n):
 
 def get_policy_manager():
     env = tianshou_setup.get_env_continous()
-    policies = MultiAgentPolicyManager([TruthfulPolicy() for _ in range(10)], env)
+    policies = MultiAgentPolicyManager(
+        [
+            TruthfulPolicy(
+                observation_space=env.observation_space, action_space=env.action_space
+            )
+            for _ in range(len(env.agents))
+        ],
+        env,
+    )
     return policies
 
 

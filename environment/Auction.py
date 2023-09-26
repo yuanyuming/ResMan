@@ -26,22 +26,22 @@ class ReverseAuction:
         if prices > bids.job.budget:
             bids.job.pay = 0
             bids.job.running_machine = -1
-            print("Auction Failed: " + str(bids.job))
+            # print("Auction Failed: " + str(bids.job))
             return False
         bids.job.pay = prices
         bids.job.running_machine = winner_machine.id
         winner_machine.allocate_job(bids.job)
-        print([mac.id for mac in bids.machines])
-        print(bids)
-        print(
-            "Auction Success: "
-            + "Job:"
-            + str(bids.job.id)
-            + " Pay:"
-            + str(prices)
-            + " Machine:"
-            + str(winner_machine.id)
-        )
+        # print([mac.id for mac in bids.machines])
+        # print(bids)
+        # print(
+        #    "Auction Success: "
+        #    + "Job:"
+        #    + str(bids.job.id)
+        #    + " Pay:"
+        #    + str(prices)
+        #    + " Machine:"
+        #    + str(winner_machine.id)
+        #)
         return True
 
 

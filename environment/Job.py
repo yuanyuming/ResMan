@@ -1,13 +1,12 @@
 """
 定义任务Job相关结构
 """
-from collections import Callable, OrderedDict
-from typing import List, Tuple
+from collections import OrderedDict
+from typing import List
 
 # 导入numpy库
 import numpy as np
 import prettytable
-from gymnasium import spaces
 from scipy.stats import poisson
 
 # 定义一个类，表示任务分配的参数

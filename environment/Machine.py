@@ -254,17 +254,21 @@ class Machine:
         """
         process time
         """
-        self.reward = 0
+        self.reward = -self.price
 
         self.avail_slot[:-1, :] = self.avail_slot[1:, :]
         self.avail_slot[-1, :] = self.res_slot
 
+        # 检查任务是否结束. 取得收益
         for job in self.running_job:
+            if job.start_time <= self.current_time:
+                self.reward += job.pay
             if job.finish_time <= self.current_time:
                 self.reward += job.pay
                 self.finished_job.append(job)
                 self.finished_job_num += 1
                 self.running_job.remove(job)
+
         self.current_time += 1
         self.earning += self.reward
         self.request_job = None

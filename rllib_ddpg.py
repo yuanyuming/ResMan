@@ -37,9 +37,11 @@ config = (
         policies=policies(test_env._agent_ids),
         policy_mapping_fn=lambda agent_id, episode, **kwargs: str(agent_id),
     )
+    .environment(disable_env_checking=True)
 )
 config.batch_mode = "complete_episodes"
 print(config.to_dict())
 # Build a Algorithm object from the config and run one training iteration.
 algo = config.build(env=env_name)
 algo.train()
+algo.evaluate()
