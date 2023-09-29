@@ -1,9 +1,13 @@
+import ray
 from ray.rllib.algorithms.sac import SACConfig
+from ray.rllib.policy.policy import PolicySpec
 from ray.tune import register_env
-
+from ray import tune
 import rllib_setup
 
+ray.init()
 env_name = "VJS"
+alg_name = "SAC"
 register_env(
     env_name,
     lambda config: rllib_setup.get_env_continuous(),
@@ -26,14 +30,26 @@ def policies(agent_ids):
     }
 
 
-config = SACConfig().training(gamma=0.9, lr=0.01)
-config = config.resources(num_gpus=0)
-config = config.rollouts(num_rollout_workers=4).multi_agent(
-    policies=policies(test_env._agent_ids),
-    policy_mapping_fn=lambda agent_id, episode, **kwargs: str(agent_id),
+config = (
+    SACConfig()
+    .rollouts(num_rollout_workers=10, rollout_fragment_length=30)
+    .training(lr=0.01)
+    .resources(num_gpus=1)
+    .multi_agent(
+        policies=policies(test_env._agent_ids),
+        policy_mapping_fn=lambda agent_id, episode, **kwargs: str(agent_id),
+    )
+    .environment(env=env_name, disable_env_checking=True)
 )
 config.batch_mode = "complete_episodes"
 print(config.to_dict())
-# Build a Algorithm object from the config and run 1 training iteration.
-algo = config.build(env=env_name)
-algo.train()
+# Build a Algorithm object from the config and run one training iteration.
+# algo = config.build(env=env_name)
+
+tune.run(
+    alg_name,
+    name="A3C",
+    stop={"episodes_total": 10000},
+    checkpoint_freq=10,
+    config=config.to_dict(),
+)

@@ -42,7 +42,7 @@ config = (
         policies=policies(test_env._agent_ids),
         policy_mapping_fn=lambda agent_id, episode, **kwargs: str(agent_id),
     )
-    .environment(disable_env_checking=True)
+    .environment(env=env_name, disable_env_checking=True)
 )
 # Build a Algorithm object from the config and run one training iteration.
 config.sample_async
