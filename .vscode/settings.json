@@ -110,6 +110,10 @@
             "source.organizeImports": true
         },
     },
+    "isort.args": [
+        "--profile",
+        "black"
+    ],
     "git.autofetch": true,
     "git.autoStash": true,
     "git.enableSmartCommit": true,
