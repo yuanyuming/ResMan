@@ -22,7 +22,7 @@ class idToAgent(PettingZooEnv):
         return super().step(action)
 
 
-def get_env():
+def get_env(average_per_slot=50, machine_num=12):
     env = Environment.VehicleJobSchedulingEnvACE()
     # env = BaseWrapper(env)
     env = PettingZooEnv(env)
@@ -31,8 +31,10 @@ def get_env():
     return env
 
 
-def get_env_continuous(average_per_slot=50):
-    para = Environment.VehicleJobSchedulingParameters(average_per_slot=average_per_slot)
+def get_env_continuous(average_per_slot=50, machine_num=12):
+    para = Environment.VehicleJobSchedulingParameters(
+        average_per_slot=average_per_slot, machine_numbers=machine_num
+    )
     para.action_space_continuous = True
     env = Environment.VehicleJobSchedulingEnvACE(parameter=para)
     # env = BaseWrapper(env)
