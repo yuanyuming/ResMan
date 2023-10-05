@@ -6,7 +6,7 @@ import tianshou_setup
 from static_policy.TruthfulPolicy import TruthfulPolicy
 
 env = tianshou_setup.get_env_continous()
-policies = MultiAgentPolicyManager([TruthfulPolicy() for _ in range(10)], env)
+policies = MultiAgentPolicyManager([TruthfulPolicy() for _ in range(12)], env)
 
 env = DummyVectorEnv([lambda: env for _ in range(1)])
 

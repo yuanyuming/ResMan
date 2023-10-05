@@ -8,14 +8,11 @@ import os
 
 import numpy as np
 import ray
-from pettingzoo.classic import leduc_holdem_v4
 from ray.rllib.algorithms.algorithm import Algorithm
 from ray.rllib.env.wrappers.pettingzoo_env import PettingZooEnv
 from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
-from rllib_leduc_holdem import TorchMaskedActions
 
-os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 parser = argparse.ArgumentParser(
     description="Render pretrained policy loaded from checkpoint"
@@ -48,7 +45,7 @@ register_env(env_name, lambda config: PettingZooEnv(env_creator()))
 ray.init()
 DQNAgent = Algorithm.from_checkpoint(checkpoint_path)
 
-reward_sums = {a: 0 for a in env.possible_agents}
+reward_sums = {a: 0.0 for a in env.possible_agents}
 i = 0
 env.reset()
 

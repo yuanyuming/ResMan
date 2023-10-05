@@ -500,7 +500,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
     # @functools.lru_cache(maxsize=1000)
     def action(self, action):
         if self.parameters.action_space_continuous:
-            return float(action[0])
+            return float(action)
         else:
             return (
                 self.parameters.action_space_high - self.parameters.action_space_low

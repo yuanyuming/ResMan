@@ -1,6 +1,7 @@
 import ray
 from ray import tune
-from ray.rllib.algorithms.ppo import PPOConfig
+from ray.rllib.algorithms.random_agent import RandomAgentConfig
+from ray.rllib.algorithms.sac import SACConfig
 from ray.rllib.policy.policy import PolicySpec
 from ray.tune import register_env
 
@@ -8,8 +9,8 @@ import rllib_setup
 
 
 def train(jobs, machine):
-    env_name = "VJS"
-    alg_name = "PPO"
+    env_name = "VJS_" + str(machine) + "_" + str(jobs)
+    alg_name = "Random"
     register_env(
         env_name,
         lambda config: rllib_setup.get_env_continuous(jobs, machine),
@@ -31,24 +32,27 @@ def train(jobs, machine):
         }
 
     config = (
-        PPOConfig()
-        .rollouts(num_rollout_workers=10, rollout_fragment_length=30)
-        .training(vf_clip_param=1080)
+        RandomAgentConfig()
+        .rollouts(
+            num_rollout_workers=10,
+            rollout_fragment_length=30,
+        )
         .resources(num_gpus=1)
         .multi_agent(
             policies=policies(test_env._agent_ids),
             policy_mapping_fn=lambda agent_id, episode, **kwargs: str(agent_id),
         )
-        .environment(env=env_name, disable_env_checking=True).evaluation(evaluation_interval=10)
+        .environment(env=env_name, disable_env_checking=True)
     )
-    # print(config.to_dict())
+    config.batch_mode = "complete_episodes"
+    print(config.to_dict())
     # Build a Algorithm object from the config and run one training iteration.
     # algo = config.build(env=env_name)
 
-    tune.run(
-        alg_name,
-        name="PPO" + str(machine) + "_" + str(jobs),
-        stop={"episodes_total": 10000},
-        checkpoint_freq=10,
-        config=config.to_dict(),
-    )
+    algo = config.build()
+    print(algo.train())
+
+
+if __name__ == "__main__":
+    ray.init()
+    train(50, 12)

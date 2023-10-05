@@ -40,6 +40,7 @@ def train(jobs, machine):
             policy_mapping_fn=lambda agent_id, episode, **kwargs: str(agent_id),
         )
         .environment(env=env_name, disable_env_checking=True)
+        .evaluation(evaluation_interval=10)
     )
     config.batch_mode = "complete_episodes"
     print(config.to_dict())
