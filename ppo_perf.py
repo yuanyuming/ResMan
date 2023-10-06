@@ -1,3 +1,5 @@
+import argparse
+
 import ray
 from ray import tune
 from ray.rllib.algorithms.ppo import PPOConfig
@@ -32,9 +34,9 @@ def train(jobs, machine, rollout_workers=10):
 
     config = (
         PPOConfig()
-        .rollouts(num_rollout_workers=rollout_workers, rollout_fragment_length=30)
+        .rollouts(num_rollout_workers=rollout_workers)
         .training(vf_clip_param=1080)
-        .resources(num_gpus=1)
+        .resources(num_gpus=2)
         .multi_agent(
             policies=policies(test_env._agent_ids),
             policy_mapping_fn=lambda agent_id, episode, **kwargs: str(agent_id),
@@ -53,3 +55,12 @@ def train(jobs, machine, rollout_workers=10):
         checkpoint_freq=10,
         config=config.to_dict(),
     )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--jobs", type=int, default=20)
+    parser.add_argument("--machine", type=int, default=6)
+    parser.add_argument("--workers", type=int, default=24)
+    args = parser.parse_args()
+    train(args.jobs, args.machine, args.workers)

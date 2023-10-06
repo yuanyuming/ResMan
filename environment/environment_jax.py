@@ -7,14 +7,16 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
+import jax
+
 # 导入numpy库
-import jax.numpy as np
+import numpy as np
 import pettingzoo
 import prettytable
 from gymnasium import spaces
 from gymnasium.spaces import Box, Space
 from gymnasium.spaces.utils import flatten, flatten_space
-from numpy import ndarray
+from numpy import ndarray, random
 from pettingzoo.utils import agent_selector
 from pettingzoo.utils.env import AgentID
 from rich import print
@@ -59,43 +61,43 @@ class JobDistribution:
 
     # 定义一个方法，返回一个随机生成的任务优先级
     def priority_dist(self):
-        return np.random.randint(self.priority_range[0], self.priority_range[1] + 1)
+        return random.randint(self.priority_range[0], self.priority_range[1] + 1)
 
     # 定义一个方法，返回一个正态分布生成的任务时长和资源请求量
     def uniform_dist(self):
         # NOTE - 新任务时长
-        nw_len = np.random.randint(1, self.max_job_len + 1)  # 随机生成一个整数作为任务时长
+        nw_len = random.randint(1, self.max_job_len + 1)  # 随机生成一个整数作为任务时长
 
         nw_size = np.zeros(self.num_res)  # 创建一个零向量作为资源请求量
 
         for i in range(self.num_res):
-            nw_size[i] = np.random.randint(1, self.max_nw_size[i] + 1)  # 随机生成每种资源的请求量
+            nw_size[i] = random.randint(1, self.max_nw_size[i] + 1)  # 随机生成每种资源的请求量
 
         return nw_len, nw_size  # 返回任务时长和资源请求量
 
     # 定义一个方法，返回一个双峰分布生成的任务时长和资源请求量
     def bi_model_dist(self):
         # NOTE - 新任务时长
-        if np.random.rand() < self.job_small_chance:  # 如果随机数小于小任务概率，则生成一个小任务
-            nw_len = np.random.randint(
+        if random.rand() < self.job_small_chance:  # 如果随机数小于小任务概率，则生成一个小任务
+            nw_len = random.randint(
                 self.job_len_small_lower, self.job_len_small_upper + 1
             )  # 随机生成一个整数作为小任务时长
         else:  # 否则生成一个大任务
-            nw_len = np.random.randint(
+            nw_len = random.randint(
                 self.job_len_big_lower, self.job_len_big_upper
             )  # 随机生成一个整数作为大任务时长
 
         # NOTE - 任务资源请求量
-        dominant_res = np.random.randint(0, self.num_res)  # 随机选择一种资源作为占主导地位的资源
+        dominant_res = random.randint(0, self.num_res)  # 随机选择一种资源作为占主导地位的资源
         nw_size = np.zeros([self.num_res])  # 创建一个零向量作为资源请求量
 
         for i in range(self.num_res):
             if i == dominant_res:  # 如果是占主导地位的资源，则生成较高的请求量
-                nw_size[i] = np.random.randint(
+                nw_size[i] = random.randint(
                     self.dominant_res_lower[i], self.dominant_res_upper[i] + 1
                 )
             else:  # 如果是其他资源，则生成较低的请求量
-                nw_size[i] = np.random.randint(
+                nw_size[i] = random.randint(
                     self.other_res_lower, self.other_res_upper[i] + 1
                 )
 
@@ -162,7 +164,7 @@ class Job:
             0,
             np.dot(np.array(self.res_vec), np.array(average_cost_vec))
             * self.len
-            * ((1 + self.priority / 10) + var * np.random.normal()),
+            * ((1 + self.priority / 10) + var * random.normal()),
         )
 
     # 定义一个方法，返回任务的观察信息，即资源需求向量、时长、优先级和限制机器列表
@@ -501,11 +503,6 @@ class JobRecord:
         print(table)
 
 
-
-
-
-
-
 class SlotShow:
     def __init__(
         self,
@@ -548,7 +545,7 @@ class BiderPolicy:
     def __init__(self) -> None:
         pass
 
-    def bid(self, job=Job.Job()):
+    def bid(self, job=Job()):
         pass
 
 
@@ -582,15 +579,17 @@ class Machine:
         self.job_slot_size = job_slot_size
         self.job_backlog_size = job_backlog_size
         self.price = price
-        self.job_slot = Job.JobSlot(self.job_slot_size)
-        self.job_backlog = Job.JobBacklog(self.job_backlog_size)
-        self.res_slot = res_slot
+        self.job_slot = JobSlot(self.job_slot_size)
+        self.job_backlog = JobBacklog(self.job_backlog_size)
+        self.res_slot = np.array(res_slot)
         self.reward = 0
         self.earning = 0
         self.finished_job = []
         self.finished_job_num = 0
         self.cost_vector = cost_vector
-        self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
+        self.avail_slot = np.broadcast_to(
+            self.res_slot, (self.time_horizon, self.num_res)
+        )
         self.res_slot_time = self.avail_slot
         self.running_job = []
         # Bid
@@ -598,17 +597,17 @@ class Machine:
         self.policy = self.drl_bid
         self.action = 1
         self.bid = 0
-        self.slot_show = SlotShow(self.res_slot, self.avail_slot)
+        # self.slot_show = SlotShow(self.res_slot, self.avail_slot)
 
-    def add_backlog(self, job=Job.Job()):
+    def add_backlog(self, job=Job()):
         """
         Add the Job to the backlog
         """
         self.job_backlog.add_job(job)
 
     def reset(self):
-        self.job_slot = Job.JobSlot(self.job_slot_size)
-        self.job_backlog = Job.JobBacklog(self.job_backlog_size)
+        self.job_slot = JobSlot(self.job_slot_size)
+        self.job_backlog = JobBacklog(self.job_backlog_size)
         self.earning = 0
         self.finished_job = []
         self.avail_slot = np.ones((self.time_horizon, self.num_res)) * self.res_slot
@@ -621,13 +620,13 @@ class Machine:
             return self.bid
         return 0
 
-    def drl_bid(self, job=Job.Job()):
+    def drl_bid(self, job=Job()):
         return self.action * (np.dot(job.res_vec, self.cost_vector)) * job.len
 
     def set_action(self, action=1):
         self.action = action
 
-    def fixed(self, job=Job.Job()):
+    def fixed(self, job=Job()):
         return np.dot(job.res_vec, self.cost_vector)
 
     def clear_job(self):
@@ -672,19 +671,19 @@ class Machine:
         )
         return machine_obs
 
-    def fixed_norm(self, job=Job.Job(), var=0.2):
+    def fixed_norm(self, job=Job(), var=0.2):
         return (
-            (np.dot(job.res_vec, self.cost_vector) + var * np.random.normal())
+            (np.dot(job.res_vec, self.cost_vector) + var * random.normal())
             * job.len
             * job.priority
         )
 
-    def request_auction(self, job=Job.Job()):
+    def request_auction(self, job=Job()):
         self.request_job = job
 
     # async allocate_job, not used
 
-    def can_allocate(self, job=Job.Job()):
+    def can_allocate(self, job=Job()):
         """
         Check if the Job can be allocated to this Machine
         """
@@ -696,7 +695,7 @@ class Machine:
 
     # async allocate_job, not used
 
-    def can_allocate_async(self, job=Job.Job()):
+    def can_allocate_async(self, job=Job()):
         """
         Check if the Job can be allocated to this Machine
         """
@@ -709,7 +708,7 @@ class Machine:
                 break
         return allocated
 
-    def allocate_job(self, job=Job.Job()):
+    def allocate_job(self, job=Job()):
         """
         Allocate the Job to this Machine
         """
@@ -725,7 +724,7 @@ class Machine:
             assert job.finish_time > job.start_time
         return allocated
 
-    def allocate_job_async(self, job=Job.Job()):
+    def allocate_job_async(self, job=Job()):
         """
         Allocate the Job to this Machine
         async allocate job, not used
@@ -948,7 +947,7 @@ class Cluster:
         Purpose: Randomly generate machines
         """
         for i in range(num):
-            bias_r = np.random.randint(-bias_r, bias_r, self.num_res)
+            bias_r = random.randint(-bias_r, bias_r, self.num_res)
             res_slot = machine_average_res_vec + bias_r
             price = np.dot(machine_average_cost_vec, res_slot)
             self.add_machine(
@@ -976,7 +975,7 @@ class Cluster:
 
         self.number = len(self.machines)
 
-    def allocate_job(self, machine_id=0, job=Job.Job()):
+    def allocate_job(self, machine_id=0, job=Job()):
         self.machines[machine_id].allocate_job(job)
 
     def step(self):
@@ -1021,7 +1020,7 @@ class Cluster:
 
 
 class Bids:
-    def __init__(self, cluster=Cluster(), job=Job.Job()):
+    def __init__(self, cluster=Cluster(), job=Job()):
         self.machines = [cluster.get_machine(i) for i in job.restrict_machines]
         self.job = job
         self.can_allocate = []
@@ -1045,11 +1044,6 @@ class Bids:
         return table.get_string()
 
 
-class JobCollection:
-    def __init__(self, collection=[Job.Job()]) -> None:
-        self.collection = collection
-
-
 # 将JobCollection的迭代器传入MachineRestrict的迭代器,返回一个迭代器
 
 
@@ -1057,7 +1051,7 @@ class MachineRestrict:
     def __init__(
         self,
         cluster=Cluster(),
-        collection=Job.JobCollection(),
+        collection=JobCollection(),
         max_machines=10,
         min_machines=3,
     ) -> None:
@@ -1079,14 +1073,14 @@ class MachineRestrict:
         collection = next(self.iter_collection)
         for jobs in collection:
             for job in jobs:
-                min_machine_num = np.random.randint(
+                min_machine_num = random.randint(
                     0, self.cluster.number - self.max_machines
                 )
-                t = np.random.randint(self.min_machines, self.max_machines)
+                t = random.randint(self.min_machines, self.max_machines)
                 array = np.arange(
                     min_machine_num, min_machine_num + self.max_machines + 1
                 )
-                np.random.shuffle(array)
+                random.shuffle(array)
                 # TODO 限制机器的数量,验证是否有空槽位
                 job.restrict_machines = array[:t]
         self.collection = collection
@@ -1156,7 +1150,7 @@ class NestedList:
 
 
 class Quote:
-    def __init__(self, job=Job.Job(), cluster=Cluster()) -> None:
+    def __init__(self, job=Job(), cluster=Cluster()) -> None:
         self.job = job
         self.cluster = cluster.machines
         self.quotes = []
@@ -1181,10 +1175,6 @@ class Quote:
             table.add_row([*item])
 
         print(table)
-
-
-
-
 
 
 class AllocationMechanism:
@@ -1236,22 +1226,18 @@ class SecondPrice(AllocationMechanism):
         return bids.can_allocate[winners], prices, prices
 
 
-
-
-
-
 class ReverseAuction:
     def __init__(
         self,
-        cluster=Machine.Cluster(),
-        allocation_mechanism=AllocationMechanism.AllocationMechanism(),
+        cluster=Cluster(),
+        allocation_mechanism=AllocationMechanism(),
     ) -> None:
         self.cluster = cluster
         self.allocation_mechanism = allocation_mechanism
 
-    def auction(self, job=Job.Job()):
+    def auction(self, job=Job()):
         self.current_job = job
-        self.bids = Machine.Bids(self.cluster, self.current_job)
+        self.bids = Bids(self.cluster, self.current_job)
 
         self.bids.get_bids()
         bids = self.bids
@@ -1282,11 +1268,6 @@ class ReverseAuction:
         return True
 
 
-
-
-
-
-
 class VehicleJobSchedulingParameters:
     def __init__(
         self,
@@ -1297,14 +1278,14 @@ class VehicleJobSchedulingParameters:
         random_cluster=False,
     ):
         # Job Config
-        self.max_job_vec = [24, 100]
+        self.max_job_vec = np.array([24, 100])
         self.max_job_len = 20
-        self.average_cost_vec = [40.5, 4.5]
+        self.average_cost_vec = np.array([40.5, 4.5])
 
         # Job Distribution Config
         self.job_small_chance = 0.8
-        self.job_priority_range = [0, 10]
-        self.job_distribution = Job.JobDistribution(
+        self.job_priority_range = np.array([0, 10])
+        self.job_distribution = JobDistribution(
             self.max_job_vec,
             self.max_job_len,
             self.job_small_chance,
@@ -1320,7 +1301,7 @@ class VehicleJobSchedulingParameters:
         self.duration = duration
         self.job_small_chance = 0.8
 
-        self.job_collection = Job.JobCollection(
+        self.job_collection = JobCollection(
             self.average_per_slot,
             0,
             0,
@@ -1338,7 +1319,7 @@ class VehicleJobSchedulingParameters:
         self.job_backlog_size = 10
         self.job_slot_size = 10
         # Cluster Generate
-        self.cluster = Machine.Cluster(
+        self.cluster = Cluster(
             self.job_backlog_size,
             self.job_slot_size,
             self.num_res,
@@ -1361,9 +1342,9 @@ class VehicleJobSchedulingParameters:
             )
 
         else:
-            self.big_machine = Machine.MachineType(192, 2048, 29.05)
-            self.middle_machine = Machine.MachineType(112, 768, 17.45)
-            self.small_machine = Machine.MachineType(72, 144, 10.25)
+            self.big_machine = MachineType(192, 2048, 29.05)
+            self.middle_machine = MachineType(112, 768, 17.45)
+            self.small_machine = MachineType(72, 144, 10.25)
             self.machine_max_res_vec = 4096
             self.machine_types = {
                 "small": self.small_machine,
@@ -1381,17 +1362,15 @@ class VehicleJobSchedulingParameters:
         self.min_machines = 3
 
         # Machine Restrict
-        self.machine_restrictions = Machine.MachineRestrict(
+        self.machine_restrictions = MachineRestrict(
             self.cluster, self.job_collection, self.max_machines, self.min_machines
         )
 
         # Job Iterator
-        self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
+        self.job_iterator = ListIterator(iter(self.machine_restrictions))
         # Auction
-        self.allocation_mechanism = AllocationMechanism.FirstPrice()
-        self.auction_type = Auction.ReverseAuction(
-            self.cluster, self.allocation_mechanism
-        )
+        self.allocation_mechanism = FirstPrice()
+        self.auction_type = ReverseAuction(self.cluster, self.allocation_mechanism)
         # observation, action space
         self.action_space_continuous = False
         self.action_discrete_space = 20
@@ -1413,7 +1392,7 @@ class VehicleJobSchedulingParameters:
         Reset the environment
         """
         self.machine_restrictions.reset()
-        self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
+        self.job_iterator = ListIterator(iter(self.machine_restrictions))
         self.cluster.reset()
 
     def stop_condition_total_job(self):
@@ -1485,7 +1464,7 @@ class VehicleJobSchedulingEnv(pettingzoo.ParallelEnv):
         return spaces.Box(low=1 / 3, high=3, shape=(1, 1), dtype=np.float32)
 
     def reset(self, seed=None, return_info=False, options=None):
-        np.random.seed(seed)
+        random.seed(seed)
         self.parameters.reset()
         self.get_job = self.get_job_next_step()
         self.request_job = None
@@ -1603,7 +1582,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
                         "request_res_vec",
                         spaces.Box(
                             low=0,
-                            high=np.max(self.parameters.max_job_vec),
+                            high=np.max(np.array(self.parameters.max_job_vec)),
                             shape=(self.parameters.num_res,),
                         ),
                     ),
@@ -1636,7 +1615,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         return spaces.Discrete(self.parameters.action_discrete_space)
 
     def reset(self, return_info=False, seed=None, options=None):
-        np.random.seed(seed)
+        random.seed(seed)
         self.parameters.reset()
         self.agents = [
             "Machine_" + str(machine.id) for machine in self.parameters.cluster.machines
@@ -1813,7 +1792,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             self.render()
 
     def seed(self, seed=None):
-        return np.random.seed(seed)
+        return random.seed(seed)
 
     def close(self):
         return

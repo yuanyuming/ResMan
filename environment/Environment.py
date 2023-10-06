@@ -29,7 +29,7 @@ class VehicleJobSchedulingParameters:
     ):
         # Job Config
         self.max_job_vec = [24, 100]
-        self.max_job_len = 20
+        self.max_job_len = 10
         self.average_cost_vec = [40.5, 4.5]
 
         # Job Distribution Config
@@ -126,7 +126,7 @@ class VehicleJobSchedulingParameters:
         # observation, action space
         self.action_space_continuous = False
         self.action_discrete_space = 20
-        self.action_space_low = 1 / 2
+        self.action_space_low = 1
         self.action_space_high = 2
 
         # Runtime Configure
