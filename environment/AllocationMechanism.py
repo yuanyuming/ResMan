@@ -47,6 +47,11 @@ class SecondPrice(AllocationMechanism):
         super().__init__()
 
     def allocate(self, bids):
-        winners = np.argsort(bids.bids)[0]
-        prices = np.sort(bids.bids)[1]
+        if len(bids.bids) == 1:
+            winners = 0
+            prices = bids.bids[0]
+            # second_prices = prices
+        else:
+            winners = np.argsort(bids.bids)[0]
+            prices = np.sort(bids.bids)[1]
         return bids.can_allocate[winners], prices, prices

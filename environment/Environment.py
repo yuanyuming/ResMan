@@ -26,6 +26,7 @@ class VehicleJobSchedulingParameters:
         duration=30,
         machine_numbers=12,
         random_cluster=False,
+        allocation_mechanism="FirstPrice",
     ):
         # Job Config
         self.max_job_vec = [24, 100]
@@ -119,7 +120,10 @@ class VehicleJobSchedulingParameters:
         # Job Iterator
         self.job_iterator = Machine.ListIterator(iter(self.machine_restrictions))
         # Auction
-        self.allocation_mechanism = AllocationMechanism.FirstPrice()
+        if allocation_mechanism == "FirstPrice":
+            self.allocation_mechanism = AllocationMechanism.FirstPrice()
+        elif allocation_mechanism == "SecondPrice":
+            self.allocation_mechanism = AllocationMechanism.SecondPrice()
         self.auction_type = Auction.ReverseAuction(
             self.cluster, self.allocation_mechanism
         )

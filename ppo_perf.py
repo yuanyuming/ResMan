@@ -47,10 +47,15 @@ def train(jobs, machine, rollout_workers=10):
     # print(config.to_dict())
     # Build a Algorithm object from the config and run one training iteration.
     # algo = config.build(env=env_name)
-
+    config.model = {
+        "fcnet_hiddens": [384, 256, 128],
+        "fcnet_activation": "relu",
+        "use_lstm": True,
+        "lstm_cell_size": 256,
+    }
     tune.run(
         alg_name,
-        name="PPO" + str(machine) + "_" + str(jobs),
+        name="PPO" + str(machine) + "_" + str(jobs) + "_lstm",
         stop={"episodes_total": 10000},
         checkpoint_freq=10,
         config=config.to_dict(),
@@ -62,5 +67,6 @@ if __name__ == "__main__":
     parser.add_argument("--jobs", type=int, default=20)
     parser.add_argument("--machine", type=int, default=6)
     parser.add_argument("--workers", type=int, default=24)
+    parser.add_argument("--allocation", type=str, default="FirstPrice")
     args = parser.parse_args()
     train(args.jobs, args.machine, args.workers)

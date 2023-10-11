@@ -1,3 +1,5 @@
+import argparse
+
 import ray
 from ray import tune
 from ray.rllib.algorithms.ppo import PPOConfig
@@ -7,16 +9,14 @@ from ray.tune import register_env
 import rllib_setup
 
 
-def train(jobs, machine, rollout_workers=10, allocation_mechanism="FirstPrice"):
-    env_name = "VJS" + allocation_mechanism
+def train(jobs, machine, rollout_workers=10):
+    env_name = "VJS"
     alg_name = "PPO"
     register_env(
         env_name,
-        lambda config: rllib_setup.get_env_continuous(
-            jobs, machine, allocation_mechanism
-        ),
+        lambda config: rllib_setup.get_env_continuous(jobs, machine),
     )
-    test_env = rllib_setup.get_env_continuous(jobs, machine, allocation_mechanism)
+    test_env = rllib_setup.get_env_continuous(jobs, machine)
 
     def policies(agent_ids):
         obs_space = test_env.observation_space
@@ -34,9 +34,9 @@ def train(jobs, machine, rollout_workers=10, allocation_mechanism="FirstPrice"):
 
     config = (
         PPOConfig()
-        .rollouts(num_rollout_workers=rollout_workers, rollout_fragment_length=30)
+        .rollouts(num_rollout_workers=rollout_workers)
         .training(vf_clip_param=1080)
-        .resources(num_gpus=1)
+        .resources(num_gpus=2)
         .multi_agent(
             policies=policies(test_env._agent_ids),
             policy_mapping_fn=lambda agent_id, episode, **kwargs: str(agent_id),
@@ -47,11 +47,22 @@ def train(jobs, machine, rollout_workers=10, allocation_mechanism="FirstPrice"):
     # print(config.to_dict())
     # Build a Algorithm object from the config and run one training iteration.
     # algo = config.build(env=env_name)
-
+    config.model = {
+        "use_attention": True,
+    }
     tune.run(
         alg_name,
-        name="PPO" + str(machine) + "_" + str(jobs),
+        name="PPO" + str(machine) + "_" + str(jobs) + "_attention",
         stop={"episodes_total": 10000},
         checkpoint_freq=10,
         config=config.to_dict(),
     )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--jobs", type=int, default=20)
+    parser.add_argument("--machine", type=int, default=6)
+    parser.add_argument("--workers", type=int, default=24)
+    args = parser.parse_args()
+    train(args.jobs, args.machine, args.workers)
