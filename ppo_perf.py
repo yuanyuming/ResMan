@@ -48,11 +48,12 @@ def train(jobs, machine, rollout_workers=10):
     # Build a Algorithm object from the config and run one training iteration.
     # algo = config.build(env=env_name)
     config.model = {
-        "fcnet_hiddens": [384, 256, 128],
+        "fcnet_hiddens": [384, 384, 384],
         "fcnet_activation": "relu",
         "use_lstm": True,
         "lstm_cell_size": 256,
     }
+    tune.TuneConfig(reuse_actors=True)
     tune.run(
         alg_name,
         name="PPO" + str(machine) + "_" + str(jobs) + "_lstm",

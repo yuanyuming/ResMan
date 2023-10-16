@@ -24,7 +24,7 @@ logs
 *.cb
 *.cb2
 .*.lb
-
+ray_results/
 ## Intermediate documents:
 *.dvi
 *.xdv
