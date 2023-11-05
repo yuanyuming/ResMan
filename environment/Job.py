@@ -125,7 +125,7 @@ class Job:
         self.res_vec = res_vec  # 资源需求向量
         self.len = job_len  # 任务长度
         self.restrict_machines = [1, 2]  # 限制的机器列表
-        self.running_machine = 0  # 运行的机器编号
+        self.running_machine = -1  # 运行的机器编号
         self.enter_time = enter_time  # 进入队列的时间
         self.time_restrict = 0  # 时间限制
         self.start_time = -1  # 开始时间
@@ -168,10 +168,11 @@ class Job:
         return self.id, self.res_vec, self.len, self.priority, self.restrict_machines
 
     # 定义一个方法，设置任务的开始时间，并根据时长计算结束时间，并更新效用值为预算减去支付金额除以时长乘以优先级（暂定）
-    def start(self, start_time):
-        self.start_time = start_time
-        self.finish(start_time + self.len)  # 设置结束时间
-        self.utility = (self.budget - self.pay) / self.len * self.priority  # 更新效用值
+    def start(self, pay, running_machine):
+        self.finish(self.enter_time + self.len)  # 设置结束时间
+        self.pay = pay  # 设置支付金额
+        self.running_machine = running_machine  # 设置运行的机器编号
+        self.utility = self.budget - self.pay  # 更新效用值
 
     # 定义一个方法，设置任务的结束时间
     def finish(self, finish_time):

@@ -503,6 +503,16 @@ class Cluster:
     def get_machine(self, machine_id):
         return self.machines[machine_id]
 
+    def get_load_balance(self):
+        # 所有服务器之间资源利用率（资源占用量除以资源总量）的标准差。
+        machine_loads = np.array(
+            [machine.avail_slot[0, :] for machine in self.machines]
+        )
+        loads_percent = machine_loads / np.array(
+            [machine.res_slot for machine in self.machines]
+        )
+        return np.std(loads_percent)
+
     def show(self):
         table = prettytable.PrettyTable(
             ["id", "Resource Slot", "Reward", "Cost Vector", "Running Job"]

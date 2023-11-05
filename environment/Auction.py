@@ -18,6 +18,8 @@ class ReverseAuction:
 
         self.bids.get_bids()
         bids = self.bids
+
+        # 拍卖失败
         if len(bids.can_allocate) == 0:
             bids.job.pay = 0
             bids.job.running_machine = -1
@@ -28,8 +30,8 @@ class ReverseAuction:
             bids.job.running_machine = -1
             # print("Auction Failed: " + str(bids.job))
             return False
-        bids.job.pay = prices
-        bids.job.running_machine = winner_machine.id
+        # 拍卖成功
+        bids.job.start(prices, winner_machine.id)
         winner_machine.allocate_job(bids.job)
         # print([mac.id for mac in bids.machines])
         # print(bids)
@@ -41,7 +43,7 @@ class ReverseAuction:
         #    + str(prices)
         #    + " Machine:"
         #    + str(winner_machine.id)
-        #)
+        # )
         return True
 
 

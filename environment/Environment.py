@@ -392,6 +392,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
 
         self.total_job = 0
         self.finished_job = 0
+        self.utility = 0
         self.__agent_selector = self._agent_selector()
         self.agent_selection = self.__agent_selector.next()
         self.round_start = True
@@ -455,6 +456,7 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
     def auction(self):
         if self.request_job is not None:
             self.finished_job += self.parameters.auction_type.auction(self.request_job)
+            self.utility += self.request_job.utility
 
     def next_job(self):
         self.request_job = next(self.get_job)
