@@ -25,6 +25,13 @@ mappo modify
 - [ ] Machine Loader
 - [ ] Policy Loader
 
+- [ ] 书写Render最后的输出
+  - [ ] 任务完成率
+  - [ ] 车辆效用
+  - [ ] 负载均衡
+- [ ] 完成四种算法的比较
+- [ ] 设置Evaluation Mode
+
 # Eassy
 
 cd ResMan

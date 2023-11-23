@@ -169,6 +169,7 @@ class Job:
 
     # 定义一个方法，设置任务的开始时间，并根据时长计算结束时间，并更新效用值为预算减去支付金额除以时长乘以优先级（暂定）
     def start(self, pay, running_machine):
+        self.start_time = self.enter_time  # 设置开始时间
         self.finish(self.enter_time + self.len)  # 设置结束时间
         self.pay = pay  # 设置支付金额
         self.running_machine = running_machine  # 设置运行的机器编号

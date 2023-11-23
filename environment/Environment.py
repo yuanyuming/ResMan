@@ -319,6 +319,8 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         self.round_start = True
         self.round_jobs = None
         self.pay = [0 for _ in range(len(self.agents))]
+        self.total_pay = 0
+        self.load_blance = 0
         self.obs = spaces.Dict(
             OrderedDict(
                 [
@@ -398,6 +400,8 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
         self.round_start = True
         self.round_jobs = None
         self.pay = [0 for _ in range(len(self.agents))]
+        self.total_pay = 0
+        self.load_blance = 0
         infos = {k: {} for k in self.observation.keys()}
         if return_info:
             return {}
@@ -491,8 +495,9 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
 
     def round_end(self):
         self.pay = self.parameters.cluster.step()
+        self.load_blance += self.parameters.cluster.get_load_balance()
         # print("Current time:", self.parameters.cluster.current_time)
-        self.finished_job = self.parameters.cluster.get_finish_job_total()
+        # self.finished_job = self.parameters.cluster.get_finish_job_total()
         self.parameters.finished_job = self.finished_job
         self.parameters.total_job = self.total_job
         self.parameters.time_step = self.parameters.cluster.current_time
@@ -500,7 +505,19 @@ class VehicleJobSchedulingEnvACE(pettingzoo.AECEnv):
             self.truncations = {agent: True for agent in self.agents}
             self.terminations = {agent: True for agent in self.agents}
             self.done = True
-            # print("Finished!!!")
+            print(
+                "|",
+                self.total_job,
+                "|",
+                self.finished_job,
+                "|",
+                sum([machine.earning for machine in self.parameters.cluster.machines]),
+                "|",
+                self.utility,
+                "|",
+                self.load_blance / self.parameters.cluster.current_time,
+                "|",
+            )
         self.parameters.cluster.clear_job()
 
     # @functools.lru_cache(maxsize=1000)

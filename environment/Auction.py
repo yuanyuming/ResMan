@@ -21,13 +21,9 @@ class ReverseAuction:
 
         # 拍卖失败
         if len(bids.can_allocate) == 0:
-            bids.job.pay = 0
-            bids.job.running_machine = -1
             return False
         winner_machine, prices, _ = self.allocation_mechanism.allocate(bids)
         if prices > bids.job.budget:
-            bids.job.pay = 0
-            bids.job.running_machine = -1
             # print("Auction Failed: " + str(bids.job))
             return False
         # 拍卖成功

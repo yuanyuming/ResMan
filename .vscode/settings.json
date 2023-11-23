@@ -27,9 +27,6 @@
         }
     },
     "dictCompletion.addSpaceAfterCompletion": false,
-    "python.linting.cwd": "${workspaceFolder}",
-    "python.linting.pylintPath": "${workspaceFolder}/man/bin/pylint",
-    "AREPL.pythonPath": "${workspaceFolder}/man/bin/python",
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
     "python.analysis.completeFunctionParens": true,
@@ -46,11 +43,8 @@
     "python.analysis.inlayHints.pytestParameters": true,
     "python.analysis.inlayHints.variableTypes": true,
     "python.languageServer": "Pylance",
-    "python.linting.pylintEnabled": true,
-    "python.formatting.provider": "black",
     "black-formatter.importStrategy": "fromEnvironment",
     "bookmarks.useWorkaroundForFormatters": true,
-    "python.formatting.blackPath": "${workspaceFolder}/man/bin/black",
     "editor.cursorSmoothCaretAnimation": "on",
     "editor.smoothScrolling": true,
     "workbench.list.smoothScrolling": true,
@@ -62,7 +56,6 @@
     "editor.experimental.asyncTokenization": true,
     "editor.experimental.asyncTokenizationLogging": false,
     "editor.experimental.asyncTokenizationVerification": false,
-    "editor.experimental.pasteActions.enabled": true,
     "editor.inlayHints.padding": false,
     "editor.lineNumbers": "on",
     "editor.scrollbar.verticalScrollbarSize": 6,
@@ -86,7 +79,6 @@
     "workbench.preferredDarkColorTheme": "GitHub Dark",
     "workbench.tree.renderIndentGuides": "always",
     "workbench.view.alwaysShowHeaderActions": true,
-    "search.experimental.notebookSearch": true,
     "search.seedWithNearestWord": true,
     "search.smartCase": true,
     "debug.autoExpandLazyVariables": true,
@@ -94,7 +86,6 @@
     "debug.toolBarLocation": "floating",
     "terminal.integrated.copyOnSelection": true,
     "problems.showCurrentInStatus": true,
-    "typewriterAutoScroll.enable": false,
     "remote.downloadExtensionsLocally": true,
     "remote.localPortHost": "allInterfaces",
     "timeline.pageOnScroll": true,
@@ -104,7 +95,7 @@
     "ipynb.pasteImagesAsAttachments.enabled": true,
     "AllAutocomplete.updateOnlyOnSave": true,
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
             "source.organizeImports": true
@@ -122,7 +113,6 @@
     "git.pruneOnFetch": false,
     "python.testing.pytestPath": "${workspaceFolder}/man/bin/pytest",
     "python.analysis.enableSyncServer": true,
-    "python.analysis.pylanceLspClientEnabled": false,
     "black-formatter.path": [
         "${workspaceFolder}/man/bin/black"
     ],

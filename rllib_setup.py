@@ -38,6 +38,7 @@ def get_env_continuous(
         average_per_slot=average_per_slot,
         machine_numbers=machine_num,
         allocation_mechanism=allocation_mechanism,
+        
     )
     para.action_space_continuous = True
     env = Environment.VehicleJobSchedulingEnvACE(parameter=para)

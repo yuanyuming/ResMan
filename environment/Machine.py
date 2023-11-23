@@ -219,7 +219,6 @@ class Machine:
         if np.all(new_avail_res[:] >= 0):
             allocated = True
             self.avail_slot[0 : job.len] = new_avail_res
-            job.start(self.current_time)
             self.running_job.append(job)
             assert job.start_time != -1
             assert job.finish_time != -1
@@ -261,8 +260,8 @@ class Machine:
 
         # 检查任务是否结束. 取得收益
         for job in self.running_job:
-            if job.start_time <= self.current_time:
-                self.reward += job.pay
+            # if job.start_time <= self.current_time:
+            #     self.reward += job.pay
             if job.finish_time <= self.current_time:
                 self.reward += job.pay
                 self.finished_job.append(job)
